@@ -2,6 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { MapPin, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
+const LOGO_SRC = '/images/logo.png';
+
 export default function Navbar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -12,17 +14,30 @@ export default function Navbar() {
     { to: '/admin', label: '管理' },
   ];
 
+  const [logoError, setLogoError] = useState(false);
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-navy-800 flex items-center justify-center">
-            <MapPin size={18} className="text-white" />
-          </div>
-          <div className="leading-tight">
-            <div className="font-black text-navy-800 text-base tracking-tight">走る旅</div>
-            <div className="text-xs text-gray-500 -mt-0.5">NIIGATA MARATHON TRAVEL</div>
-          </div>
+          {!logoError ? (
+            <img
+              src={LOGO_SRC}
+              alt="新潟マラソンナビ"
+              className="h-12 w-auto object-contain"
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            <>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-navy-800 flex items-center justify-center">
+                <MapPin size={18} className="text-white" />
+              </div>
+              <div className="leading-tight">
+                <div className="font-black text-navy-800 text-base tracking-tight">走る旅</div>
+                <div className="text-xs text-gray-500 -mt-0.5">NIIGATA MARATHON TRAVEL</div>
+              </div>
+            </>
+          )}
         </Link>
 
         {/* Desktop nav */}

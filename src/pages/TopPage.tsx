@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronRight, MapPin, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
+import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
 import { getAllDisplayableEvents, ALL_TAGS } from '../data';
 import { getFeaturedSettings } from '../utils/adminSettings';
 import EventCard from '../components/EventCard';
@@ -20,12 +20,35 @@ const TAG_ICONS: Record<string, React.ReactNode> = {
 
 const FEATURED_TAGS = ['日本海グルメ', '温泉', '地酒', '米どころ', '城下町', '紅葉', '雪景色', '佐渡'];
 
+const CONCEPT_STEPS = [
+  {
+    step: '01',
+    icon: '🏃',
+    title: '大会を選ぶ',
+    desc: '新潟各地のマラソン大会をコース・距離・開催時期から探せます。',
+    badgeClass: 'from-blue-600 to-blue-900',
+  },
+  {
+    step: '02',
+    icon: '🏨',
+    title: '宿泊を決める',
+    desc: '会場近くの温泉旅館・市内ホテルをまとめて確認できます。',
+    badgeClass: 'from-teal-500 to-green-800',
+  },
+  {
+    step: '03',
+    icon: '🍱',
+    title: '旅を楽しむ',
+    desc: 'コシヒカリ・のどぐろ・地酒。走り終えた後の楽しみを事前に計画。',
+    badgeClass: 'from-amber-500 to-orange-700',
+  },
+];
+
 export default function TopPage() {
   const navigate = useNavigate();
   const [searchRegion, setSearchRegion] = useState('');
   const [searchMonth, setSearchMonth] = useState('');
   const [searchDistance, setSearchDistance] = useState('');
-
   const events = getAllDisplayableEvents();
   const featuredSettings = getFeaturedSettings();
   const featured = featuredSettings.length > 0
@@ -52,32 +75,32 @@ export default function TopPage() {
 
   return (
     <div>
-      {/* Hero */}
+      {/* ヒーロー */}
       <section
-        className="relative min-h-[560px] flex items-center"
+        className="relative min-h-[540px] flex items-center"
         style={{ background: 'linear-gradient(135deg, #0a2540 0%, #1e3a5f 50%, #1a5276 100%)' }}
       >
-        {/* Decorative overlay */}
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: 'radial-gradient(circle at 10% 90%, rgba(255,165,0,0.4) 0%, transparent 40%), radial-gradient(circle at 90% 10%, rgba(0,150,200,0.4) 0%, transparent 40%)',
+            backgroundImage:
+              'radial-gradient(circle at 10% 90%, rgba(255,165,0,0.4) 0%, transparent 40%), radial-gradient(circle at 90% 10%, rgba(0,150,200,0.4) 0%, transparent 40%)',
           }}
         />
 
         <div className="relative max-w-6xl mx-auto px-4 py-20 text-white">
           <div className="max-w-2xl">
-            <p className="text-orange-400 font-bold text-sm tracking-widest mb-4 uppercase">
+            <p className="text-amber-400 font-bold text-sm tracking-widest mb-4 uppercase">
               Niigata Marathon Travel
             </p>
-            <h1 className="text-5xl md:text-6xl font-black leading-tight mb-6">
-              走る旅を、<br />新潟で。
+            <h1 className="text-4xl md:text-6xl font-black leading-tight mb-5">
+              走る旅で、<br />新潟をもっと<br className="md:hidden" />好きになる。
             </h1>
             <p className="text-lg text-blue-200 mb-10 leading-relaxed">
-              マラソン大会をきっかけに、宿泊・食・特産までまとめて見つけられる地域体験プラットフォーム
+              マラソン大会をきっかけに、宿泊・食・観光までまとめて見つけられる地域体験プラットフォーム
             </p>
 
-            {/* Search box */}
+            {/* 検索UI */}
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                 <div>
@@ -129,11 +152,11 @@ export default function TopPage() {
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 <Search size={18} />
-                新潟の大会を探す
+                大会から旅を探す
               </button>
             </div>
 
-            {/* Featured tags */}
+            {/* タグ */}
             <div className="flex flex-wrap gap-2">
               {FEATURED_TAGS.map((tag) => (
                 <button
@@ -150,32 +173,34 @@ export default function TopPage() {
         </div>
       </section>
 
-      {/* Concept */}
-      <section className="bg-white py-16">
+      {/* ③ コンセプト */}
+      <section className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-4 text-center">
+          <p className="text-amber-600 font-bold text-xs tracking-widest mb-3 uppercase">How It Works</p>
           <h2 className="text-3xl font-black text-navy-800 mb-4">マラソンは、旅の入り口。</h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed mb-14">
             新潟の大会に出るなら、温泉も、コシヒカリも、地酒も、一緒に楽しみたい。<br />
             走ることをきっかけに、新潟の魅力をもっと深く体験しよう。
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            {[
-              { icon: '🏃', title: '大会を選ぶ', desc: '新潟各地のマラソン大会。コースの特徴・距離・開催時期で探せます。' },
-              { icon: '🏨', title: '宿泊を見つける', desc: '会場近くのおすすめ宿泊エリア。温泉旅館から市内ホテルまで導線あり。' },
-              { icon: '🍱', title: '特産を楽しむ', desc: 'コシヒカリ、のどぐろ、地酒…走り終えた後のご褒美を事前に計画。' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="text-center p-6 rounded-2xl bg-gray-50 hover:bg-blue-50 transition-colors">
-                <div className="text-5xl mb-4">{icon}</div>
-                <h3 className="font-bold text-navy-800 text-lg mb-2">{title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{desc}</p>
+          <div className="grid grid-cols-3 gap-3 md:gap-8">
+            {CONCEPT_STEPS.map(({ step, icon, title, desc, badgeClass }) => (
+              <div key={title} className="text-center p-3 md:p-8 rounded-2xl bg-gray-50 hover:bg-blue-50 transition-colors">
+                <div
+                  className={`inline-flex items-center justify-center w-7 h-7 md:w-11 md:h-11 rounded-full bg-gradient-to-br ${badgeClass} text-white font-black text-xs md:text-sm mb-2 md:mb-3`}
+                >
+                  {step}
+                </div>
+                <div className="text-3xl md:text-5xl mb-2 md:mb-3">{icon}</div>
+                <h3 className="font-bold text-navy-800 text-xs md:text-xl mb-1 md:mb-2 leading-tight">{title}</h3>
+                <p className="text-gray-600 text-xs md:text-sm leading-relaxed line-clamp-3 md:line-clamp-none">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Events */}
+      {/* ④ 注目の大会 */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
@@ -198,10 +223,7 @@ export default function TopPage() {
           </div>
 
           <div className="text-center mt-10">
-            <button
-              onClick={() => navigate('/events')}
-              className="btn-primary"
-            >
+            <button onClick={() => navigate('/events')} className="btn-primary">
               新潟の大会をすべて見る
               <ChevronRight size={18} />
             </button>
@@ -209,14 +231,11 @@ export default function TopPage() {
         </div>
       </section>
 
-      {/* Tag Browse */}
+      {/* ⑤ タグで探す */}
       <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-black text-navy-800 mb-2 text-center">
-            魅力で大会を探す
-          </h2>
+          <h2 className="text-2xl font-black text-navy-800 mb-2 text-center">魅力で大会を探す</h2>
           <p className="text-gray-500 text-sm text-center mb-8">気になる体験テーマから新潟の大会を見つけよう</p>
-
           <div className="flex flex-wrap justify-center gap-3">
             {ALL_TAGS.map((tag) => (
               <button
@@ -232,7 +251,7 @@ export default function TopPage() {
         </div>
       </section>
 
-      {/* Data disclaimer */}
+      {/* 免責 */}
       <section className="bg-amber-50 border-t border-amber-200 py-6">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <p className="text-amber-800 text-sm">

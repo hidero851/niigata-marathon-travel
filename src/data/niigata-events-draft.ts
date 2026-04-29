@@ -17,7 +17,7 @@ const DRAFT_SOURCE = {
 
 export const niigataMarathonEventsDraft: MarathonEvent[] = [
   {
-    id: 'takada-castle-road',
+    id: 'takada-castle-road-race',
     name: '高田城ロードレース',
     location: '上越市',
     prefecture: '新潟県',
