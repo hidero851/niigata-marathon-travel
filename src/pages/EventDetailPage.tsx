@@ -326,7 +326,61 @@ export default function EventDetailPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-12">
 
-        {/* ② このレースで楽しめること */}
+        {/* ② 大会基本情報 */}
+        <section className="mb-12">
+          <h2 className="section-title">大会基本情報</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              {allInfoItems.map(({ icon, label, value }) => (
+                <div
+                  key={label}
+                  className="flex items-start gap-3 p-5 border-b border-gray-100 last:border-b-0 md:odd:border-r"
+                >
+                  <span className="text-navy-500 flex-shrink-0 mt-0.5">{icon}</span>
+                  <div>
+                    <div className="text-xs text-gray-500 mb-0.5">{label}</div>
+                    <div className="text-sm font-medium text-gray-800">{value}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {event.notes && (
+              <div className="flex items-start gap-3 p-5 border-t border-gray-100 bg-amber-50">
+                <FileText size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs text-amber-700 mb-0.5">備考</div>
+                  <div className="text-sm text-amber-900">{event.notes}</div>
+                </div>
+              </div>
+            )}
+            <div className="p-5 border-t border-gray-100 bg-gray-50">
+              {displayOfficialUrl && displayOfficialUrl !== '#' ? (
+                <a
+                  href={displayOfficialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
+                  }
+                  className="flex items-center gap-2 text-sm text-navy-700 hover:text-navy-900 font-medium transition-colors"
+                >
+                  <ExternalLink size={14} />
+                  公式サイトで最新情報を確認する
+                </a>
+              ) : (
+                <span className="flex items-center gap-2 text-sm text-gray-400">
+                  <ExternalLink size={14} />
+                  公式サイトURL（管理画面から設定できます）
+                </span>
+              )}
+            </div>
+          </div>
+          <p className="text-xs text-amber-700 bg-amber-50 rounded-lg p-3 mt-3">
+            ⚠️ 上記は仮データです。参加費・定員・日程などの正確な情報は必ず公式サイトでご確認ください。
+          </p>
+        </section>
+
+        {/* ③ このレースで楽しめること */}
         {displayHighlights && displayHighlights.length > 0 && (
           <section className="mb-14">
             <h2 className="section-title">このレースで楽しめること</h2>
@@ -483,60 +537,6 @@ export default function EventDetailPage() {
             </div>
           </section>
         )}
-
-        {/* ⑧ 大会基本情報 */}
-        <section className="mb-12">
-          <h2 className="section-title">大会基本情報</h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              {allInfoItems.map(({ icon, label, value }) => (
-                <div
-                  key={label}
-                  className="flex items-start gap-3 p-5 border-b border-gray-100 last:border-b-0 md:odd:border-r"
-                >
-                  <span className="text-navy-500 flex-shrink-0 mt-0.5">{icon}</span>
-                  <div>
-                    <div className="text-xs text-gray-500 mb-0.5">{label}</div>
-                    <div className="text-sm font-medium text-gray-800">{value}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {event.notes && (
-              <div className="flex items-start gap-3 p-5 border-t border-gray-100 bg-amber-50">
-                <FileText size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-xs text-amber-700 mb-0.5">備考</div>
-                  <div className="text-sm text-amber-900">{event.notes}</div>
-                </div>
-              </div>
-            )}
-            <div className="p-5 border-t border-gray-100 bg-gray-50">
-              {displayOfficialUrl && displayOfficialUrl !== '#' ? (
-                <a
-                  href={displayOfficialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() =>
-                    trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
-                  }
-                  className="flex items-center gap-2 text-sm text-navy-700 hover:text-navy-900 font-medium transition-colors"
-                >
-                  <ExternalLink size={14} />
-                  公式サイトで最新情報を確認する
-                </a>
-              ) : (
-                <span className="flex items-center gap-2 text-sm text-gray-400">
-                  <ExternalLink size={14} />
-                  公式サイトURL（管理画面から設定できます）
-                </span>
-              )}
-            </div>
-          </div>
-          <p className="text-xs text-amber-700 bg-amber-50 rounded-lg p-3 mt-3">
-            ⚠️ 上記は仮データです。参加費・定員・日程などの正確な情報は必ず公式サイトでご確認ください。
-          </p>
-        </section>
 
         {/* ⑨ 最終CTA */}
         <section className="bg-gradient-to-r from-navy-800 to-navy-700 rounded-2xl p-8 text-white mb-8">
