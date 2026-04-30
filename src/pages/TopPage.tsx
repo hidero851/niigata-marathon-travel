@@ -50,14 +50,25 @@ export default function TopPage() {
   const [searchMonth, setSearchMonth] = useState('');
   const [searchDistance, setSearchDistance] = useState('');
   const events = getAllDisplayableEvents();
+
+  // おすすめ大会のデフォルト（コード固定）
+  // 将来: バックエンド導入後は管理画面の設定をDBから取得してここを上書きする
+  const DEFAULT_FEATURED_IDS = [
+    'takada-castle-road-race',
+    'minamiuonuma-gourmet-marathon',
+    'sado-toki-marathon',
+  ];
+
   const featuredSettings = getFeaturedSettings();
-  const featured = featuredSettings.length > 0
-    ? featuredSettings
-        .filter((s) => s.isFeatured)
+  const adminFeatured = featuredSettings.filter((s) => s.isFeatured);
+  const featured = adminFeatured.length > 0
+    ? adminFeatured
         .sort((a, b) => a.displayOrder - b.displayOrder)
         .map((s) => events.find((e) => e.id === s.eventId))
         .filter((e): e is typeof events[0] => e !== undefined)
-    : events.slice(0, 3);
+    : DEFAULT_FEATURED_IDS
+        .map((id) => events.find((e) => e.id === id))
+        .filter((e): e is typeof events[0] => e !== undefined);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
