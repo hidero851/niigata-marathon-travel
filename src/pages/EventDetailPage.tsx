@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, ExternalLink, MapPin, Calendar, Clock, Users,
-  Banknote, Flag, ChevronRight, Building2, FileText, Map,
+  Banknote, Flag, Building2, FileText,
 } from 'lucide-react';
 import { getEventByIdAll, allProducts } from '../data';
 import { getEventVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
@@ -11,6 +11,24 @@ import ProductCard from '../components/ProductCard';
 import { trackEvent } from '../utils/analytics';
 
 const DEFAULT_GRADIENT = 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
+
+const RAKUTEN_AFFILIATE_URL =
+  'https://hb.afl.rakuten.co.jp/hsc/5350d40a.8d095e86.3843a301.e074fa90/?link_type=hybrid_url&ut=eyJwYWdlIjoic2hvcCIsInR5cGUiOiJoeWJyaWRfdXJsIiwiY29sIjoxLCJjYXQiOiIxMjEiLCJiYW4iOjY5Nzk2MywiYW1wIjpmYWxzZX0%3D';
+
+const TAG_EXPERIENCE_MAP: Record<string, string> = {
+  '日本海グルメ': '日本海の新鮮な海鮮料理',
+  '温泉': 'レース後に行ける温泉',
+  '地酒': '地元の地酒が楽しめる居酒屋',
+  '城下町': '城下町の街並み散策',
+  '絶景': '絶景スポット',
+  '米どころ': '産地直送コシヒカリ体験',
+  '佐渡': '佐渡・離島観光',
+  '桜': '春の桜並木',
+  '自然': '豊かな自然でリフレッシュ',
+  'グルメ': '地元グルメの食べ歩き',
+  '紅葉': '秋の紅葉スポット',
+  '雪景色': '冬の雪景色',
+};
 
 function buildBgImage(imageUrl: string, fallbackGradient: string): string {
   const alt = imageUrl.endsWith('.png')
@@ -21,6 +39,65 @@ function buildBgImage(imageUrl: string, fallbackGradient: string): string {
 
 function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function RakutenButton({ label, className = '' }: { label: string; className?: string }) {
+  return (
+    <a
+      href={RAKUTEN_AFFILIATE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm py-3 px-5 rounded-xl transition-colors ${className}`}
+    >
+      <ExternalLink size={15} />
+      {label}
+    </a>
+  );
+}
+
+type StayCardProps = {
+  rank: string;
+  priority: string;
+  area: string;
+  description: string;
+  experiences: string[];
+  priceRange?: string;
+};
+
+function StayCard({ rank, priority, area, description, experiences, priceRange }: StayCardProps) {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 flex flex-col">
+      <div className="flex items-start gap-3 mb-3">
+        <span className="text-3xl flex-shrink-0">{rank}</span>
+        <div>
+          <div className="font-black text-navy-800 text-lg leading-tight">{priority}</div>
+          <div className="text-sm text-gray-500 mt-0.5">{area}</div>
+          {priceRange && (
+            <div className="text-xs text-orange-600 font-medium mt-0.5">{priceRange}</div>
+          )}
+        </div>
+      </div>
+      <p className="text-gray-700 text-sm leading-relaxed mb-4">{description}</p>
+
+      {experiences.length > 0 && (
+        <div className="mb-5 flex-1">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+            このエリアで楽しめること
+          </p>
+          <ul className="space-y-1.5">
+            {experiences.map((exp, i) => (
+              <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
+                {exp}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <RakutenButton label="楽天トラベルでこのエリアの宿を探す" className="w-full mt-auto" />
+    </div>
+  );
 }
 
 export default function EventDetailPage() {
@@ -51,7 +128,9 @@ export default function EventDetailPage() {
   const displayableProducts = (() => {
     if (productAssignment && productAssignment.productIds.length > 0) {
       return allProducts.filter(
-        (p) => productAssignment.productIds.includes(p.id) && p.sourceInfo.every((s) => s.usageAllowed)
+        (p) =>
+          productAssignment.productIds.includes(p.id) &&
+          p.sourceInfo.every((s) => s.usageAllowed)
       );
     }
     return event.localProducts.filter((p) => p.sourceInfo.every((s) => s.usageAllowed));
@@ -81,42 +160,81 @@ export default function EventDetailPage() {
 
   const heroBg = event.imageGradient ?? DEFAULT_GRADIENT;
 
-  // 宿泊エリアランキング（エリア単位・将来的にアフィリエイトURLに差し替え可能）
-  const stayRanking = [
+  // 体験リストをハイライト＋タグから生成
+  const highlightTitles = (displayHighlights ?? []).map((h) => h.title);
+  const tagExperiences = event.tags
+    .map((t) => TAG_EXPERIENCE_MAP[t])
+    .filter((e): e is string => Boolean(e));
+  const allExperiences = [...new Set([...highlightTitles, ...tagExperiences])];
+
+  // 宿泊カードデータ
+  const stayCards: StayCardProps[] = [
     {
       rank: '🥇',
       priority: '当日ラク重視',
-      area: '会場周辺・徒歩圏',
-      desc: displayableAccommodations[0]?.description
-        || 'スタート前の移動ストレスを最小化。朝の準備に余裕が持てます。前日入りする場合にも便利です。',
-      areaName: displayableAccommodations[0]?.areaName,
-      mapUrl: `https://www.google.com/maps/search/ホテル+${encodeURIComponent(event.location)}`,
-      mapLabel: 'Googleマップで会場周辺の宿を探す',
-      externalUrl: displayableAccommodations[0]?.rakutenTravelUrl || displayableAccommodations[0]?.externalUrl,
+      area: displayableAccommodations[0]?.areaName || `${event.location}・会場周辺`,
+      description:
+        displayableAccommodations[0]?.description ||
+        '会場まで徒歩圏内のエリア。スタート前の移動ストレスをゼロにして、朝の準備に余裕を持てます。',
+      experiences:
+        allExperiences.slice(0, 3).length > 0
+          ? allExperiences.slice(0, 3)
+          : ['会場へ徒歩でアクセス', '朝の準備に余裕ができる', 'レース後もすぐ休憩できる'],
+      priceRange: displayableAccommodations[0]?.priceRange,
     },
     {
       rank: '🥈',
       priority: '前泊バランス重視',
-      area: '最寄駅周辺',
-      desc: displayableAccommodations[1]?.description
-        || '飲食店やコンビニが充実。前夜に地元グルメを楽しんで翌朝会場へ移動するプランに最適です。',
-      areaName: displayableAccommodations[1]?.areaName,
-      mapUrl: `https://www.google.com/maps/search/ホテル+${encodeURIComponent(event.location)}+駅`,
-      mapLabel: '駅周辺の宿を探す',
-      externalUrl: displayableAccommodations[1]?.rakutenTravelUrl || displayableAccommodations[1]?.externalUrl,
+      area: displayableAccommodations[1]?.areaName || `${event.location}・駅周辺`,
+      description:
+        displayableAccommodations[1]?.description ||
+        '飲食店・コンビニが充実した前泊向きエリア。前夜に地元グルメを楽しんで翌朝会場へ移動するプランに最適です。',
+      experiences:
+        allExperiences.slice(1, 4).length > 0
+          ? allExperiences.slice(1, 4)
+          : ['地元グルメの食べ歩き', '飲食店・居酒屋が豊富', '翌朝の移動も便利'],
+      priceRange: displayableAccommodations[1]?.priceRange,
     },
     {
       rank: '🥉',
       priority: '観光も楽しむ',
-      area: '広域エリア',
-      desc: displayableAccommodations[2]?.description
-        || '大会と観光・温泉をセットで楽しみたい人向け。車移動や家族旅行との相性が良いエリアです。',
-      areaName: displayableAccommodations[2]?.areaName,
-      mapUrl: `https://www.google.com/maps/search/ホテル+${encodeURIComponent(event.prefecture || '新潟県')}`,
-      mapLabel: `${event.prefecture || '新潟県'}内の宿を探す`,
-      externalUrl: displayableAccommodations[2]?.rakutenTravelUrl || displayableAccommodations[2]?.externalUrl,
+      area: displayableAccommodations[2]?.areaName || `${event.prefecture || '新潟県'}・広域エリア`,
+      description:
+        displayableAccommodations[2]?.description ||
+        '大会＋観光・温泉をセットで楽しみたい人向け。車移動や家族旅行との相性が良いエリアです。',
+      experiences:
+        allExperiences.slice(2, 5).length > 0
+          ? allExperiences.slice(2, 5)
+          : ['温泉でリカバリー', '観光スポットへのアクセス', '家族旅行にも最適'],
+      priceRange: displayableAccommodations[2]?.priceRange,
     },
   ];
+
+  // エリア魅力アイコン
+  const areaIconMap: Record<string, { icon: string; title: string }> = {
+    '日本海グルメ': { icon: '🐟', title: '日本海の海鮮' },
+    '温泉': { icon: '♨️', title: '温泉でリカバリー' },
+    '地酒': { icon: '🍶', title: '地酒・郷土料理' },
+    '城下町': { icon: '🏯', title: '城下町の街並み' },
+    '絶景': { icon: '🏔️', title: '絶景スポット' },
+    '米どころ': { icon: '🌾', title: 'コシヒカリ体験' },
+    '佐渡': { icon: '🏝️', title: '佐渡・離島観光' },
+    '桜': { icon: '🌸', title: '春の桜並木' },
+    '自然': { icon: '🌿', title: '豊かな自然' },
+    'グルメ': { icon: '🍽️', title: '地元グルメ' },
+  };
+  const areaHighlights = event.tags
+    .map((t) => areaIconMap[t])
+    .filter((e): e is { icon: string; title: string } => Boolean(e))
+    .slice(0, 3);
+  const displayAreaHighlights =
+    areaHighlights.length >= 2
+      ? areaHighlights
+      : [
+          { icon: '🗺️', title: `${event.location}の観光` },
+          { icon: '🍽️', title: '地元グルメ' },
+          { icon: '📸', title: '旅の思い出' },
+        ];
 
   // 大会基本情報
   type InfoItem = { icon: React.ReactNode; label: string; value: string };
@@ -184,15 +302,13 @@ export default function EventDetailPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 mb-7">
+              {event.modelPlans.length > 0 && (
+                <button onClick={() => scrollToId('plan')} className="btn-primary">
+                  参加プランを見る
+                </button>
+              )}
               <button
-                onClick={() => scrollToId('plan')}
-                className="btn-primary"
-              >
-                参加プランを見る
-                <ChevronRight size={16} />
-              </button>
-              <button
-                onClick={() => scrollToId('stay-ranking')}
+                onClick={() => scrollToId('stay')}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/15 backdrop-blur-sm text-white font-semibold text-sm hover:bg-white/25 transition-colors border border-white/30"
               >
                 🏨 宿泊エリアを見る
@@ -210,7 +326,7 @@ export default function EventDetailPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-12">
 
-        {/* ② おすすめ参加プラン */}
+        {/* ② 参加プラン */}
         {event.modelPlans.length > 0 && (
           <section id="plan" className="mb-14 scroll-mt-20">
             <h2 className="section-title">おすすめ参加プラン</h2>
@@ -237,12 +353,8 @@ export default function EventDetailPage() {
                     ))}
                   </ol>
                   <div className="pt-4 border-t border-gray-100">
-                    <button
-                      onClick={() => scrollToId('stay-ranking')}
-                      className="w-full text-center bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2.5 px-4 rounded-xl transition-colors"
-                    >
-                      このプランで宿泊エリアを探す
-                    </button>
+                    <p className="text-xs text-gray-500 mb-2">このプランで宿泊を探す</p>
+                    <RakutenButton label="楽天トラベルで宿泊エリアを探す" className="w-full" />
                   </div>
                 </div>
               ))}
@@ -250,67 +362,12 @@ export default function EventDetailPage() {
           </section>
         )}
 
-        {/* ③ 宿泊エリアランキング */}
-        <section id="stay-ranking" className="mb-14 scroll-mt-20">
-          <h2 className="section-title">ランナー向けおすすめ宿泊エリア</h2>
-          <p className="text-gray-500 text-sm mb-6 -mt-3">
-            目的別に3エリアを紹介。エントリー前に宿泊エリアを確認しておきましょう。
-          </p>
-
-          <div className="space-y-4 mb-5">
-            {stayRanking.map((item, idx) => (
-              <div key={idx} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
-                <div className="flex items-start gap-4">
-                  <div className="text-3xl flex-shrink-0 mt-1">{item.rank}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-black text-navy-800 text-base">{item.priority}</span>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                        {item.areaName || item.area}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">{item.desc}</p>
-                    <div className="flex flex-wrap gap-2">
-                      <a
-                        href={item.mapUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-xl transition-colors"
-                      >
-                        <Map size={14} />
-                        {item.mapLabel}
-                      </a>
-                      {item.externalUrl && item.externalUrl !== '#' && (
-                        <a
-                          href={item.externalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-sm bg-red-50 hover:bg-red-100 text-red-700 font-medium px-4 py-2 rounded-xl transition-colors"
-                        >
-                          <ExternalLink size={14} />
-                          楽天トラベルで探す
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <p className="text-amber-800 text-sm">
-              💡 大会当日は会場周辺の宿が早めに埋まる可能性があります。エントリー前後に宿泊エリアも確認しておくと安心です。
-            </p>
-          </div>
-        </section>
-
-        {/* ④ レース後に楽しめること */}
+        {/* ③ このレースで楽しめること */}
         {displayHighlights && displayHighlights.length > 0 && (
           <section className="mb-14">
-            <h2 className="section-title">レース後に楽しめること</h2>
+            <h2 className="section-title">このレースで楽しめること</h2>
             <p className="text-gray-500 text-sm mb-6 -mt-3">
-              温泉、グルメ、観光…この大会ならではの体験を事前にチェックしよう。
+              走るだけじゃない、{event.location}ならではの体験。
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {displayHighlights.map((h) => (
@@ -326,7 +383,9 @@ export default function EventDetailPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-3">
                     <p className="text-white font-bold text-sm leading-tight">{h.title}</p>
-                    <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">{h.description}</p>
+                    <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">
+                      {h.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -334,7 +393,83 @@ export default function EventDetailPage() {
           </section>
         )}
 
-        {/* ⑤ 食・特産・お土産 */}
+        {/* ④ 宿泊セクション（最重要・収益導線） */}
+        <section id="stay" className="mb-8 scroll-mt-20">
+          <h2 className="section-title">ランナー向けおすすめ宿泊エリア</h2>
+          <p className="text-gray-500 text-sm mb-6 -mt-3">
+            宿泊先が決まると参加への迷いがなくなります。目的に合わせて選んでください。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+            {stayCards.map((card) => (
+              <StayCard key={card.rank} {...card} />
+            ))}
+          </div>
+
+          {/* エリア魅力 */}
+          <div className="bg-navy-50 border border-navy-100 rounded-2xl p-6">
+            <h3 className="font-black text-navy-800 text-lg mb-4">
+              {event.location}エリアの魅力
+            </h3>
+            <div className="grid grid-cols-3 gap-4 mb-5">
+              {displayAreaHighlights.map((item, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-3xl mb-1">{item.icon}</div>
+                  <div className="font-bold text-navy-800 text-xs md:text-sm">{item.title}</div>
+                </div>
+              ))}
+            </div>
+            <RakutenButton
+              label={`${event.location}の観光・宿泊を探す`}
+              className="w-full md:w-auto"
+            />
+          </div>
+        </section>
+
+        {/* ⑤ 注意（不安トリガー） */}
+        <div className="mb-12 bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start">
+          <span className="text-xl flex-shrink-0">⚠️</span>
+          <p className="text-amber-800 text-sm leading-relaxed">
+            大会当日は会場周辺の宿が早めに埋まる可能性があります。エントリー前後に宿泊を確認しておくと安心です。
+          </p>
+        </div>
+
+        {/* ⑥ エントリー導線 */}
+        <section className="mb-14">
+          <div className="bg-gradient-to-r from-navy-800 to-navy-700 rounded-2xl p-6 md:p-8 text-white">
+            <h2 className="text-xl font-black mb-2">エントリーの前に宿泊を確認</h2>
+            <p className="text-blue-200 text-sm mb-5">
+              宿泊先が決まると、参加への迷いが一気になくなります。
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <RakutenButton
+                label="宿泊を先に確認する（楽天トラベル）"
+                className="flex-1"
+              />
+              {displayOfficialUrl && displayOfficialUrl !== '#' ? (
+                <a
+                  href={displayOfficialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
+                  }
+                  className="flex-1 flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-sm py-3 px-5 rounded-xl transition-colors"
+                >
+                  <ExternalLink size={15} />
+                  エントリーサイトへ進む
+                </a>
+              ) : (
+                <span className="flex-1 flex items-center justify-center gap-2 bg-white/10 text-white/40 font-bold text-sm py-3 px-5 rounded-xl border border-white/20 cursor-not-allowed">
+                  <ExternalLink size={15} />
+                  エントリーサイト（設定中）
+                </span>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ⑦ お土産・特産 */}
         {displayableProducts.length > 0 && (
           <section className="mb-14">
             <h2 className="section-title">食・特産・お土産</h2>
@@ -349,7 +484,7 @@ export default function EventDetailPage() {
           </section>
         )}
 
-        {/* ⑥ 大会基本情報 */}
+        {/* ⑧ 大会基本情報 */}
         <section className="mb-12">
           <h2 className="section-title">大会基本情報</h2>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -367,7 +502,6 @@ export default function EventDetailPage() {
                 </div>
               ))}
             </div>
-
             {event.notes && (
               <div className="flex items-start gap-3 p-5 border-t border-gray-100 bg-amber-50">
                 <FileText size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
@@ -377,14 +511,15 @@ export default function EventDetailPage() {
                 </div>
               </div>
             )}
-
             <div className="p-5 border-t border-gray-100 bg-gray-50">
               {displayOfficialUrl && displayOfficialUrl !== '#' ? (
                 <a
                   href={displayOfficialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })}
+                  onClick={() =>
+                    trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
+                  }
                   className="flex items-center gap-2 text-sm text-navy-700 hover:text-navy-900 font-medium transition-colors"
                 >
                   <ExternalLink size={14} />
@@ -403,32 +538,34 @@ export default function EventDetailPage() {
           </p>
         </section>
 
-        {/* ⑦ 最終CTA */}
+        {/* ⑨ 最終CTA */}
         <section className="bg-gradient-to-r from-navy-800 to-navy-700 rounded-2xl p-8 text-white mb-8">
-          <h2 className="text-xl font-black mb-2">参加前に、宿泊と当日の動きも確認しておきましょう</h2>
+          <h2 className="text-xl font-black mb-2">
+            参加前に、宿泊と当日の動きも確認しておきましょう
+          </h2>
           <p className="text-blue-200 text-sm mb-6">
-            エントリー後は宿が埋まりやすくなります。エントリー前に宿泊エリアをチェックしておくのがおすすめです。
+            エントリー後は宿が埋まりやすくなります。今のうちに宿泊エリアをチェックしてください。
           </p>
-          <div className="flex flex-wrap gap-3 mb-6">
-            <button
-              onClick={() => scrollToId('stay-ranking')}
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
-            >
-              🏨 宿泊エリアをもう一度見る
-            </button>
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <RakutenButton
+              label="宿泊を楽天トラベルで探す"
+              className="flex-1 py-4 text-base"
+            />
             {displayOfficialUrl && displayOfficialUrl !== '#' ? (
               <a
                 href={displayOfficialUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })}
-                className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+                onClick={() =>
+                  trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
+                }
+                className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-4 px-5 rounded-xl transition-colors text-sm"
               >
                 <ExternalLink size={15} />
-                エントリーサイトへ進む
+                エントリーする
               </a>
             ) : (
-              <span className="flex items-center gap-2 bg-white/10 text-white/40 font-bold text-sm px-5 py-3 rounded-xl cursor-not-allowed border border-white/20">
+              <span className="flex-1 flex items-center justify-center gap-2 bg-white/10 text-white/40 font-bold text-sm py-4 px-5 rounded-xl border border-white/20 cursor-not-allowed">
                 <ExternalLink size={15} />
                 エントリーサイト（設定中）
               </span>
