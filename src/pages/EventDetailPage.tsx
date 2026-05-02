@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, ExternalLink, MapPin, Calendar, Clock, Users,
-  Banknote, Flag, Building2, FileText,
+  Banknote, Flag, Building2, FileText, Hotel,
 } from 'lucide-react';
 import { getEventByIdAll, allProducts } from '../data';
 import { getEventVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
@@ -39,6 +39,21 @@ function buildBgImage(imageUrl: string, fallbackGradient: string): string {
 
 function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function getPrevDay(isoDate: string): string {
+  const d = new Date(isoDate);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function formatShortDate(isoDate: string): string {
+  const d = new Date(isoDate);
+  return `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
+}
+
+function buildRakutenSearchUrl(keyword: string, checkin: string, checkout: string): string {
+  return `https://travel.rakuten.co.jp/keyword/?f_teikei=travel&f_keyword=${encodeURIComponent(keyword)}&f_checkin=${checkin}&f_checkout=${checkout}`;
 }
 
 function RakutenButton({ label, className = '' }: { label: string; className?: string }) {
@@ -78,7 +93,6 @@ function StayCard({ rank, priority, area, description, experiences, priceRange }
         </div>
       </div>
       <p className="text-gray-700 text-sm leading-relaxed mb-4">{description}</p>
-
       {experiences.length > 0 && (
         <div className="mb-5 flex-1">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
@@ -94,7 +108,6 @@ function StayCard({ rank, priority, area, description, experiences, priceRange }
           </ul>
         </div>
       )}
-
       <RakutenButton label="楽天トラベルでこのエリアの宿を探す" className="w-full mt-auto" />
     </div>
   );
@@ -104,12 +117,25 @@ export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const event = id ? getEventByIdAll(id) : undefined;
+  const stayRef = useRef<HTMLElement>(null);
+  const [isStayVisible, setIsStayVisible] = useState(false);
 
   useEffect(() => {
     if (event) {
       trackEvent({ eventType: 'view_event', marathonEventId: event.id });
       window.scrollTo(0, 0);
     }
+  }, [event]);
+
+  useEffect(() => {
+    const el = stayRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsStayVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [event]);
 
   if (!event) {
@@ -160,14 +186,23 @@ export default function EventDetailPage() {
 
   const heroBg = event.imageGradient ?? DEFAULT_GRADIENT;
 
-  // 体験リストをハイライト＋タグから生成
+  // 前泊推奨日
+  const isoDate = event.eventDate;
+  const checkinDate = isoDate ? getPrevDay(isoDate) : null;
+  const checkoutDate = isoDate ?? null;
+  const rakutenSearchUrl =
+    checkinDate && checkoutDate
+      ? buildRakutenSearchUrl(event.location, checkinDate, checkoutDate)
+      : RAKUTEN_AFFILIATE_URL;
+
+  // 体験リスト
   const highlightTitles = (displayHighlights ?? []).map((h) => h.title);
   const tagExperiences = event.tags
     .map((t) => TAG_EXPERIENCE_MAP[t])
     .filter((e): e is string => Boolean(e));
   const allExperiences = [...new Set([...highlightTitles, ...tagExperiences])];
 
-  // 宿泊カードデータ
+  // 宿泊カード
   const stayCards: StayCardProps[] = [
     {
       rank: '🥇',
@@ -210,7 +245,7 @@ export default function EventDetailPage() {
     },
   ];
 
-  // エリア魅力アイコン
+  // エリア魅力
   const areaIconMap: Record<string, { icon: string; title: string }> = {
     '日本海グルメ': { icon: '🐟', title: '日本海の海鮮' },
     '温泉': { icon: '♨️', title: '温泉でリカバリー' },
@@ -252,8 +287,31 @@ export default function EventDetailPage() {
   if (event.organizer) allInfoItems.push({ icon: <Users size={16} />, label: '主催者', value: event.organizer });
   if (event.access) allInfoItems.push({ icon: <MapPin size={16} />, label: 'アクセス', value: event.access });
 
+  const entryLink = event.entryUrl && event.entryUrl !== '#'
+    ? event.entryUrl
+    : (displayOfficialUrl && displayOfficialUrl !== '#' ? displayOfficialUrl : null);
+
   return (
-    <div>
+    <div className="pb-16">
+      {/* スティッキーCTAバナー（宿泊セクションが見えていない間のみ表示） */}
+      {!isStayVisible && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-3 px-4 py-3 shadow-2xl"
+          style={{ background: '#1a2e5a' }}
+        >
+          <div className="flex items-center gap-2 text-white min-w-0">
+            <Hotel size={18} className="flex-shrink-0 text-blue-300" />
+            <span className="text-sm font-medium truncate">この大会の宿泊を今すぐ予約</span>
+          </div>
+          <button
+            onClick={() => scrollToId('stay')}
+            className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm py-2 px-4 rounded-xl transition-colors whitespace-nowrap"
+          >
+            予約する →
+          </button>
+        </div>
+      )}
+
       {/* ① ヒーロー */}
       <div className="relative min-h-[85vh] flex items-end">
         <div
@@ -378,38 +436,30 @@ export default function EventDetailPage() {
           <p className="text-xs text-amber-700 bg-amber-50 rounded-lg p-3 mt-3">
             ⚠️ 上記は仮データです。参加費・定員・日程などの正確な情報は必ず公式サイトでご確認ください。
           </p>
-        </section>
 
-        {/* ③ このレースで楽しめること */}
-        {displayHighlights && displayHighlights.length > 0 && (
-          <section className="mb-14">
-            <h2 className="section-title">このレースで楽しめること</h2>
-            <p className="text-gray-500 text-sm mb-6 -mt-3">
-              走るだけじゃない、{event.location}ならではの体験。
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {displayHighlights.map((h) => (
-                <div key={h.title} className="relative rounded-2xl overflow-hidden h-48 shadow-md">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{
-                      backgroundImage: h.imageUrl
-                        ? buildBgImage(h.imageUrl, h.gradient || DEFAULT_GRADIENT)
-                        : h.gradient || DEFAULT_GRADIENT,
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <p className="text-white font-bold text-sm leading-tight">{h.title}</p>
-                    <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">
-                      {h.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          {/* 前泊推奨日カード */}
+          {checkinDate && checkoutDate && (
+            <div
+              className="mt-4 rounded-xl border-l-4 border-blue-400 p-4"
+              style={{ background: '#eff6ff' }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-base">📅</span>
+                <span className="text-sm font-bold text-blue-800">
+                  前泊推奨：{formatShortDate(checkinDate)} チェックイン
+                </span>
+              </div>
+              <a
+                href={rakutenSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors"
+              >
+                🏨 残室・料金を確認する →
+              </a>
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
         {/* ③ 参加プラン */}
         {event.modelPlans.length > 0 && (
@@ -447,8 +497,8 @@ export default function EventDetailPage() {
           </section>
         )}
 
-        {/* ④ 宿泊セクション（最重要・収益導線） */}
-        <section id="stay" className="mb-8 scroll-mt-20">
+        {/* ④ 宿泊セクション */}
+        <section id="stay" ref={stayRef as React.RefObject<HTMLDivElement>} className="mb-8 scroll-mt-20">
           <h2 className="section-title">ランナー向けおすすめ宿泊エリア</h2>
           <p className="text-gray-500 text-sm mb-6 -mt-3">
             宿泊先が決まると参加への迷いがなくなります。目的に合わせて選んでください。
@@ -460,7 +510,6 @@ export default function EventDetailPage() {
             ))}
           </div>
 
-          {/* エリア魅力 */}
           <div className="bg-navy-50 border border-navy-100 rounded-2xl p-6">
             <h3 className="font-black text-navy-800 text-lg mb-4">
               {event.location}エリアの魅力
@@ -480,48 +529,60 @@ export default function EventDetailPage() {
           </div>
         </section>
 
-        {/* ⑤ 注意（不安トリガー） */}
-        <div className="mb-12 bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start">
-          <span className="text-xl flex-shrink-0">⚠️</span>
-          <p className="text-amber-800 text-sm leading-relaxed">
-            大会当日は会場周辺の宿が早めに埋まる可能性があります。エントリー前後に宿泊を確認しておくと安心です。
-          </p>
-        </div>
-
-        {/* ⑥ エントリー導線 */}
-        <section className="mb-14">
-          <div className="bg-gradient-to-r from-navy-800 to-navy-700 rounded-2xl p-6 md:p-8 text-white">
-            <h2 className="text-xl font-black mb-2">エントリーの前に宿泊を確認</h2>
-            <p className="text-blue-200 text-sm mb-5">
-              宿泊先が決まると、参加への迷いが一気になくなります。
+        {/* ⑤ エントリー誘導（宿泊後） */}
+        {entryLink && (
+          <div
+            className="mb-12 rounded-xl border-l-4 border-green-400 p-5"
+            style={{ background: '#f0fdf4' }}
+          >
+            <p className="text-sm font-bold text-green-800 mb-3">
+              ✅ 宿泊の手配が終わったら…
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <RakutenButton
-                label="宿泊を先に確認する（楽天トラベル）"
-                className="flex-1"
-              />
-              {displayOfficialUrl && displayOfficialUrl !== '#' ? (
-                <a
-                  href={displayOfficialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() =>
-                    trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
-                  }
-                  className="flex-1 flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-sm py-3 px-5 rounded-xl transition-colors"
-                >
-                  <ExternalLink size={15} />
-                  エントリーサイトへ進む
-                </a>
-              ) : (
-                <span className="flex-1 flex items-center justify-center gap-2 bg-white/10 text-white/40 font-bold text-sm py-3 px-5 rounded-xl border border-white/20 cursor-not-allowed">
-                  <ExternalLink size={15} />
-                  エントリーサイト（設定中）
-                </span>
-              )}
-            </div>
+            <a
+              href={entryLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
+              }
+              className="inline-flex items-center gap-2 text-sm font-bold text-green-700 hover:text-green-900 transition-colors"
+            >
+              <ExternalLink size={14} />
+              大会にエントリーする →（RUNNET等）
+            </a>
           </div>
-        </section>
+        )}
+
+        {/* ⑥ このレースで楽しめること */}
+        {displayHighlights && displayHighlights.length > 0 && (
+          <section className="mb-14">
+            <h2 className="section-title">このレースで楽しめること</h2>
+            <p className="text-gray-500 text-sm mb-6 -mt-3">
+              走るだけじゃない、{event.location}ならではの体験。
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {displayHighlights.map((h) => (
+                <div key={h.title} className="relative rounded-2xl overflow-hidden h-48 shadow-md">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage: h.imageUrl
+                        ? buildBgImage(h.imageUrl, h.gradient || DEFAULT_GRADIENT)
+                        : h.gradient || DEFAULT_GRADIENT,
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <p className="text-white font-bold text-sm leading-tight">{h.title}</p>
+                    <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">
+                      {h.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ⑦ お土産・特産 */}
         {displayableProducts.length > 0 && (
@@ -538,6 +599,14 @@ export default function EventDetailPage() {
           </section>
         )}
 
+        {/* ⑧ 注意バナー */}
+        <div className="mb-12 bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start">
+          <span className="text-xl flex-shrink-0">⚠️</span>
+          <p className="text-amber-800 text-sm leading-relaxed">
+            大会当日は会場周辺の宿が早めに埋まる可能性があります。エントリー前後に宿泊を確認しておくと安心です。
+          </p>
+        </div>
+
         {/* ⑨ 最終CTA */}
         <section className="bg-gradient-to-r from-navy-800 to-navy-700 rounded-2xl p-8 text-white mb-8">
           <h2 className="text-xl font-black mb-2">
@@ -551,9 +620,9 @@ export default function EventDetailPage() {
               label="宿泊を楽天トラベルで探す"
               className="flex-1 py-4 text-base"
             />
-            {displayOfficialUrl && displayOfficialUrl !== '#' ? (
+            {entryLink ? (
               <a
-                href={displayOfficialUrl}
+                href={entryLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() =>
