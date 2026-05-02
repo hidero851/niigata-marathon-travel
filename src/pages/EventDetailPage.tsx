@@ -461,7 +461,38 @@ export default function EventDetailPage() {
           )}
         </section>
 
-        {/* ③ 参加プラン */}
+        {/* ③ このレースで楽しめること */}
+        {displayHighlights && displayHighlights.length > 0 && (
+          <section className="mb-14">
+            <h2 className="section-title">このレースで楽しめること</h2>
+            <p className="text-gray-500 text-sm mb-6 -mt-3">
+              走るだけじゃない、{event.location}ならではの体験。
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {displayHighlights.map((h) => (
+                <div key={h.title} className="relative rounded-2xl overflow-hidden h-48 shadow-md">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage: h.imageUrl
+                        ? buildBgImage(h.imageUrl, h.gradient || DEFAULT_GRADIENT)
+                        : h.gradient || DEFAULT_GRADIENT,
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <p className="text-white font-bold text-sm leading-tight">{h.title}</p>
+                    <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">
+                      {h.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ④ 参加プラン */}
         {event.modelPlans.length > 0 && (
           <section id="plan" className="mb-14 scroll-mt-20">
             <h2 className="section-title">おすすめ参加プラン</h2>
@@ -551,37 +582,6 @@ export default function EventDetailPage() {
               大会にエントリーする →（RUNNET等）
             </a>
           </div>
-        )}
-
-        {/* ⑥ このレースで楽しめること */}
-        {displayHighlights && displayHighlights.length > 0 && (
-          <section className="mb-14">
-            <h2 className="section-title">このレースで楽しめること</h2>
-            <p className="text-gray-500 text-sm mb-6 -mt-3">
-              走るだけじゃない、{event.location}ならではの体験。
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {displayHighlights.map((h) => (
-                <div key={h.title} className="relative rounded-2xl overflow-hidden h-48 shadow-md">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{
-                      backgroundImage: h.imageUrl
-                        ? buildBgImage(h.imageUrl, h.gradient || DEFAULT_GRADIENT)
-                        : h.gradient || DEFAULT_GRADIENT,
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <p className="text-white font-bold text-sm leading-tight">{h.title}</p>
-                    <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">
-                      {h.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ⑦ お土産・特産 */}
