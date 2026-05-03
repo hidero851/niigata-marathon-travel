@@ -21,7 +21,7 @@ export default function ProductCard({ product, marathonEventId, compact = false 
 
   const handleClick = () => {
     trackEvent({ eventType: 'click_product', productId: product.id, marathonEventId });
-    navigate(`/products/${product.id}`);
+    navigate(`/products/${product.id}`, { state: { fromEventId: marathonEventId } });
   };
 
   return (

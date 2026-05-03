@@ -89,6 +89,8 @@ export type MarathonEvent = {
 export type EventProductAssignment = {
   eventId: string;
   productIds: string[];
+  // 大会ごとの特産品テキスト上書き（同じ特産品でも大会によって購入場所を変えられる）
+  productOverrides?: Record<string, { whereToBuy?: string }>;
 };
 
 export type UserEventLog = {

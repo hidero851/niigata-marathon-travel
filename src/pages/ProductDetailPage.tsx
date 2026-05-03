@@ -1,16 +1,22 @@
 import { useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Star, Store } from 'lucide-react';
 import { getProductById, getEventById } from '../data';
-import { getProductVisualSetting } from '../utils/adminSettings';
+import { getProductVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
 import GradientImage from '../components/GradientImage';
 import { trackEvent } from '../utils/analytics';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromEventId = (location.state as { fromEventId?: string } | null)?.fromEventId;
   const baseProduct = id ? getProductById(id) : undefined;
   const visualSetting = id ? getProductVisualSetting(id) : undefined;
+  const eventOverrideWhereToBuy =
+    fromEventId && id
+      ? getEventProductAssignment(fromEventId)?.productOverrides?.[id]?.whereToBuy
+      : undefined;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -35,7 +41,7 @@ export default function ProductDetailPage() {
     shortDescription: visualSetting?.shortDescription || baseProduct.shortDescription,
     description: visualSetting?.description || baseProduct.description,
     externalUrl: visualSetting?.externalUrl || baseProduct.externalUrl,
-    whereToBuy: visualSetting?.whereToBuy || baseProduct.whereToBuy,
+    whereToBuy: eventOverrideWhereToBuy || visualSetting?.whereToBuy || baseProduct.whereToBuy,
     salesLocations:
       visualSetting?.salesLocations && visualSetting.salesLocations.length > 0
         ? visualSetting.salesLocations
