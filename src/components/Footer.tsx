@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
-            <div className="font-black text-xl mb-2">走る旅を、新潟から。</div>
+            <div className="font-black text-xl mb-2">マラソンナビ</div>
             <p className="text-navy-200 text-sm leading-relaxed">
               マラソン大会をきっかけに、宿泊・食・特産までまとめて見つけられる地域体験プラットフォーム
             </p>
@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-navy-700 pt-6 text-center text-navy-400 text-xs">
-          <p>© 2024 走る旅 - Niigata Marathon Travel MVP</p>
+          <p>© 2026 マラソンナビ</p>
           <p className="mt-1">本サイトは開発中のMVPです。掲載情報はすべて仮データです。</p>
         </div>
       </div>

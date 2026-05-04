@@ -23,7 +23,7 @@ export default function Navbar() {
           {!logoError ? (
             <img
               src={LOGO_SRC}
-              alt="新潟マラソンナビ"
+              alt="マラソンナビ"
               className="h-12 w-auto object-contain"
               onError={() => setLogoError(true)}
             />
@@ -33,8 +33,8 @@ export default function Navbar() {
                 <MapPin size={18} className="text-white" />
               </div>
               <div className="leading-tight">
-                <div className="font-black text-navy-800 text-base tracking-tight">走る旅</div>
-                <div className="text-xs text-gray-500 -mt-0.5">NIIGATA MARATHON TRAVEL</div>
+                <div className="font-black text-navy-800 text-base tracking-tight">マラソンナビ</div>
+                <div className="text-xs text-gray-500 -mt-0.5">MARATHON NAVI</div>
               </div>
             </>
           )}
