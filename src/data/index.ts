@@ -4,7 +4,10 @@ import { allEvents as baseEvents } from './events';
 import { allProducts } from './products';
 import { niigataMarathonEventsDraft } from './niigata-events-draft';
 import type { MarathonEvent, LocalProduct } from '../types';
-import { getAdminCreatedEvents, getHiddenEventIds, getEventVisualSettings } from '../utils/adminSettings';
+import {
+  getAdminCreatedEvents, getHiddenEventIds, getEventVisualSettings,
+  getEventAccommodationOverride, getEventModelPlanOverride, getEventAdminLocalProducts,
+} from '../utils/adminSettings';
 
 /** YYYY-MM-DD → "YYYY年M月D日（曜）" */
 export function formatEventDate(dateStr: string): string {
@@ -47,7 +50,6 @@ export function getDisplayableEvents(): MarathonEvent[] {
   return allEvents.filter((e) => e.sourceInfo.every((s) => s.usageAllowed));
 }
 
-/** EventVisualSetting の eventDate を event.date / month / eventDate に反映する */
 function applyDateOverride(event: MarathonEvent, visualSettings: ReturnType<typeof getEventVisualSettings>): MarathonEvent {
   const vs = visualSettings.find((s) => s.eventId === event.id);
   if (vs?.eventDate) {
@@ -58,13 +60,24 @@ function applyDateOverride(event: MarathonEvent, visualSettings: ReturnType<type
   return event;
 }
 
+function applyAdminOverrides(event: MarathonEvent, visualSettings: ReturnType<typeof getEventVisualSettings>): MarathonEvent {
+  let e = applyDateOverride(event, visualSettings);
+  const accOverride = getEventAccommodationOverride(e.id);
+  if (accOverride !== undefined) e = { ...e, accommodations: accOverride };
+  const planOverride = getEventModelPlanOverride(e.id);
+  if (planOverride !== undefined) e = { ...e, modelPlans: planOverride };
+  const adminProducts = getEventAdminLocalProducts(e.id);
+  if (adminProducts.length > 0) e = { ...e, localProducts: [...e.localProducts, ...adminProducts] };
+  return e;
+}
+
 export function getAllDisplayableEvents(): MarathonEvent[] {
   try {
     const hidden = getHiddenEventIds();
     const adminCreated = getAdminCreatedEvents();
     const visualSettings = getEventVisualSettings();
     const staticEvents = getDisplayableEvents().filter((e) => !hidden.includes(e.id));
-    return [...staticEvents, ...adminCreated].map((e) => applyDateOverride(e, visualSettings));
+    return [...staticEvents, ...adminCreated].map((e) => applyAdminOverrides(e, visualSettings));
   } catch {
     return getDisplayableEvents();
   }
@@ -76,7 +89,7 @@ export function getEventByIdAll(id: string): MarathonEvent | undefined {
     const event = adminCreated.find((e) => e.id === id) ?? getEventById(id);
     if (!event) return undefined;
     const visualSettings = getEventVisualSettings();
-    return applyDateOverride(event, visualSettings);
+    return applyAdminOverrides(event, visualSettings);
   } catch {
     return getEventById(id);
   }

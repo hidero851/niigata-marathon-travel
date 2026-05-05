@@ -214,7 +214,7 @@ export default function EventDetailPage() {
   const stayCards: StayCardProps[] = [
     {
       rank: '🥇',
-      priority: '当日ラク重視',
+      priority: displayableAccommodations[0]?.label || '当日ラク重視',
       area: displayableAccommodations[0]?.areaName || `${event.location}・会場周辺`,
       description:
         displayableAccommodations[0]?.description ||
@@ -229,7 +229,7 @@ export default function EventDetailPage() {
     },
     {
       rank: '🥈',
-      priority: '前泊バランス重視',
+      priority: displayableAccommodations[1]?.label || '前泊バランス重視',
       area: displayableAccommodations[1]?.areaName || `${event.location}・駅周辺`,
       description:
         displayableAccommodations[1]?.description ||
@@ -244,7 +244,7 @@ export default function EventDetailPage() {
     },
     {
       rank: '🥉',
-      priority: '観光も楽しむ',
+      priority: displayableAccommodations[2]?.label || '観光も楽しむ',
       area: displayableAccommodations[2]?.areaName || `${event.prefecture || '新潟県'}・広域エリア`,
       description:
         displayableAccommodations[2]?.description ||

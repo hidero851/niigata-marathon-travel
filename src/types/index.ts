@@ -16,6 +16,7 @@ export type SourceInfo = {
 
 export type Accommodation = {
   id: string;
+  label?: string;
   areaName: string;
   distanceToVenue: string;
   description: string;

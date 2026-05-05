@@ -4,6 +4,9 @@ import type {
   ProductVisualSetting,
   MarathonEvent,
   EventProductAssignment,
+  Accommodation,
+  ModelPlan,
+  LocalProduct,
 } from '../types';
 
 const KEYS = {
@@ -13,6 +16,9 @@ const KEYS = {
   adminEvents: 'adminCreatedEvents',
   hiddenEvents: 'hiddenEventIds',
   eventProducts: 'eventProductAssignments',
+  eventAccommodations: 'eventAccommodationOverrides',
+  eventModelPlans: 'eventModelPlanOverrides',
+  eventAdminProducts: 'eventAdminLocalProducts',
 } as const;
 
 function load<T>(key: string): T[] {
@@ -172,4 +178,49 @@ export function saveEventProductAssignment(assignment: EventProductAssignment): 
 export function resetEventProductAssignment(eventId: string): void {
   const all = getEventProductAssignments().filter((a) => a.eventId !== eventId);
   persist(KEYS.eventProducts, all);
+}
+
+// --- Accommodation Overrides ---
+
+type AccommodationOverrideEntry = { eventId: string; accommodations: Accommodation[] };
+
+export function getEventAccommodationOverride(eventId: string): Accommodation[] | undefined {
+  return load<AccommodationOverrideEntry>(KEYS.eventAccommodations).find((a) => a.eventId === eventId)?.accommodations;
+}
+
+export function saveEventAccommodationOverride(eventId: string, accommodations: Accommodation[]): void {
+  const all = load<AccommodationOverrideEntry>(KEYS.eventAccommodations);
+  const idx = all.findIndex((a) => a.eventId === eventId);
+  if (idx >= 0) { all[idx] = { eventId, accommodations }; } else { all.push({ eventId, accommodations }); }
+  persist(KEYS.eventAccommodations, all);
+}
+
+// --- Model Plan Overrides ---
+
+type ModelPlanOverrideEntry = { eventId: string; modelPlans: ModelPlan[] };
+
+export function getEventModelPlanOverride(eventId: string): ModelPlan[] | undefined {
+  return load<ModelPlanOverrideEntry>(KEYS.eventModelPlans).find((a) => a.eventId === eventId)?.modelPlans;
+}
+
+export function saveEventModelPlanOverride(eventId: string, modelPlans: ModelPlan[]): void {
+  const all = load<ModelPlanOverrideEntry>(KEYS.eventModelPlans);
+  const idx = all.findIndex((a) => a.eventId === eventId);
+  if (idx >= 0) { all[idx] = { eventId, modelPlans }; } else { all.push({ eventId, modelPlans }); }
+  persist(KEYS.eventModelPlans, all);
+}
+
+// --- Admin-Added Local Products (appended to event) ---
+
+type AdminLocalProductEntry = { eventId: string; localProducts: LocalProduct[] };
+
+export function getEventAdminLocalProducts(eventId: string): LocalProduct[] {
+  return load<AdminLocalProductEntry>(KEYS.eventAdminProducts).find((a) => a.eventId === eventId)?.localProducts ?? [];
+}
+
+export function saveEventAdminLocalProducts(eventId: string, localProducts: LocalProduct[]): void {
+  const all = load<AdminLocalProductEntry>(KEYS.eventAdminProducts);
+  const idx = all.findIndex((a) => a.eventId === eventId);
+  if (idx >= 0) { all[idx] = { eventId, localProducts }; } else { all.push({ eventId, localProducts }); }
+  persist(KEYS.eventAdminProducts, all);
 }

@@ -24,7 +24,7 @@ export default function Navbar() {
             <img
               src={LOGO_SRC}
               alt="マラソンナビ"
-              className="h-[80px] w-auto object-contain"
+              className="h-[70px] w-auto object-contain"
               onError={() => setLogoError(true)}
             />
           ) : (

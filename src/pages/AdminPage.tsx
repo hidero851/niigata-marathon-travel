@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
-  Link2, CalendarDays, Pencil, X, BarChart2,
+  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package,
 } from 'lucide-react';
 import { getAllDisplayableEvents, allProducts, formatEventDate } from '../data';
-import type { MarathonEvent } from '../types';
+import type { MarathonEvent, Accommodation, ModelPlan, LocalProduct } from '../types';
 import type {
   FeaturedEventSetting,
   EventVisualSetting,
@@ -29,11 +29,18 @@ import {
   hideEventId,
   getEventProductAssignment,
   saveEventProductAssignment,
+  getEventAccommodationOverride,
+  saveEventAccommodationOverride,
+  getEventModelPlanOverride,
+  saveEventModelPlanOverride,
+  getEventAdminLocalProducts,
+  saveEventAdminLocalProducts,
 } from '../utils/adminSettings';
 import { getLogs, clearLogs } from '../utils/analytics';
+import { logoutAdmin } from '../utils/auth';
 
 type Tab = 'featured' | 'eventManage' | 'data';
-type EventSubTab = 'visual' | 'products' | 'productAssign';
+type EventSubTab = 'visual' | 'accommodations' | 'modelPlans' | 'products' | 'productAssign' | 'localProductsAdmin';
 
 // --- Toast ---
 
@@ -593,6 +600,320 @@ function ProductAssignPanel({ eventId, onSave }: { eventId: string; onSave: (msg
   );
 }
 
+// --- AccommodationPanel ---
+
+const EMPTY_ACC = { label: '', areaName: '', distanceToVenue: '', description: '', priceRange: '', externalUrl: '', rakutenTravelUrl: '' };
+
+function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
+  const events = getAllDisplayableEvents();
+  const event = events.find((e) => e.id === eventId);
+  const [items, setItems] = useState<Accommodation[]>(() => getEventAccommodationOverride(eventId) ?? event?.accommodations ?? []);
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [form, setForm] = useState({ ...EMPTY_ACC });
+  const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const persistItems = (updated: Accommodation[]) => {
+    setItems(updated);
+    saveEventAccommodationOverride(eventId, updated);
+  };
+
+  const handleAdd = () => {
+    if (!form.areaName.trim()) { alert('エリア名は必須です'); return; }
+    persistItems([...items, {
+      id: `acc-admin-${Date.now()}`, ...form,
+      label: form.label || undefined,
+      rakutenTravelUrl: form.rakutenTravelUrl || undefined, sourceInfo: [ADMIN_SOURCE],
+    }]);
+    setForm({ ...EMPTY_ACC }); setShowAddForm(false); onSave('宿泊エリアを追加しました');
+  };
+
+  const handleEditSave = () => {
+    if (editIdx === null) return;
+    if (!form.areaName.trim()) { alert('エリア名は必須です'); return; }
+    persistItems(items.map((item, i) => i === editIdx ? { ...item, ...form, rakutenTravelUrl: form.rakutenTravelUrl || undefined } : item));
+    setEditIdx(null); setForm({ ...EMPTY_ACC }); onSave('宿泊エリアを更新しました');
+  };
+
+  const handleEditStart = (idx: number) => {
+    const item = items[idx];
+    setForm({ label: item.label ?? '', areaName: item.areaName, distanceToVenue: item.distanceToVenue, description: item.description, priceRange: item.priceRange, externalUrl: item.externalUrl, rakutenTravelUrl: item.rakutenTravelUrl ?? '' });
+    setEditIdx(idx); setShowAddForm(false);
+  };
+
+  const handleDelete = (idx: number) => {
+    if (!window.confirm('この宿泊エリアを削除しますか？')) return;
+    persistItems(items.filter((_, i) => i !== idx)); onSave('宿泊エリアを削除しました');
+  };
+
+  const AccForm = () => (
+    <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-3 mt-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <FormField label="ラベル（例：当日ラク重視）" value={form.label} onChange={(v) => setF('label', v)} />
+        <FormField label="エリア名 *" value={form.areaName} onChange={(v) => setF('areaName', v)} />
+        <FormField label="会場からの距離" value={form.distanceToVenue} onChange={(v) => setF('distanceToVenue', v)} />
+        <FormField label="価格帯" value={form.priceRange} onChange={(v) => setF('priceRange', v)} />
+        <FormField label="楽天トラベルURL" value={form.rakutenTravelUrl} onChange={(v) => setF('rakutenTravelUrl', v)} />
+        <div className="md:col-span-2"><FormField label="説明文" value={form.description} onChange={(v) => setF('description', v)} multiline /></div>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={editIdx !== null ? handleEditSave : handleAdd} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
+          <Save size={13} /> {editIdx !== null ? '更新' : '追加'}
+        </button>
+        <button onClick={() => { setShowAddForm(false); setEditIdx(null); setForm({ ...EMPTY_ACC }); }} className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+          <X size={13} /> キャンセル
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <p className="text-sm text-gray-500 mb-4">ランナー向け宿泊エリアを管理します。設定するとデフォルトデータを上書きします。</p>
+      {items.length > 0 ? (
+        <div className="space-y-2 mb-4">
+          {items.map((item, idx) => (
+            <div key={item.id}>
+              <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-navy-800 text-sm">{item.areaName}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{item.distanceToVenue} / {item.priceRange}</div>
+                  <div className="text-xs text-gray-600 mt-1 line-clamp-2">{item.description}</div>
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button onClick={() => handleEditStart(idx)} className="p-1.5 text-gray-400 hover:text-orange-500 rounded transition-colors"><Pencil size={14} /></button>
+                  <button onClick={() => handleDelete(idx)} className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"><Trash2 size={14} /></button>
+                </div>
+              </div>
+              {editIdx === idx && AccForm()}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-400 text-center py-4 mb-4">宿泊エリアがありません</p>
+      )}
+      {showAddForm && editIdx === null && AccForm()}
+      {!showAddForm && editIdx === null && (
+        <button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
+          <Plus size={14} /> 宿泊エリアを追加
+        </button>
+      )}
+    </div>
+  );
+}
+
+// --- ModelPlanPanel ---
+
+const EMPTY_PLAN = { title: '', steps: [''] };
+
+function ModelPlanPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
+  const events = getAllDisplayableEvents();
+  const event = events.find((e) => e.id === eventId);
+  const [plans, setPlans] = useState<ModelPlan[]>(() => getEventModelPlanOverride(eventId) ?? event?.modelPlans ?? []);
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [form, setForm] = useState({ ...EMPTY_PLAN });
+
+  const persistPlans = (updated: ModelPlan[]) => {
+    setPlans(updated); saveEventModelPlanOverride(eventId, updated);
+  };
+
+  const handleAdd = () => {
+    if (!form.title.trim()) { alert('タイトルは必須です'); return; }
+    persistPlans([...plans, { title: form.title, steps: form.steps.filter((s) => s.trim()) }]);
+    setForm({ ...EMPTY_PLAN }); setShowAddForm(false); onSave('プランを追加しました');
+  };
+
+  const handleEditSave = () => {
+    if (editIdx === null) return;
+    if (!form.title.trim()) { alert('タイトルは必須です'); return; }
+    persistPlans(plans.map((p, i) => i === editIdx ? { title: form.title, steps: form.steps.filter((s) => s.trim()) } : p));
+    setEditIdx(null); setForm({ ...EMPTY_PLAN }); onSave('プランを更新しました');
+  };
+
+  const handleEditStart = (idx: number) => {
+    const p = plans[idx];
+    setForm({ title: p.title, steps: p.steps.length > 0 ? [...p.steps] : [''] });
+    setEditIdx(idx); setShowAddForm(false);
+  };
+
+  const handleDelete = (idx: number) => {
+    if (!window.confirm('このプランを削除しますか？')) return;
+    persistPlans(plans.filter((_, i) => i !== idx)); onSave('プランを削除しました');
+  };
+
+  const addStep = () => setForm((p) => ({ ...p, steps: [...p.steps, ''] }));
+  const removeStep = (i: number) => setForm((p) => ({ ...p, steps: p.steps.filter((_, si) => si !== i) }));
+  const setStep = (i: number, v: string) => setForm((p) => ({ ...p, steps: p.steps.map((s, si) => si === i ? v : s) }));
+
+  const PlanForm = () => (
+    <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-3 mt-2">
+      <FormField label="プランタイトル *" value={form.title} onChange={(v) => setForm((p) => ({ ...p, title: v }))} />
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-medium text-gray-700">ステップ</label>
+          <button onClick={addStep} className="text-xs text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1"><Plus size={12} /> 追加</button>
+        </div>
+        <div className="space-y-2">
+          {form.steps.map((step, i) => (
+            <div key={i} className="flex gap-2">
+              <input value={step} onChange={(e) => setStep(i, e.target.value)} placeholder={`ステップ ${i + 1}`}
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400" />
+              {form.steps.length > 1 && (
+                <button onClick={() => removeStep(i)} className="text-red-400 hover:text-red-600 p-1"><X size={14} /></button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={editIdx !== null ? handleEditSave : handleAdd} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
+          <Save size={13} /> {editIdx !== null ? '更新' : '追加'}
+        </button>
+        <button onClick={() => { setShowAddForm(false); setEditIdx(null); setForm({ ...EMPTY_PLAN }); }} className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+          <X size={13} /> キャンセル
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <p className="text-sm text-gray-500 mb-4">おすすめ参加プランを管理します。設定するとデフォルトデータを上書きします。</p>
+      {plans.length > 0 ? (
+        <div className="space-y-2 mb-4">
+          {plans.map((plan, idx) => (
+            <div key={idx}>
+              <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <div className="font-medium text-navy-800 text-sm">{plan.title}</div>
+                  <ol className="mt-2 space-y-0.5">
+                    {plan.steps.map((step, si) => (
+                      <li key={si} className="text-xs text-gray-600 flex gap-1.5">
+                        <span className="text-orange-400 font-bold flex-shrink-0">{si + 1}.</span>{step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button onClick={() => handleEditStart(idx)} className="p-1.5 text-gray-400 hover:text-orange-500 rounded transition-colors"><Pencil size={14} /></button>
+                  <button onClick={() => handleDelete(idx)} className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"><Trash2 size={14} /></button>
+                </div>
+              </div>
+              {editIdx === idx && PlanForm()}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-400 text-center py-4 mb-4">参加プランがありません</p>
+      )}
+      {showAddForm && editIdx === null && PlanForm()}
+      {!showAddForm && editIdx === null && (
+        <button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
+          <Plus size={14} /> プランを追加
+        </button>
+      )}
+    </div>
+  );
+}
+
+// --- LocalProductAdminPanel ---
+
+const EMPTY_LP = { name: '', area: '', shortDescription: '', description: '', recommendedPoint: '', whereToBuy: '', externalUrl: '', imageUrl: '' };
+
+function LocalProductAdminPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
+  const [products, setProducts] = useState<LocalProduct[]>(() => getEventAdminLocalProducts(eventId));
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [form, setForm] = useState({ ...EMPTY_LP });
+  const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const persistProducts = (updated: LocalProduct[]) => {
+    setProducts(updated); saveEventAdminLocalProducts(eventId, updated);
+  };
+
+  const handleAdd = () => {
+    if (!form.name.trim()) { alert('名称は必須です'); return; }
+    persistProducts([...products, { id: `lp-admin-${Date.now()}`, ...form, relatedEventIds: [eventId], sourceInfo: [ADMIN_SOURCE] }]);
+    setForm({ ...EMPTY_LP }); setShowAddForm(false); onSave('特産品を追加しました');
+  };
+
+  const handleEditSave = () => {
+    if (editIdx === null) return;
+    if (!form.name.trim()) { alert('名称は必須です'); return; }
+    persistProducts(products.map((p, i) => i === editIdx ? { ...p, ...form } : p));
+    setEditIdx(null); setForm({ ...EMPTY_LP }); onSave('特産品を更新しました');
+  };
+
+  const handleEditStart = (idx: number) => {
+    const p = products[idx];
+    setForm({ name: p.name, area: p.area, shortDescription: p.shortDescription, description: p.description, recommendedPoint: p.recommendedPoint, whereToBuy: p.whereToBuy, externalUrl: p.externalUrl, imageUrl: p.imageUrl });
+    setEditIdx(idx); setShowAddForm(false);
+  };
+
+  const handleDelete = (idx: number) => {
+    if (!window.confirm('この特産品を削除しますか？')) return;
+    persistProducts(products.filter((_, i) => i !== idx)); onSave('特産品を削除しました');
+  };
+
+  const LpForm = () => (
+    <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 mt-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <FormField label="名称 *" value={form.name} onChange={(v) => setF('name', v)} />
+        <FormField label="エリア" value={form.area} onChange={(v) => setF('area', v)} />
+        <FormField label="短い説明" value={form.shortDescription} onChange={(v) => setF('shortDescription', v)} />
+        <FormField label="おすすめポイント" value={form.recommendedPoint} onChange={(v) => setF('recommendedPoint', v)} />
+        <FormField label="購入場所" value={form.whereToBuy} onChange={(v) => setF('whereToBuy', v)} />
+        <FormField label="外部リンクURL" value={form.externalUrl} onChange={(v) => setF('externalUrl', v)} />
+        <FormField label="画像URL" value={form.imageUrl} onChange={(v) => setF('imageUrl', v)} preview={!!form.imageUrl} previewUrl={form.imageUrl} />
+        <div className="md:col-span-2"><FormField label="詳細説明" value={form.description} onChange={(v) => setF('description', v)} multiline /></div>
+      </div>
+      <div className="flex gap-2 mt-3">
+        <button onClick={editIdx !== null ? handleEditSave : handleAdd} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
+          <Save size={13} /> {editIdx !== null ? '更新' : '追加'}
+        </button>
+        <button onClick={() => { setShowAddForm(false); setEditIdx(null); setForm({ ...EMPTY_LP }); }} className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+          <X size={13} /> キャンセル
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <p className="text-sm text-gray-500 mb-4">この大会専用の特産品・グルメ情報を追加できます。グローバル特産品の紐づけは「特産品紐づけ」タブをご利用ください。</p>
+      {products.length > 0 ? (
+        <div className="space-y-2 mb-4">
+          {products.map((product, idx) => (
+            <div key={product.id}>
+              <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-navy-800 text-sm">{product.name}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{product.area}</div>
+                  <div className="text-xs text-gray-600 mt-1 line-clamp-2">{product.shortDescription}</div>
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button onClick={() => handleEditStart(idx)} className="p-1.5 text-gray-400 hover:text-orange-500 rounded transition-colors"><Pencil size={14} /></button>
+                  <button onClick={() => handleDelete(idx)} className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"><Trash2 size={14} /></button>
+                </div>
+              </div>
+              {editIdx === idx && LpForm()}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-400 text-center py-4 mb-4">追加された特産品がありません</p>
+      )}
+      {showAddForm && editIdx === null && LpForm()}
+      {!showAddForm && editIdx === null && (
+        <button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
+          <Plus size={14} /> 特産品を追加
+        </button>
+      )}
+    </div>
+  );
+}
+
 // --- EventManageContainer (event list + sub-tabs) ---
 
 const ADMIN_SOURCE = {
@@ -613,9 +934,12 @@ const INIT_FORM = {
 };
 
 const EVENT_SUBTABS: { id: EventSubTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'visual', label: '大会ビジュアル', icon: <Image size={14} /> },
+  { id: 'visual', label: 'ビジュアル', icon: <Image size={14} /> },
+  { id: 'accommodations', label: '宿泊エリア', icon: <Hotel size={14} /> },
+  { id: 'modelPlans', label: '参加プラン', icon: <Route size={14} /> },
   { id: 'products', label: '特産品設定', icon: <ShoppingBag size={14} /> },
   { id: 'productAssign', label: '特産品紐づけ', icon: <Link2 size={14} /> },
+  { id: 'localProductsAdmin', label: '独自特産品', icon: <Package size={14} /> },
 ];
 
 function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
@@ -627,6 +951,8 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDate, setEditDate] = useState('');
+  const [adminEditId, setAdminEditId] = useState<string | null>(null);
+  const [adminEditForm, setAdminEditForm] = useState({ ...INIT_FORM });
 
   const [selectedEventId, setSelectedEventId] = useState(() => getAllDisplayableEvents()[0]?.id ?? '');
   const [subTab, setSubTab] = useState<EventSubTab>('visual');
@@ -654,6 +980,41 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
   const handleEditStart = (event: MarathonEvent) => {
     setEditingId(event.id);
     setEditDate(event.eventDate ?? '');
+  };
+
+  const handleAdminEditStart = (event: MarathonEvent) => {
+    setAdminEditId(event.id);
+    setAdminEditForm({
+      name: event.name, eventDate: event.eventDate ?? '', location: event.location,
+      venue: event.venue ?? '', distances: event.distances.join(', '), catchCopy: event.catchCopy,
+      fee: event.fee, capacity: event.capacity, timeLimit: event.timeLimit,
+      startPoint: event.startPoint, goalPoint: event.goalPoint,
+      entryPeriod: event.entryPeriod ?? '', organizer: event.organizer ?? '',
+      officialUrl: event.officialUrl, rakutenTravelUrl: event.accommodations[0]?.rakutenTravelUrl ?? '',
+      heroImageUrl: event.heroImageUrl ?? '', tags: event.tags.join(', '), notes: event.notes ?? '',
+    });
+  };
+
+  const handleAdminEditSave = (eventId: string) => {
+    const f = adminEditForm;
+    const stored = getAdminCreatedEvents().find((e) => e.id === eventId);
+    if (!stored) return;
+    const date = f.eventDate ? formatEventDate(f.eventDate) : stored.date;
+    const month = f.eventDate ? String(parseInt(f.eventDate.split('-')[1] ?? '1')) : stored.month;
+    const updated: MarathonEvent = {
+      ...stored, name: f.name, eventDate: f.eventDate || undefined, date, month,
+      location: f.location || stored.location, venue: f.venue || undefined,
+      distances: f.distances ? f.distances.split(',').map((s) => s.trim()).filter(Boolean) : stored.distances,
+      catchCopy: f.catchCopy, fee: f.fee || stored.fee, capacity: f.capacity || stored.capacity,
+      timeLimit: f.timeLimit || stored.timeLimit, startPoint: f.startPoint || stored.startPoint,
+      goalPoint: f.goalPoint || stored.goalPoint, entryPeriod: f.entryPeriod || undefined,
+      organizer: f.organizer || undefined, officialUrl: f.officialUrl, entryUrl: f.officialUrl,
+      heroImageUrl: f.heroImageUrl || undefined,
+      tags: f.tags ? f.tags.split(',').map((s) => s.trim()).filter(Boolean) : stored.tags,
+      notes: f.notes || undefined,
+    };
+    saveAdminCreatedEvent(updated);
+    refresh(); setAdminEditId(null); onSave('大会情報を更新しました');
   };
 
   const handleEditSave = (eventId: string) => {
@@ -769,9 +1130,15 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
                       <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">管理登録</span>
                     )}
                     <button
-                      onClick={() => editingId === event.id ? setEditingId(null) : handleEditStart(event)}
-                      className={`p-1 rounded transition-colors ${editingId === event.id ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'}`}
-                      title="開催日を編集"
+                      onClick={() => {
+                        if (adminIds.has(event.id)) {
+                          adminEditId === event.id ? setAdminEditId(null) : handleAdminEditStart(event);
+                        } else {
+                          editingId === event.id ? setEditingId(null) : handleEditStart(event);
+                        }
+                      }}
+                      className={`p-1 rounded transition-colors ${(editingId === event.id || adminEditId === event.id) ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'}`}
+                      title={adminIds.has(event.id) ? '大会情報を編集' : '開催日を編集'}
                     >
                       <Pencil size={14} />
                     </button>
@@ -788,27 +1155,53 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
                   <div className="px-4 pb-4 bg-orange-50 border-t border-orange-100">
                     <p className="text-xs text-orange-700 font-medium pt-3 mb-2">開催日を変更</p>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <input
-                        type="date"
-                        value={editDate}
-                        onChange={(e) => setEditDate(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
-                      />
+                      <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)}
+                        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400" />
                       {editDate && (
                         <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded border border-gray-200">
                           表示: {formatEventDate(editDate)}
                         </span>
                       )}
-                      <button
-                        onClick={() => handleEditSave(event.id)}
-                        className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors"
-                      >
+                      <button onClick={() => handleEditSave(event.id)}
+                        className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors">
                         <Save size={13} /> 保存
                       </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-xs px-2 py-1.5 rounded-lg transition-colors"
-                      >
+                      <button onClick={() => setEditingId(null)}
+                        className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-xs px-2 py-1.5 rounded-lg transition-colors">
+                        <X size={13} /> キャンセル
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {adminEditId === event.id && (
+                  <div className="px-4 pb-5 bg-orange-50 border-t border-orange-100">
+                    <p className="text-xs text-orange-700 font-medium pt-3 mb-3">大会情報を編集</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="md:col-span-2"><FormField label="大会名 *" value={adminEditForm.name} onChange={(v) => setAdminEditForm((p) => ({ ...p, name: v }))} /></div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
+                        <input type="date" value={adminEditForm.eventDate} onChange={(e) => setAdminEditForm((p) => ({ ...p, eventDate: e.target.value }))}
+                          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                      </div>
+                      <FormField label="開催エリア" value={adminEditForm.location} onChange={(v) => setAdminEditForm((p) => ({ ...p, location: v }))} />
+                      <FormField label="会場" value={adminEditForm.venue} onChange={(v) => setAdminEditForm((p) => ({ ...p, venue: v }))} />
+                      <FormField label="種目（カンマ区切り）" value={adminEditForm.distances} onChange={(v) => setAdminEditForm((p) => ({ ...p, distances: v }))} />
+                      <FormField label="タグ（カンマ区切り）" value={adminEditForm.tags} onChange={(v) => setAdminEditForm((p) => ({ ...p, tags: v }))} />
+                      <FormField label="参加費" value={adminEditForm.fee} onChange={(v) => setAdminEditForm((p) => ({ ...p, fee: v }))} />
+                      <FormField label="制限時間" value={adminEditForm.timeLimit} onChange={(v) => setAdminEditForm((p) => ({ ...p, timeLimit: v }))} />
+                      <FormField label="定員" value={adminEditForm.capacity} onChange={(v) => setAdminEditForm((p) => ({ ...p, capacity: v }))} />
+                      <FormField label="申込期間" value={adminEditForm.entryPeriod} onChange={(v) => setAdminEditForm((p) => ({ ...p, entryPeriod: v }))} />
+                      <FormField label="公式サイトURL" value={adminEditForm.officialUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, officialUrl: v }))} />
+                      <FormField label="楽天トラベルURL" value={adminEditForm.rakutenTravelUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, rakutenTravelUrl: v }))} />
+                      <div className="md:col-span-2"><FormField label="キャッチコピー" value={adminEditForm.catchCopy} onChange={(v) => setAdminEditForm((p) => ({ ...p, catchCopy: v }))} multiline /></div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <button onClick={() => handleAdminEditSave(event.id)}
+                        className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors">
+                        <Save size={13} /> 保存
+                      </button>
+                      <button onClick={() => setAdminEditId(null)}
+                        className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-xs px-2 py-1.5 rounded-lg transition-colors">
                         <X size={13} /> キャンセル
                       </button>
                     </div>
@@ -923,11 +1316,20 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
             {subTab === 'visual' && (
               <EventVisualPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
             )}
+            {subTab === 'accommodations' && (
+              <AccommodationPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
+            )}
+            {subTab === 'modelPlans' && (
+              <ModelPlanPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
+            )}
             {subTab === 'products' && (
               <ProductVisualPanel onSave={onSave} />
             )}
             {subTab === 'productAssign' && (
               <ProductAssignPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
+            )}
+            {subTab === 'localProductsAdmin' && (
+              <LocalProductAdminPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
             )}
           </div>
         </div>
@@ -1114,11 +1516,24 @@ export default function AdminPage() {
   const showToast = useCallback((msg: string) => setToast(msg), []);
   const hideToast = useCallback(() => setToast(''), []);
 
+  const handleLogout = () => {
+    logoutAdmin();
+    window.location.href = '/admin/login';
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-black text-navy-800 mb-1">管理画面</h1>
-        <p className="text-sm text-gray-500">設定はブラウザのlocalStorageに保存されます。認証なし・MVPモード。</p>
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-black text-navy-800 mb-1">管理画面</h1>
+          <p className="text-sm text-gray-500">設定はブラウザのlocalStorageに保存されます。</p>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="text-sm text-gray-500 hover:text-red-500 font-medium transition-colors"
+        >
+          ログアウト
+        </button>
       </div>
 
       {/* Main tab bar */}

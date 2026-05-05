@@ -25,21 +25,21 @@ const CONCEPT_STEPS = [
     step: '01',
     icon: '🏃',
     title: '大会を選ぶ',
-    desc: '新潟各地のマラソン大会をコース・距離・開催時期から探せます。',
+    desc: <>距離・コース・時期から<br className="md:hidden" />大会を探せます。</>,
     badgeClass: 'from-blue-600 to-blue-900',
   },
   {
     step: '02',
     icon: '🏨',
     title: '宿泊を決める',
-    desc: '会場近くの温泉旅館・市内ホテルをまとめて確認できます。',
+    desc: '会場近くの旅館・ホテルをまとめて確認。',
     badgeClass: 'from-teal-500 to-green-800',
   },
   {
     step: '03',
     icon: '🍱',
     title: '旅を楽しむ',
-    desc: 'コシヒカリ・のどぐろ・地酒。走り終えた後の楽しみを事前に計画。',
+    desc: <>レース後の楽しみも<br className="md:hidden" />計画しよう。</>,
     badgeClass: 'from-amber-500 to-orange-700',
   },
 ];
@@ -89,13 +89,13 @@ export default function TopPage() {
       {/* ヒーロー */}
       <section
         className="relative min-h-[540px] flex items-center"
-        style={{ background: 'rgb(30, 66, 148)' }}
+        style={{ background: 'linear-gradient(135deg, #0b1d51 0%, #1e5fa8 55%, #f97316 100%)' }}
       >
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-30"
           style={{
             backgroundImage:
-              'radial-gradient(circle at 10% 90%, rgba(255,165,0,0.4) 0%, transparent 40%), radial-gradient(circle at 90% 10%, rgba(0,150,200,0.4) 0%, transparent 40%)',
+              'radial-gradient(circle at 80% 100%, rgba(249,115,22,0.5) 0%, transparent 45%), radial-gradient(circle at 10% 20%, rgba(14,165,233,0.4) 0%, transparent 40%)',
           }}
         />
 
@@ -105,7 +105,7 @@ export default function TopPage() {
               Niigata Marathon Navi
             </p>
             <h1 className="text-4xl md:text-6xl font-black leading-tight mb-5">
-              走る旅で、<br />新潟をもっと<br className="md:hidden" />好きになる。
+              走る旅で、<br />新潟をもっと<br />好きになる。
             </h1>
             <p className="text-lg text-blue-200 mb-10 leading-relaxed">
               マラソン大会をきっかけに、<br className="md:hidden" />宿泊・食・観光まで<br className="hidden md:block" />まとめて見つけられる<br className="md:hidden" />地域体験プラットフォーム
