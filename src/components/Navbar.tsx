@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { MapPin, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
-const LOGO_SRC = '/images/logo.png';
+const LOGO_SRC = '/images/logo.png?v=2';
 
 export default function Navbar() {
   const location = useLocation();
@@ -18,13 +18,13 @@ export default function Navbar() {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 h-[90px] flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
           {!logoError ? (
             <img
               src={LOGO_SRC}
               alt="マラソンナビ"
-              className="h-12 w-auto object-contain"
+              className="h-[80px] w-auto object-contain"
               onError={() => setLogoError(true)}
             />
           ) : (

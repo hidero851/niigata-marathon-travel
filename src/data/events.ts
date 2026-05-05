@@ -35,6 +35,7 @@ export const allEvents: MarathonEvent[] = [
     timeLimit: 'フル: 6時間 / ハーフ: 3時間（仮）',
     startPoint: '新潟市陸上競技場（仮）',
     goalPoint: '新潟市陸上競技場（仮）',
+    rakutenSearchKeyword: '万代',
     highlights: [
       {
         title: '万代橋を駆け抜ける',
@@ -131,6 +132,7 @@ export const allEvents: MarathonEvent[] = [
     timeLimit: 'ハーフ: 3時間30分（仮）',
     startPoint: '南魚沼市民会館周辺（仮）',
     goalPoint: '南魚沼市民会館周辺（仮）',
+    rakutenSearchKeyword: '六日町',
     highlights: [
       {
         title: '走りながら食べるマラソン',
@@ -227,6 +229,7 @@ export const allEvents: MarathonEvent[] = [
     timeLimit: 'フル: 6時間（仮）',
     startPoint: '佐渡市内（仮）',
     goalPoint: '佐渡市内（仮）',
+    rakutenSearchKeyword: '佐渡',
     highlights: [
       {
         title: 'トキ舞う里山コース',
@@ -323,6 +326,7 @@ export const allEvents: MarathonEvent[] = [
     timeLimit: 'フル: 6時間（仮）',
     startPoint: '村上市・瀬波温泉近く（仮）',
     goalPoint: '村上市・笹川流れエリア（仮）',
+    rakutenSearchKeyword: '笹川流れ',
     highlights: [
       {
         title: '国の名勝・笹川流れの絶景',
@@ -410,6 +414,7 @@ export const allEvents: MarathonEvent[] = [
     timeLimit: 'ハーフ: 3時間（仮）',
     startPoint: '魚沼市・小出スポーツ公園周辺（仮）',
     goalPoint: '魚沼市・小出スポーツ公園周辺（仮）',
+    rakutenSearchKeyword: '小出',
     highlights: [
       {
         title: '越後三山を望む紅葉コース',
@@ -484,6 +489,7 @@ export const allEvents: MarathonEvent[] = [
     timeLimit: 'ハーフ: 3時間30分（仮）',
     startPoint: '五泉市・さくらんど公園周辺（仮）',
     goalPoint: '五泉市・さくらんど公園周辺（仮）',
+    rakutenSearchKeyword: '五泉',
     highlights: [
       {
         title: '紅葉のトンネルコース',
@@ -559,6 +565,7 @@ export const allEvents: MarathonEvent[] = [
     timeLimit: 'フル: 6時間30分（仮）',
     startPoint: '柏崎市・海浜公園周辺（仮）',
     goalPoint: '柏崎市・海浜公園周辺（仮）',
+    rakutenSearchKeyword: '柏崎',
     highlights: [
       {
         title: '日本海の海岸線コース',

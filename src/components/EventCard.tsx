@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, ChevronRight, BedDouble } from 'lucide-react';
+import { MapPin, Calendar, ChevronRight } from 'lucide-react';
 import type { MarathonEvent } from '../types';
 import TagBadge from './TagBadge';
 import { trackEvent } from '../utils/analytics';
+import { trackGA4 } from '../utils/ga4';
 
 const DEFAULT_GRADIENT = 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
 
@@ -15,13 +16,18 @@ function buildBgImage(imageUrl: string, fallback: string): string {
 
 interface EventCardProps {
   event: MarathonEvent;
+  source?: 'featured' | 'list';
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, source }: EventCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
     trackEvent({ eventType: 'click_event_detail', marathonEventId: event.id });
+    trackGA4(source === 'featured' ? 'click_featured_event' : 'click_event_list', {
+      event_id: event.id,
+      event_name: event.name,
+    });
     navigate(`/events/${event.id}`);
   };
 
@@ -75,16 +81,7 @@ export default function EventCard({ event }: EventCardProps) {
           ))}
         </div>
 
-        <div className="flex items-center justify-between">
-          {event.accommodations.length > 0 ? (
-            <span className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
-              <BedDouble size={12} />
-              宿泊導線あり
-            </span>
-          ) : (
-            <span />
-          )}
-
+        <div className="flex items-center justify-end">
           <button className="flex items-center gap-1 text-sm font-bold text-orange-500 group-hover:text-orange-600 transition-colors">
             大会と旅を見る
             <ChevronRight size={16} />

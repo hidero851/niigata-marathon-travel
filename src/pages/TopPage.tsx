@@ -89,7 +89,7 @@ export default function TopPage() {
       {/* ヒーロー */}
       <section
         className="relative min-h-[540px] flex items-center"
-        style={{ background: 'linear-gradient(135deg, #0a2540 0%, #1e3a5f 50%, #1a5276 100%)' }}
+        style={{ background: 'rgb(30, 66, 148)' }}
       >
         <div
           className="absolute inset-0 opacity-20"
@@ -102,13 +102,13 @@ export default function TopPage() {
         <div className="relative max-w-6xl mx-auto px-4 py-20 text-white">
           <div className="max-w-2xl">
             <p className="text-amber-400 font-bold text-sm tracking-widest mb-4 uppercase">
-              Niigata Marathon Travel
+              Niigata Marathon Navi
             </p>
             <h1 className="text-4xl md:text-6xl font-black leading-tight mb-5">
               走る旅で、<br />新潟をもっと<br className="md:hidden" />好きになる。
             </h1>
             <p className="text-lg text-blue-200 mb-10 leading-relaxed">
-              マラソン大会をきっかけに、宿泊・食・観光までまとめて見つけられる地域体験プラットフォーム
+              マラソン大会をきっかけに、<br className="md:hidden" />宿泊・食・観光まで<br className="hidden md:block" />まとめて見つけられる<br className="md:hidden" />地域体験プラットフォーム
             </p>
 
             {/* 検索UI */}
@@ -190,8 +190,8 @@ export default function TopPage() {
           <p className="text-amber-600 font-bold text-xs tracking-widest mb-3 uppercase">How It Works</p>
           <h2 className="text-3xl font-black text-navy-800 mb-4">マラソンは、旅の入り口。</h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed mb-14">
-            新潟の大会に出るなら、温泉も、コシヒカリも、地酒も、一緒に楽しみたい。<br />
-            走ることをきっかけに、新潟の魅力をもっと深く体験しよう。
+            新潟の大会に出るなら、<br className="md:hidden" />温泉も、コシヒカリも、地酒も、一緒に楽しみたい。<br />
+            走ることをきっかけに、<br className="md:hidden" />新潟の魅力をもっと深く体験しよう。
           </p>
 
           <div className="grid grid-cols-3 gap-3 md:gap-8">
@@ -229,7 +229,7 @@ export default function TopPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featured.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventCard key={event.id} event={event} source="featured" />
             ))}
           </div>
 

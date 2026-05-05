@@ -37,6 +37,7 @@ export const niigataMarathonEventsDraft: MarathonEvent[] = [
     timeLimit: '要確認',
     startPoint: '要確認',
     goalPoint: '要確認',
+    rakutenSearchKeyword: '高田',
     highlights: [
       {
         title: '高田城址公園を走る',
@@ -172,6 +173,7 @@ export const niigataMarathonEventsDraft: MarathonEvent[] = [
     timeLimit: '要確認',
     startPoint: '要確認',
     goalPoint: '要確認',
+    rakutenSearchKeyword: '上越',
     highlights: [
       {
         title: '100kmの達成感',
@@ -305,6 +307,7 @@ export const niigataMarathonEventsDraft: MarathonEvent[] = [
     timeLimit: '要確認',
     startPoint: '要確認',
     goalPoint: '要確認',
+    rakutenSearchKeyword: '六日町',
     highlights: [
       {
         title: 'コシヒカリの里を走る',
@@ -438,6 +441,7 @@ export const niigataMarathonEventsDraft: MarathonEvent[] = [
     timeLimit: '要確認',
     startPoint: '要確認',
     goalPoint: '要確認',
+    rakutenSearchKeyword: '柏崎',
     highlights: [
       {
         title: '日本海沿いの絶景コース',
@@ -572,6 +576,7 @@ export const niigataMarathonEventsDraft: MarathonEvent[] = [
     timeLimit: '要確認',
     startPoint: '要確認',
     goalPoint: '要確認',
+    rakutenSearchKeyword: '佐渡',
     highlights: [
       {
         title: '島を走る特別な体験',

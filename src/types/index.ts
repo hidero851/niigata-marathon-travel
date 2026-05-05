@@ -74,6 +74,7 @@ export type MarathonEvent = {
   timeLimit: string;
   startPoint: string;
   goalPoint: string;
+  rakutenSearchKeyword?: string;
   venue?: string;
   entryPeriod?: string;
   organizer?: string;

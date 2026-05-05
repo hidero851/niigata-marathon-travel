@@ -34,7 +34,13 @@ export function getEventById(id: string): MarathonEvent | undefined {
 }
 
 export function getProductById(id: string): LocalProduct | undefined {
-  return allProducts.find((p) => p.id === id);
+  const global = allProducts.find((p) => p.id === id);
+  if (global) return global;
+  for (const event of allEvents) {
+    const local = event.localProducts.find((p) => p.id === id);
+    if (local) return local;
+  }
+  return undefined;
 }
 
 export function getDisplayableEvents(): MarathonEvent[] {

@@ -3,6 +3,7 @@ import { ChevronRight, MapPin } from 'lucide-react';
 import type { LocalProduct } from '../types';
 import GradientImage from './GradientImage';
 import { trackEvent } from '../utils/analytics';
+import { trackGA4 } from '../utils/ga4';
 import { getProductVisualSetting } from '../utils/adminSettings';
 
 interface ProductCardProps {
@@ -21,6 +22,7 @@ export default function ProductCard({ product, marathonEventId, compact = false 
 
   const handleClick = () => {
     trackEvent({ eventType: 'click_product', productId: product.id, marathonEventId });
+    trackGA4('click_product', { product_id: product.id, product_name: product.name, event_id: marathonEventId });
     navigate(`/products/${product.id}`, { state: { fromEventId: marathonEventId } });
   };
 

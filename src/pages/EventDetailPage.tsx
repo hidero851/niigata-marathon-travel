@@ -9,6 +9,7 @@ import { getEventVisualSetting, getEventProductAssignment } from '../utils/admin
 import TagBadge from '../components/TagBadge';
 import ProductCard from '../components/ProductCard';
 import { trackEvent } from '../utils/analytics';
+import { trackGA4 } from '../utils/ga4';
 
 const DEFAULT_GRADIENT = 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
 
@@ -52,16 +53,20 @@ function formatShortDate(isoDate: string): string {
   return `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
 }
 
-function buildRakutenSearchUrl(keyword: string, checkin: string, checkout: string): string {
-  return `https://travel.rakuten.co.jp/keyword/?f_teikei=travel&f_keyword=${encodeURIComponent(keyword)}&f_checkin=${checkin}&f_checkout=${checkout}`;
+function buildRakutenSearchUrl(keyword: string, checkin?: string, checkout?: string): string {
+  let url = `https://travel.rakuten.co.jp/keyword/?f_teikei=travel&f_keyword=${encodeURIComponent(keyword)}`;
+  if (checkin) url += `&f_checkin=${checkin}`;
+  if (checkout) url += `&f_checkout=${checkout}`;
+  return url;
 }
 
-function RakutenButton({ label, className = '' }: { label: string; className?: string }) {
+function RakutenButton({ label, className = '', onClick, href }: { label: string; className?: string; onClick?: () => void; href?: string }) {
   return (
     <a
-      href={RAKUTEN_AFFILIATE_URL}
+      href={href || RAKUTEN_AFFILIATE_URL}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={onClick}
       className={`flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm py-3 px-5 rounded-xl transition-colors ${className}`}
     >
       <ExternalLink size={15} />
@@ -77,9 +82,11 @@ type StayCardProps = {
   description: string;
   experiences: string[];
   priceRange?: string;
+  onRakutenClick?: () => void;
+  rakutenUrl?: string;
 };
 
-function StayCard({ rank, priority, area, description, experiences, priceRange }: StayCardProps) {
+function StayCard({ rank, priority, area, description, experiences, priceRange, onRakutenClick, rakutenUrl }: StayCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 flex flex-col">
       <div className="flex items-start gap-3 mb-3">
@@ -108,7 +115,7 @@ function StayCard({ rank, priority, area, description, experiences, priceRange }
           </ul>
         </div>
       )}
-      <RakutenButton label="楽天トラベルでこのエリアの宿を探す" className="w-full mt-auto" />
+      <RakutenButton label="楽天トラベルでこのエリアの宿を探す" className="w-full mt-auto" onClick={onRakutenClick} href={rakutenUrl} />
     </div>
   );
 }
@@ -123,9 +130,10 @@ export default function EventDetailPage() {
   useEffect(() => {
     if (event) {
       trackEvent({ eventType: 'view_event', marathonEventId: event.id });
+      trackGA4('view_event_detail', { event_id: event.id, event_name: event.name });
       window.scrollTo(0, 0);
     }
-  }, [event]);
+  }, [id]);
 
   useEffect(() => {
     const el = stayRef.current;
@@ -136,7 +144,7 @@ export default function EventDetailPage() {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [event]);
+  }, [id]);
 
   if (!event) {
     return (
@@ -190,10 +198,10 @@ export default function EventDetailPage() {
   const isoDate = event.eventDate;
   const checkinDate = isoDate ? getPrevDay(isoDate) : null;
   const checkoutDate = isoDate ?? null;
-  const rakutenSearchUrl =
-    checkinDate && checkoutDate
-      ? buildRakutenSearchUrl(event.location, checkinDate, checkoutDate)
-      : RAKUTEN_AFFILIATE_URL;
+
+  const venueKeyword = event.rakutenSearchKeyword || event.location;
+  const venueRakutenUrl = buildRakutenSearchUrl(venueKeyword, checkinDate ?? undefined, checkoutDate ?? undefined);
+  const rakutenSearchUrl = venueRakutenUrl;
 
   // 体験リスト
   const highlightTitles = (displayHighlights ?? []).map((h) => h.title);
@@ -216,6 +224,8 @@ export default function EventDetailPage() {
           ? allExperiences.slice(0, 3)
           : ['会場へ徒歩でアクセス', '朝の準備に余裕ができる', 'レース後もすぐ休憩できる'],
       priceRange: displayableAccommodations[0]?.priceRange,
+      onRakutenClick: () => trackGA4('click_rakuten_stay_area', { event_id: event.id, rank: '1_gold' }),
+      rakutenUrl: displayableAccommodations[0]?.rakutenTravelUrl || venueRakutenUrl,
     },
     {
       rank: '🥈',
@@ -229,6 +239,8 @@ export default function EventDetailPage() {
           ? allExperiences.slice(1, 4)
           : ['地元グルメの食べ歩き', '飲食店・居酒屋が豊富', '翌朝の移動も便利'],
       priceRange: displayableAccommodations[1]?.priceRange,
+      onRakutenClick: () => trackGA4('click_rakuten_stay_area', { event_id: event.id, rank: '2_silver' }),
+      rakutenUrl: displayableAccommodations[1]?.rakutenTravelUrl || venueRakutenUrl,
     },
     {
       rank: '🥉',
@@ -242,34 +254,11 @@ export default function EventDetailPage() {
           ? allExperiences.slice(2, 5)
           : ['温泉でリカバリー', '観光スポットへのアクセス', '家族旅行にも最適'],
       priceRange: displayableAccommodations[2]?.priceRange,
+      onRakutenClick: () => trackGA4('click_rakuten_stay_area', { event_id: event.id, rank: '3_bronze' }),
+      rakutenUrl: displayableAccommodations[2]?.rakutenTravelUrl || venueRakutenUrl,
     },
   ];
 
-  // エリア魅力
-  const areaIconMap: Record<string, { icon: string; title: string }> = {
-    '日本海グルメ': { icon: '🐟', title: '日本海の海鮮' },
-    '温泉': { icon: '♨️', title: '温泉でリカバリー' },
-    '地酒': { icon: '🍶', title: '地酒・郷土料理' },
-    '城下町': { icon: '🏯', title: '城下町の街並み' },
-    '絶景': { icon: '🏔️', title: '絶景スポット' },
-    '米どころ': { icon: '🌾', title: 'コシヒカリ体験' },
-    '佐渡': { icon: '🏝️', title: '佐渡・離島観光' },
-    '桜': { icon: '🌸', title: '春の桜並木' },
-    '自然': { icon: '🌿', title: '豊かな自然' },
-    'グルメ': { icon: '🍽️', title: '地元グルメ' },
-  };
-  const areaHighlights = event.tags
-    .map((t) => areaIconMap[t])
-    .filter((e): e is { icon: string; title: string } => Boolean(e))
-    .slice(0, 3);
-  const displayAreaHighlights =
-    areaHighlights.length >= 2
-      ? areaHighlights
-      : [
-          { icon: '🗺️', title: `${event.location}の観光` },
-          { icon: '🍽️', title: '地元グルメ' },
-          { icon: '📸', title: '旅の思い出' },
-        ];
 
   // 大会基本情報
   type InfoItem = { icon: React.ReactNode; label: string; value: string };
@@ -304,7 +293,7 @@ export default function EventDetailPage() {
             <span className="text-sm font-medium truncate">この大会の宿泊を今すぐ予約</span>
           </div>
           <button
-            onClick={() => scrollToId('stay')}
+            onClick={() => { scrollToId('stay'); trackGA4('click_sticky_banner', { event_id: event.id }); }}
             className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm py-2 px-4 rounded-xl transition-colors whitespace-nowrap"
           >
             予約する →
@@ -417,9 +406,10 @@ export default function EventDetailPage() {
                   href={displayOfficialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() =>
-                    trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
-                  }
+                  onClick={() => {
+                    trackEvent({ eventType: 'click_official_site', marathonEventId: event.id });
+                    trackGA4('click_official_site', { event_id: event.id });
+                  }}
                   className="flex items-center gap-2 text-sm text-navy-700 hover:text-navy-900 font-medium transition-colors"
                 >
                   <ExternalLink size={14} />
@@ -453,6 +443,7 @@ export default function EventDetailPage() {
                 href={rakutenSearchUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackGA4('click_rakuten_prev_night', { event_id: event.id })}
                 className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors"
               >
                 🏨 残室・料金を確認する →
@@ -508,19 +499,31 @@ export default function EventDetailPage() {
                     </span>
                     {plan.title}
                   </h3>
-                  <ol className="space-y-3 mb-5">
+                  <ol className="mb-5">
                     {plan.steps.map((step, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                        <span className="w-5 h-5 rounded-full bg-navy-100 text-navy-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                          {i + 1}
-                        </span>
-                        {step}
+                      <li key={i}>
+                        <div className="flex items-start gap-3 text-sm text-gray-700">
+                          <span className="w-5 h-5 rounded-full bg-navy-100 text-navy-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                            {i + 1}
+                          </span>
+                          {step}
+                        </div>
+                        {i < plan.steps.length - 1 && (
+                          <div className="flex items-center gap-3 py-1">
+                            <span className="w-5 flex items-center justify-center flex-shrink-0 text-gray-300 text-base leading-none">↓</span>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ol>
                   <div className="pt-4 border-t border-gray-100">
                     <p className="text-xs text-gray-500 mb-2">このプランで宿泊を探す</p>
-                    <RakutenButton label="楽天トラベルで宿泊エリアを探す" className="w-full" />
+                    <RakutenButton
+                      label="楽天トラベルで宿泊エリアを探す"
+                      className="w-full"
+                      href={venueRakutenUrl}
+                      onClick={() => trackGA4('click_rakuten_plan', { event_id: event.id, plan_title: plan.title })}
+                    />
                   </div>
                 </div>
               ))}
@@ -542,21 +545,29 @@ export default function EventDetailPage() {
           </div>
 
           <div className="bg-navy-50 border border-navy-100 rounded-2xl p-6">
-            <h3 className="font-black text-navy-800 text-lg mb-4">
+            <h3 className="font-black text-navy-800 text-lg mb-5">
               {event.location}エリアの魅力
             </h3>
-            <div className="grid grid-cols-3 gap-4 mb-5">
-              {displayAreaHighlights.map((item, i) => (
-                <div key={i} className="text-center">
-                  <div className="text-3xl mb-1">{item.icon}</div>
-                  <div className="font-bold text-navy-800 text-xs md:text-sm">{item.title}</div>
-                </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: '🗺️', title: '観光', label: '観光スポットを探す', gaKey: 'kanko' },
+                { icon: '🍽️', title: '地元グルメ', label: 'グルメ・飲食店を探す', gaKey: 'gourmet' },
+                { icon: '📸', title: '旅の思い出', label: 'お土産・特産を探す', gaKey: 'memory' },
+              ].map((item) => (
+                <a
+                  key={item.gaKey}
+                  href={buildRakutenSearchUrl(venueKeyword)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackGA4(`click_rakuten_area_${item.gaKey}`, { event_id: event.id })}
+                  className="flex flex-col items-center text-center bg-white rounded-xl p-3 md:p-4 border border-navy-100 hover:border-orange-300 hover:shadow-md transition-all group"
+                >
+                  <div className="text-3xl mb-2">{item.icon}</div>
+                  <div className="font-bold text-navy-800 text-xs md:text-sm mb-1">{item.title}</div>
+                  <div className="text-xs text-orange-500 group-hover:text-orange-600 font-medium">{item.label} →</div>
+                </a>
               ))}
             </div>
-            <RakutenButton
-              label={`${event.location}の観光・宿泊を探す`}
-              className="w-full md:w-auto"
-            />
           </div>
         </section>
 
@@ -573,9 +584,10 @@ export default function EventDetailPage() {
               href={entryLink}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() =>
-                trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
-              }
+              onClick={() => {
+                trackEvent({ eventType: 'click_official_site', marathonEventId: event.id });
+                trackGA4('click_entry_link', { event_id: event.id });
+              }}
               className="inline-flex items-center gap-2 text-sm font-bold text-green-700 hover:text-green-900 transition-colors"
             >
               <ExternalLink size={14} />
@@ -619,15 +631,18 @@ export default function EventDetailPage() {
             <RakutenButton
               label="宿泊を楽天トラベルで探す"
               className="flex-1 py-4 text-base"
+              href={venueRakutenUrl}
+              onClick={() => trackGA4('click_rakuten_final_cta', { event_id: event.id })}
             />
             {entryLink ? (
               <a
                 href={entryLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() =>
-                  trackEvent({ eventType: 'click_official_site', marathonEventId: event.id })
-                }
+                onClick={() => {
+                  trackEvent({ eventType: 'click_official_site', marathonEventId: event.id });
+                  trackGA4('click_entry_final_cta', { event_id: event.id });
+                }}
                 className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-4 px-5 rounded-xl transition-colors text-sm"
               >
                 <ExternalLink size={15} />
