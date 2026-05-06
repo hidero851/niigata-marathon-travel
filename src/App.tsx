@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import type { Session } from '@supabase/supabase-js'
 import Layout from './components/Layout'
 import TopPage from './pages/TopPage'
 import EventListPage from './pages/EventListPage'
@@ -8,7 +9,7 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import DataSourcePage from './pages/DataSourcePage'
 import AdminPage from './pages/AdminPage'
 import AdminLoginPage from './pages/AdminLoginPage'
-import { isAdminLoggedIn } from './utils/auth'
+import { supabase } from './utils/supabase'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -20,9 +21,16 @@ function ScrollToTop() {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation()
-  if (!isAdminLoggedIn()) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />
-  }
+  const [session, setSession] = useState<Session | null | undefined>(undefined)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => setSession(session))
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (session === undefined) return null
+  if (!session) return <Navigate to="/admin/login" state={{ from: location }} replace />
   return <>{children}</>
 }
 

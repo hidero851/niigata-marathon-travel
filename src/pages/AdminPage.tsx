@@ -1516,8 +1516,8 @@ export default function AdminPage() {
   const showToast = useCallback((msg: string) => setToast(msg), []);
   const hideToast = useCallback(() => setToast(''), []);
 
-  const handleLogout = () => {
-    logoutAdmin();
+  const handleLogout = async () => {
+    await logoutAdmin();
     window.location.href = '/admin/login';
   };
 

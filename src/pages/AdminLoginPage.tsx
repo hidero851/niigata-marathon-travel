@@ -10,10 +10,14 @@ export default function AdminLoginPage() {
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginAdmin(password)) {
+    setLoading(true);
+    const { error: err } = await loginAdmin(password);
+    setLoading(false);
+    if (!err) {
       navigate(from, { replace: true });
     } else {
       setError(true);
@@ -40,6 +44,7 @@ export default function AdminLoginPage() {
             onChange={(e) => { setPassword(e.target.value); setError(false); }}
             placeholder="パスワード"
             autoFocus
+            disabled={loading}
             className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 ${
               error ? 'border-red-400 bg-red-50' : 'border-gray-300'
             }`}
@@ -49,9 +54,10 @@ export default function AdminLoginPage() {
           )}
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors text-sm"
+            disabled={loading}
+            className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors text-sm"
           >
-            ログイン
+            {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>
       </div>

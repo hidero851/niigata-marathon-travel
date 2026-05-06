@@ -1,18 +1,18 @@
-const SESSION_KEY = 'admin_auth_session';
+import { supabase } from './supabase';
 
-export function isAdminLoggedIn(): boolean {
-  return localStorage.getItem(SESSION_KEY) === '1';
+export async function loginAdmin(password: string): Promise<{ error: string | null }> {
+  const email = import.meta.env.VITE_ADMIN_EMAIL;
+  if (!email) return { error: 'VITE_ADMIN_EMAIL が設定されていません' };
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { error: 'パスワードが正しくありません' };
+  return { error: null };
 }
 
-export function loginAdmin(password: string): boolean {
-  const correct = import.meta.env.VITE_ADMIN_PASSWORD;
-  if (correct && password === correct) {
-    localStorage.setItem(SESSION_KEY, '1');
-    return true;
-  }
-  return false;
+export async function logoutAdmin(): Promise<void> {
+  await supabase.auth.signOut();
 }
 
-export function logoutAdmin(): void {
-  localStorage.removeItem(SESSION_KEY);
+export async function getAdminSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session;
 }
