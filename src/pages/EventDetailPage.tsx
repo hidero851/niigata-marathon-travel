@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, ExternalLink, MapPin, Calendar, Clock, Users,
@@ -282,6 +283,15 @@ export default function EventDetailPage() {
 
   return (
     <div className="pb-16">
+      <Helmet>
+        <title>{event.name} | マラソン旅ナビ新潟</title>
+        <meta name="description" content={`${event.name}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
+        <meta property="og:title" content={`${event.name} | マラソン旅ナビ新潟`} />
+        <meta property="og:description" content={`${event.name}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://marathon-navi.com/events/${event.id}`} />
+        {event.imageUrl && <meta property="og:image" content={event.imageUrl} />}
+      </Helmet>
       {/* スティッキーCTAバナー（宿泊セクションが見えていない間のみ表示） */}
       {!isStayVisible && (
         <div

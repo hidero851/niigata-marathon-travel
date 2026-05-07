@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { getAllDisplayableEvents, ALL_TAGS, ALL_REGIONS } from '../data';
@@ -55,6 +56,13 @@ export default function EventListPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
+      <Helmet>
+        <title>新潟のマラソン大会一覧 | マラソン旅ナビ新潟</title>
+        <meta name="description" content="新潟県内のマラソン・ランニング大会を一覧で紹介。距離・地域・開催月で絞り込んで、あなたにぴったりの大会を見つけよう。" />
+        <meta property="og:title" content="新潟のマラソン大会一覧 | マラソン旅ナビ新潟" />
+        <meta property="og:description" content="新潟県内のマラソン・ランニング大会を一覧で紹介。距離・地域・開催月で絞り込んで、あなたにぴったりの大会を見つけよう。" />
+        <meta property="og:url" content="https://marathon-navi.com/events" />
+      </Helmet>
       <div className="mb-8">
         <h1 className="text-3xl font-black text-navy-800 mb-2">新潟のマラソン大会</h1>
         <p className="text-gray-600">大会名だけでなく、地域の魅力で選ぼう</p>

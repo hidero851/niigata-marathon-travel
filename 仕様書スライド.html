@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新潟マラソントラベル 機能仕様書</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Hiragino Sans', 'Meiryo', sans-serif; background: #f0f4f8; }
+
+  .slide {
+    width: 960px;
+    min-height: 540px;
+    margin: 32px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  /* ヘッダー */
+  .slide-header {
+    padding: 28px 40px 20px;
+    border-bottom: 3px solid #f0f0f0;
+  }
+  .slide-header.navy  { background: #1a2e5a; color: white; }
+  .slide-header.orange { background: #f97316; color: white; }
+  .slide-header.teal  { background: #0f766e; color: white; }
+  .slide-header.purple { background: #6d28d9; color: white; }
+  .slide-header.green { background: #15803d; color: white; }
+  .slide-header.rose  { background: #be123c; color: white; }
+
+  .slide-num { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+  .slide-title { font-size: 26px; font-weight: 900; }
+  .slide-sub   { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+  .slide-url   { display: inline-block; font-size: 12px; background: rgba(255,255,255,0.2);
+                 padding: 2px 10px; border-radius: 20px; margin-top: 8px; }
+
+  /* ボディ */
+  .slide-body { padding: 28px 40px 32px; display: flex; gap: 32px; }
+  .col { flex: 1; }
+  .col-wide { flex: 1.5; }
+
+  /* セクション */
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;
+  }
+
+  /* 機能カード */
+  .feature-card {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
+  }
+  .feature-card .name {
+    font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px;
+  }
+  .feature-card .desc {
+    font-size: 12px; color: #64748b; line-height: 1.6;
+  }
+  .feature-card.highlight { border-left: 4px solid #f97316; background: #fff7ed; }
+  .feature-card.note { border-left: 4px solid #f59e0b; background: #fffbeb; }
+  .feature-card.warn { border-left: 4px solid #ef4444; background: #fef2f2; }
+  .feature-card.good { border-left: 4px solid #22c55e; background: #f0fdf4; }
+
+  /* スクリーンモック */
+  .mock {
+    background: #1e293b; border-radius: 8px; padding: 10px;
+    font-size: 11px; color: #94a3b8; line-height: 1.8;
+    font-family: monospace;
+  }
+  .mock .hero { background: #1a2e5a; color: white; padding: 8px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 12px; }
+  .mock .section-block {
+    background: #334155; color: #e2e8f0; padding: 6px 10px;
+    border-radius: 4px; margin-bottom: 4px; font-size: 11px;
+  }
+  .mock .cta-block {
+    background: #f97316; color: white; padding: 5px 10px;
+    border-radius: 4px; margin-bottom: 4px; font-size: 11px; text-align: center;
+  }
+  .mock .green-block {
+    background: #15803d; color: white; padding: 5px 10px;
+    border-radius: 4px; margin-bottom: 4px; font-size: 11px;
+  }
+  .mock .sticky {
+    background: #1a2e5a; color: white; padding: 5px 10px;
+    border-radius: 4px; font-size: 11px; text-align: center;
+    border: 2px dashed #f97316;
+  }
+
+  /* フロー */
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .flow-step {
+    background: #1a2e5a; color: white; border-radius: 6px;
+    padding: 6px 12px; font-size: 12px; font-weight: 700;
+  }
+  .flow-arrow { color: #94a3b8; font-size: 16px; }
+
+  /* バッジ */
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px; margin-right: 4px;
+  }
+  .badge.blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge.orange { background: #fed7aa; color: #c2410c; }
+  .badge.green  { background: #dcfce7; color: #15803d; }
+  .badge.red    { background: #fee2e2; color: #b91c1c; }
+
+  /* タグ一覧 */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag { background: #e2e8f0; color: #475569; font-size: 11px;
+         padding: 3px 10px; border-radius: 20px; }
+
+  /* 表 */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #f1f5f9; padding: 8px 10px; text-align: left; color: #475569; font-weight: 700; }
+  td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+
+  /* 表紙 */
+  .cover { min-height: 540px; display: flex; flex-direction: column;
+           justify-content: center; align-items: center; text-align: center;
+           background: linear-gradient(135deg, #0a2540 0%, #1a2e5a 60%, #1a5276 100%); color: white; }
+  .cover h1 { font-size: 40px; font-weight: 900; margin-bottom: 12px; }
+  .cover p  { font-size: 18px; opacity: 0.8; }
+  .cover .date { font-size: 13px; opacity: 0.5; margin-top: 24px; }
+
+  /* 印刷用 */
+  @media print {
+    body { background: white; }
+    .slide { margin: 0; box-shadow: none; border-radius: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 表紙 ===== -->
+<div class="slide">
+  <div class="cover">
+    <div style="font-size:13px;letter-spacing:0.15em;opacity:0.6;margin-bottom:16px;">NIIGATA MARATHON TRAVEL</div>
+    <h1>機能仕様書</h1>
+    <p>各画面でできること・見えるもの</p>
+    <div class="date">2026年5月 / MVP版</div>
+  </div>
+</div>
+
+<!-- ===== スライド1: サービス全体像 ===== -->
+<div class="slide">
+  <div class="slide-header navy">
+    <div class="slide-num">SLIDE 01</div>
+    <div class="slide-title">サービス全体像</div>
+    <div class="slide-sub">6つの画面と、ユーザーの動線</div>
+  </div>
+  <div class="slide-body">
+    <div class="col-wide">
+      <div class="section-label">ユーザーの動線</div>
+      <div class="flow">
+        <div class="flow-step">🏠 トップ</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">📋 大会一覧</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">🏃 大会詳細</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">🏨 楽天トラベル</div>
+      </div>
+      <div style="margin-top:16px;">
+        <table>
+          <tr><th>画面</th><th>URL</th><th>主な目的</th></tr>
+          <tr><td>🏠 トップページ</td><td>/</td><td>検索・大会の入口</td></tr>
+          <tr><td>📋 大会一覧</td><td>/events</td><td>条件を絞って大会を探す</td></tr>
+          <tr><td>🏃 大会詳細</td><td>/events/:id</td><td>宿泊・エントリーへの導線</td></tr>
+          <tr><td>🛍 特産品詳細</td><td>/products/:id</td><td>特産品・お土産の情報</td></tr>
+          <tr><td>⚙️ 管理画面</td><td>/admin</td><td>コンテンツ設定（運営者用）</td></tr>
+          <tr><td>📄 データ確認</td><td>/datasource</td><td>出典・利用規約の確認</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="col">
+      <div class="section-label">収益の仕組み</div>
+      <div class="feature-card highlight">
+        <div class="name">💰 楽天トラベルアフィリエイト</div>
+        <div class="desc">大会詳細ページの宿泊CTAボタンをクリックして楽天で予約が成立すると報酬が発生する。</div>
+      </div>
+      <div class="section-label" style="margin-top:16px;">現在のデータ状態</div>
+      <div class="feature-card warn">
+        <div class="name">⚠️ 全データが仮データ</div>
+        <div class="desc">大会情報・宿泊・特産品はすべてサンプル。正式公開前に実データへの差し替えが必要。</div>
+      </div>
+      <div class="feature-card good">
+        <div class="name">✅ 高田城ロードレース</div>
+        <div class="desc">サンプルとして整備済み。前泊推奨日・エントリーURLを設定済み。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド2: トップページ ===== -->
+<div class="slide">
+  <div class="slide-header orange">
+    <div class="slide-num">SLIDE 02</div>
+    <div class="slide-title">🏠 トップページ</div>
+    <div class="slide-sub">新規ユーザーが最初に見る画面</div>
+    <div class="slide-url">URL: /</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">画面の構成（上から）</div>
+      <div class="mock">
+        <div class="hero">🏔 ヒーローセクション<br>「走る旅で、新潟をもっと好きになる。」<br>[ 地域 ▼ ] [ 開催月 ▼ ] [ 距離 ▼ ]<br>[ 🔍 大会から旅を探す ]<br>🐟日本海グルメ ♨温泉 🍶地酒 ...</div>
+        <div class="section-block">📖 How It Works（3ステップ説明）</div>
+        <div class="section-block">⭐ 注目の大会（3件カード表示）</div>
+        <div class="section-block">🏷 魅力で大会を探す（タグ一覧）</div>
+        <div class="section-block">⚠️ 仮データ注意文</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="section-label">できること</div>
+      <div class="feature-card">
+        <div class="name">🔍 条件で検索する</div>
+        <div class="desc">地域・開催月・距離を選んで「大会から旅を探す」ボタンで大会一覧ページへ遷移。</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">🏷 タグで探す</div>
+        <div class="desc">「日本海グルメ」「温泉」等のタグをクリックすると、そのタグで絞り込まれた大会一覧へ遷移。</div>
+      </div>
+      <div class="feature-card highlight">
+        <div class="name">⭐ 注目の大会（固定表示）</div>
+        <div class="desc">高田城ロードレース・南魚沼グルメマラソン・佐渡トキマラソンを常に表示。管理画面で上書き可能。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド3: 大会一覧ページ ===== -->
+<div class="slide">
+  <div class="slide-header teal">
+    <div class="slide-num">SLIDE 03</div>
+    <div class="slide-title">📋 大会一覧ページ</div>
+    <div class="slide-sub">条件を絞って大会を探す</div>
+    <div class="slide-url">URL: /events</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">画面の構成</div>
+      <div class="mock">
+        <div class="section-block">🔧 フィルターバー<br>[ 地域 ▼ ] [ 月 ▼ ] [ 距離 ▼ ] [ タグ ▼ ]</div>
+        <div class="section-block">🏃 大会カード × N件<br>（名前・場所・日付・距離・タグ）</div>
+        <div class="section-block">📄 ページ下部：結果件数</div>
+      </div>
+      <div class="section-label" style="margin-top:16px;">フィルター条件</div>
+      <div class="tag-list">
+        <div class="tag">地域（新潟市・上越市等）</div>
+        <div class="tag">開催月（4〜11月）</div>
+        <div class="tag">距離（フル・ハーフ・10km等）</div>
+        <div class="tag">タグ（温泉・グルメ等）</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="section-label">できること</div>
+      <div class="feature-card">
+        <div class="name">🔧 フィルタリング</div>
+        <div class="desc">地域・月・距離・タグを組み合わせて絞り込める。複数条件の同時指定も可能。</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">🔗 URLで条件を共有</div>
+        <div class="desc">フィルター結果はURLパラメータに反映される。例：/events?region=上越市&tag=城下町</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">🃏 大会カードをクリック</div>
+        <div class="desc">大会詳細ページへ遷移。</div>
+      </div>
+      <div class="feature-card note">
+        <div class="name">📌 現在の大会数</div>
+        <div class="desc">高田城 / 越後くびき野100km / 南魚沼グルメ / 柏崎潮風 / 佐渡トキ ＋ 旧データ数件</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド4: 大会詳細ページ（上半分）===== -->
+<div class="slide">
+  <div class="slide-header rose">
+    <div class="slide-num">SLIDE 04</div>
+    <div class="slide-title">🏃 大会詳細ページ（セクション構成）</div>
+    <div class="slide-sub">宿泊・エントリーへの収益導線が集約されたメインページ</div>
+    <div class="slide-url">URL: /events/:id　例：/events/takada-castle-road-race</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">セクション順序（上から）</div>
+      <div class="mock">
+        <div class="sticky">📌 スティッキーバナー（画面下部に常時固定）<br>「この大会の宿泊を今すぐ予約」[ 予約する → ]</div>
+        <div style="height:6px;"></div>
+        <div class="hero">① ヒーロー画像＋大会名・日付・タグ<br>[ 参加プランを見る ] [ 🏨宿泊エリアを見る ]</div>
+        <div class="section-block">② 大会基本情報（距離・参加費・定員等）<br>📅 前泊推奨日カード ← eventDate設定時のみ</div>
+        <div class="section-block">③ このレースで楽しめること（画像グリッド）</div>
+        <div class="section-block">④ おすすめ参加プラン（モデルコース）<br>[ 楽天トラベルで宿泊エリアを探す ]</div>
+        <div class="cta-block">⑤ ランナー向けおすすめ宿泊エリア 🥇🥈🥉<br>[ 楽天トラベルで探す × 3 ]</div>
+        <div class="green-block">⑥ ✅ 宿泊の手配が終わったら… エントリーする →</div>
+        <div class="section-block">⑦ 食・特産・お土産</div>
+        <div class="section-block">⑧ 注意バナー</div>
+        <div class="cta-block">⑨ 最終CTA：楽天トラベル＋エントリー</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="section-label">楽天アフィリエイトCTAの設置箇所</div>
+      <div class="feature-card highlight">
+        <div class="name">💰 CTAが全6箇所</div>
+        <div class="desc">
+          1. 前泊推奨日カード（日程付き検索URL）<br>
+          2. 参加プランカード（プランごと）<br>
+          3. 宿泊エリア🥇カード<br>
+          4. 宿泊エリア🥈カード<br>
+          5. 宿泊エリア🥉カード<br>
+          6. エリア魅力セクション<br>
+          7. 最終CTA
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:12px;">条件付き表示の要素</div>
+      <div class="feature-card note">
+        <div class="name">📅 前泊推奨日カード</div>
+        <div class="desc">大会データに <code>eventDate</code>（ISO日付）が設定されている場合のみ表示。現在: 高田城のみ対応済み。</div>
+      </div>
+      <div class="feature-card good">
+        <div class="name">✅ エントリー誘導カード（緑）</div>
+        <div class="desc"><code>entryUrl</code> または <code>officialUrl</code> が設定されている場合のみ表示。現在: 高田城のみ対応済み。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド5: スティッキーバナー詳細 ===== -->
+<div class="slide">
+  <div class="slide-header rose">
+    <div class="slide-num">SLIDE 05</div>
+    <div class="slide-title">📌 スティッキーCTAバナー</div>
+    <div class="slide-sub">大会詳細ページの画面下部に常時固定表示される宿泊誘導バナー</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">見た目のイメージ</div>
+      <div style="background:#1a2e5a;border-radius:8px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="color:white;font-size:14px;">🏨 この大会の宿泊を今すぐ予約</div>
+        <div style="background:#f97316;color:white;font-size:13px;font-weight:700;padding:8px 16px;border-radius:8px;">予約する →</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">表示位置</div>
+        <div class="desc">画面の一番下に固定（position: fixed, bottom: 0）。スクロールしても常に見える。</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">ボタンの動作</div>
+        <div class="desc">クリックすると宿泊セクション（🥇🥈🥉のあるエリア）までスムーズスクロールする。</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="section-label">表示・非表示のルール</div>
+      <div class="feature-card highlight">
+        <div class="name">🟠 宿泊セクションが画面外 → バナー表示</div>
+        <div class="desc">ページ上部〜宿泊セクションの手前までスクロール中はバナーが表示される。</div>
+      </div>
+      <div class="feature-card good">
+        <div class="name">✅ 宿泊セクションが画面内 → バナー非表示</div>
+        <div class="desc">宿泊エリアセクションが画面に入ったら自動でバナーが消える（重複を避けるため）。</div>
+      </div>
+      <div class="feature-card note">
+        <div class="name">🔧 技術的な仕組み</div>
+        <div class="desc">IntersectionObserver API を使って宿泊セクションの表示状態を監視している。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド6: 管理画面 ===== -->
+<div class="slide">
+  <div class="slide-header purple">
+    <div class="slide-num">SLIDE 06</div>
+    <div class="slide-title">⚙️ 管理画面</div>
+    <div class="slide-sub">運営者がコンテンツを設定・管理する画面（URLを知っている人のみアクセス可能）</div>
+    <div class="slide-url">URL: /admin</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">できること（全5機能）</div>
+      <div class="feature-card">
+        <div class="name">① おすすめ大会の設定</div>
+        <div class="desc">トップページの「注目の大会」に表示する大会を指定できる。順番も設定可能。<br><span class="badge red">注意</span>設定はこのブラウザのみ有効。他のデバイスには反映されない。</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">② 大会ビジュアル設定</div>
+        <div class="desc">大会ごとにヒーロー画像URL・キャッチコピー・サブタイトル・公式URL・<strong>開催日（eventDate）</strong>を上書き設定できる。</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">③ 大会の非表示設定</div>
+        <div class="desc">一覧から特定の大会を非表示にできる（削除ではなく非表示）。</div>
+      </div>
+    </div>
+    <div class="col">
+      <div style="margin-top:0px;">
+        <div class="feature-card">
+          <div class="name">④ 大会の新規作成</div>
+          <div class="desc">管理画面から新しい大会データを作成できる（このブラウザのみ保存）。</div>
+        </div>
+        <div class="feature-card">
+          <div class="name">⑤ 特産品の紐付け</div>
+          <div class="desc">大会詳細ページに表示する特産品を選択・設定できる。</div>
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:8px;">重要な制約</div>
+      <div class="feature-card warn">
+        <div class="name">⚠️ localStorageに保存される</div>
+        <div class="desc">
+          管理画面の設定はブラウザのローカルストレージに保存される。<br>
+          <strong>→ 別のPCやスマホには反映されない</strong><br>
+          → ブラウザのデータ削除で消える<br><br>
+          確実に全ユーザーに反映させるには、<strong>コードを修正してgit push</strong>することが必要。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド7: データ構造と設定状況 ===== -->
+<div class="slide">
+  <div class="slide-header green">
+    <div class="slide-num">SLIDE 07</div>
+    <div class="slide-title">📊 大会データの現状</div>
+    <div class="slide-sub">各大会で設定済み・未設定の項目一覧</div>
+  </div>
+  <div class="slide-body" style="display:block;">
+    <table>
+      <tr>
+        <th>大会名</th>
+        <th>eventDate<br>前泊推奨日</th>
+        <th>entryUrl<br>エントリー誘導</th>
+        <th>officialUrl<br>公式サイト</th>
+        <th>ヒーロー画像</th>
+        <th>状態</th>
+      </tr>
+      <tr>
+        <td><strong>高田城ロードレース</strong></td>
+        <td><span class="badge green">✅ 2026-06-07</span></td>
+        <td><span class="badge green">✅ 設定済み</span></td>
+        <td><span class="badge green">✅ 設定済み</span></td>
+        <td><span class="badge blue">設定済み</span></td>
+        <td><span class="badge green">サンプル完成</span></td>
+      </tr>
+      <tr>
+        <td>南魚沼グルメマラソン</td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td>未設定</td>
+        <td><span class="badge orange">仮データのみ</span></td>
+      </tr>
+      <tr>
+        <td>佐渡トキマラソン</td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td>未設定</td>
+        <td><span class="badge orange">仮データのみ</span></td>
+      </tr>
+      <tr>
+        <td>柏崎潮風マラソン</td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td>未設定</td>
+        <td><span class="badge orange">仮データのみ</span></td>
+      </tr>
+      <tr>
+        <td>越後くびき野100km</td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td><span class="badge red">❌ 未設定</span></td>
+        <td>未設定</td>
+        <td><span class="badge orange">仮データのみ</span></td>
+      </tr>
+    </table>
+    <div style="margin-top:24px;display:flex;gap:24px;">
+      <div style="flex:1;">
+        <div class="section-label">eventDate を設定するとできること</div>
+        <div class="feature-card good">
+          <div class="name">📅 前泊推奨日カードが表示される</div>
+          <div class="desc">大会基本情報の下に「前泊推奨: ○月○日 チェックイン」カードが出現。楽天トラベルの日程付き検索URLが生成される。</div>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div class="section-label">entryUrl / officialUrl を設定するとできること</div>
+        <div class="feature-card good">
+          <div class="name">✅ エントリー誘導カードが表示される</div>
+          <div class="desc">宿泊セクションの直後に「宿泊の手配が終わったら…大会にエントリーする」の緑カードが出現。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド8: インフラ・デプロイ ===== -->
+<div class="slide">
+  <div class="slide-header navy">
+    <div class="slide-num">SLIDE 08</div>
+    <div class="slide-title">🚀 デプロイ・インフラ構成</div>
+    <div class="slide-sub">ローカル開発から本番公開までの流れ</div>
+  </div>
+  <div class="slide-body">
+    <div class="col-wide">
+      <div class="section-label">デプロイフロー</div>
+      <div class="flow" style="flex-direction:column;align-items:flex-start;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;width:100%;">
+          <div class="flow-step">① コード編集</div>
+          <div style="color:#64748b;font-size:12px;">src/ フォルダ内のファイルを変更</div>
+        </div>
+        <div style="color:#94a3b8;padding-left:12px;">↓</div>
+        <div style="display:flex;align-items:center;gap:12px;width:100%;">
+          <div class="flow-step">② ビルド確認</div>
+          <div style="color:#64748b;font-size:12px;">npm run build でエラーがないか確認</div>
+        </div>
+        <div style="color:#94a3b8;padding-left:12px;">↓</div>
+        <div style="display:flex;align-items:center;gap:12px;width:100%;">
+          <div class="flow-step">③ git push</div>
+          <div style="color:#64748b;font-size:12px;">GitHub（hidero851/niigata-marathon-travel）へ送信</div>
+        </div>
+        <div style="color:#94a3b8;padding-left:12px;">↓ 自動</div>
+        <div style="display:flex;align-items:center;gap:12px;width:100%;">
+          <div class="flow-step" style="background:#15803d;">④ 本番反映</div>
+          <div style="color:#64748b;font-size:12px;">Vercelが自動検知・ビルド・デプロイ（約1〜2分）</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="section-label">環境の違い</div>
+      <div class="feature-card">
+        <div class="name">🖥 ローカル（開発用）</div>
+        <div class="desc">
+          URL: http://localhost:5173<br>
+          起動: デスクトップの「走る旅-起動.bat」<br>
+          特徴: PCを閉じると止まる。自分のみ閲覧可。
+        </div>
+      </div>
+      <div class="feature-card highlight">
+        <div class="name">🌐 Vercel（本番・常時稼働）</div>
+        <div class="desc">
+          URL: niigata-marathon-travel.vercel.app<br>
+          特徴: 24時間365日稼働。PCの電源に関係なし。世界中からアクセス可能。
+        </div>
+      </div>
+      <div class="feature-card note">
+        <div class="name">📌 商用化時の検討事項</div>
+        <div class="desc">
+          独自ドメイン取得（例: niigata-marathon.jp）<br>
+          Vercel Hobby → Pro プランへの移行<br>
+          管理画面への認証追加
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド9: 今後の課題 ===== -->
+<div class="slide">
+  <div class="slide-header orange">
+    <div class="slide-num">SLIDE 09</div>
+    <div class="slide-title">📋 今後の課題・ロードマップ</div>
+    <div class="slide-sub">MVP完成に向けてやるべきこと</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">🔴 近期（すぐやること）</div>
+      <div class="feature-card warn">
+        <div class="name">各大会のURLを調査・設定</div>
+        <div class="desc">南魚沼・佐渡トキ・柏崎・越後くびき野の<br>entryUrl / officialUrl を実URLに更新</div>
+      </div>
+      <div class="feature-card warn">
+        <div class="name">各大会の eventDate を設定</div>
+        <div class="desc">実開催日が分かっている大会に YYYY-MM-DD 形式で設定 → 前泊推奨日カードが表示される</div>
+      </div>
+      <div class="feature-card warn">
+        <div class="name">高田城ロードレースの実データ確認</div>
+        <div class="desc">仮置きのURL・日程・参加費等を公式情報に差し替え</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="section-label">🟡 中期（商用化準備）</div>
+      <div class="feature-card note">
+        <div class="name">独自ドメインの取得</div>
+        <div class="desc">niigata-marathon.jp 等の独自ドメインを取得してVercelに設定</div>
+      </div>
+      <div class="feature-card note">
+        <div class="name">管理画面に認証を追加</div>
+        <div class="desc">現在はURLを知っていれば誰でも管理画面にアクセス可能。パスワード認証が必要。</div>
+      </div>
+      <div class="section-label" style="margin-top:12px;">🔵 長期（機能拡張）</div>
+      <div class="feature-card">
+        <div class="name">バックエンド・DB の導入</div>
+        <div class="desc">管理設定をどのデバイスからでも反映できるようにする。おすすめ大会・ビジュアル設定をDB管理に移行。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
+  新潟マラソントラベル 機能仕様書 — 2026年5月 MVP版
+</div>
+
+</body>
+</html>

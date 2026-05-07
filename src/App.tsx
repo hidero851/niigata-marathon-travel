@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import type { Session } from '@supabase/supabase-js'
 import Layout from './components/Layout'
 import TopPage from './pages/TopPage'
@@ -45,18 +46,20 @@ function App() {
   if (!synced) return null
 
   return (
-    <Layout>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<TopPage />} />
-        <Route path="/events" element={<EventListPage />} />
-        <Route path="/events/:id" element={<EventDetailPage />} />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/datasource" element={<DataSourcePage />} />
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-      </Routes>
-    </Layout>
+    <HelmetProvider>
+      <Layout>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<TopPage />} />
+          <Route path="/events" element={<EventListPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/datasource" element={<DataSourcePage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+        </Routes>
+      </Layout>
+    </HelmetProvider>
   )
 }
 

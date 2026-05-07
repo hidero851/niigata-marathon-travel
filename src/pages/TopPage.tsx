@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
 import { getAllDisplayableEvents, ALL_TAGS } from '../data';
@@ -86,6 +87,14 @@ export default function TopPage() {
 
   return (
     <div>
+      <Helmet>
+        <title>マラソン旅ナビ新潟 | 走る旅で、新潟をもっと好きになる。</title>
+        <meta name="description" content="新潟のマラソン大会情報と旅の楽しみ方を一緒にお届け。宿泊・グルメ・観光スポットまで、ランナーのための旅ガイドです。" />
+        <meta property="og:title" content="マラソン旅ナビ新潟 | 走る旅で、新潟をもっと好きになる。" />
+        <meta property="og:description" content="新潟のマラソン大会情報と旅の楽しみ方を一緒にお届け。宿泊・グルメ・観光スポットまで、ランナーのための旅ガイドです。" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://marathon-navi.com" />
+      </Helmet>
       {/* ヒーロー */}
       <section
         className="relative min-h-[540px] flex items-center"
