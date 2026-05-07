@@ -10,6 +10,7 @@ import DataSourcePage from './pages/DataSourcePage'
 import AdminPage from './pages/AdminPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import { supabase } from './utils/supabase'
+import { loadFromSupabase } from './utils/syncDB'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -35,6 +36,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const [synced, setSynced] = useState(false)
+
+  useEffect(() => {
+    loadFromSupabase().finally(() => setSynced(true))
+  }, [])
+
+  if (!synced) return null
+
   return (
     <Layout>
       <ScrollToTop />

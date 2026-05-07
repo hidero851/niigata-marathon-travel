@@ -8,6 +8,7 @@ import type {
   ModelPlan,
   LocalProduct,
 } from '../types';
+import { saveToSupabase } from './syncDB';
 
 const KEYS = {
   featured: 'featuredEventSettings',
@@ -32,6 +33,7 @@ function load<T>(key: string): T[] {
 
 function persist<T>(key: string, data: T[]): void {
   localStorage.setItem(key, JSON.stringify(data));
+  saveToSupabase(key, data);
 }
 
 // --- Featured Event Settings ---
@@ -46,6 +48,7 @@ export function saveFeaturedSettings(settings: FeaturedEventSetting[]): void {
 
 export function resetFeaturedSettings(): void {
   localStorage.removeItem(KEYS.featured);
+  saveToSupabase(KEYS.featured, []);
 }
 
 // --- Event Visual Settings ---
@@ -76,6 +79,7 @@ export function resetEventVisualSetting(eventId: string): void {
 
 export function resetAllEventVisualSettings(): void {
   localStorage.removeItem(KEYS.eventVisual);
+  saveToSupabase(KEYS.eventVisual, []);
 }
 
 // --- Product Visual Settings ---
@@ -106,6 +110,7 @@ export function resetProductVisualSetting(productId: string): void {
 
 export function resetAllProductVisualSettings(): void {
   localStorage.removeItem(KEYS.productVisual);
+  saveToSupabase(KEYS.productVisual, []);
 }
 
 // --- Admin Created Events ---
@@ -146,12 +151,14 @@ export function hideEventId(id: string): void {
   if (!hidden.includes(id)) {
     hidden.push(id);
     localStorage.setItem(KEYS.hiddenEvents, JSON.stringify(hidden));
+    saveToSupabase(KEYS.hiddenEvents, hidden);
   }
 }
 
 export function unhideEventId(id: string): void {
   const hidden = getHiddenEventIds().filter((h) => h !== id);
   localStorage.setItem(KEYS.hiddenEvents, JSON.stringify(hidden));
+  saveToSupabase(KEYS.hiddenEvents, hidden);
 }
 
 // --- Event Product Assignments ---
