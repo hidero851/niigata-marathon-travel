@@ -10,6 +10,7 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import DataSourcePage from './pages/DataSourcePage'
 import AdminPage from './pages/AdminPage'
 import AdminLoginPage from './pages/AdminLoginPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import { supabase } from './utils/supabase'
 import { loadFromSupabase } from './utils/syncDB'
 
@@ -57,6 +58,7 @@ function App() {
           <Route path="/datasource" element={<DataSourcePage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
         </Routes>
       </Layout>
     </HelmetProvider>

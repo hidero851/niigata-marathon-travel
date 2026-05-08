@@ -18,21 +18,21 @@ export default function Footer() {
               <li><Link to="/" className="hover:text-white transition-colors">トップ</Link></li>
               <li><Link to="/events" className="hover:text-white transition-colors">大会一覧</Link></li>
               <li><Link to="/datasource" className="hover:text-white transition-colors">データソース確認</Link></li>
+              <li><Link to="/privacy" className="hover:text-white transition-colors">プライバシーポリシー</Link></li>
             </ul>
           </div>
 
           <div>
             <div className="font-bold mb-3 text-navy-100">免責・利用について</div>
             <p className="text-navy-300 text-xs leading-relaxed">
-              掲載情報は仮データです。実際の大会情報・宿泊情報・特産品情報については、各公式サイトでご確認ください。
+              掲載情報は各公式サイト等をもとに作成しています。実際の大会情報・宿泊情報・特産品情報については、各公式サイトでご確認ください。
               掲載内容の正確性について保証しません。
             </p>
           </div>
         </div>
 
         <div className="border-t border-navy-700 pt-6 text-center text-navy-400 text-xs">
-          <p>© 2026 マラソンナビ</p>
-          <p className="mt-1">本サイトは開発中のMVPです。掲載情報はすべて仮データです。</p>
+          <p>© 2026 新潟マラソンナビ</p>
         </div>
       </div>
     </footer>
