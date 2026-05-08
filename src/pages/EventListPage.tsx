@@ -62,6 +62,9 @@ export default function EventListPage() {
         <meta property="og:title" content="新潟のマラソン大会一覧 | 新潟マラソンナビ" />
         <meta property="og:description" content="新潟県内のマラソン・ランニング大会を一覧で紹介。距離・地域・開催月で絞り込んで、あなたにぴったりの大会を見つけよう。" />
         <meta property="og:url" content="https://marathon-navi.com/events" />
+        <meta property="og:image" content="https://marathon-navi.com/images/ogp.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://marathon-navi.com/images/ogp.png" />
       </Helmet>
       <div className="mb-8">
         <h1 className="text-3xl font-black text-navy-800 mb-2">新潟のマラソン大会</h1>

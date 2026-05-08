@@ -94,6 +94,9 @@ export default function TopPage() {
         <meta property="og:description" content="新潟のマラソン大会情報と旅の楽しみ方を一緒にお届け。宿泊・グルメ・観光スポットまで、ランナーのための旅ガイドです。" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://marathon-navi.com" />
+        <meta property="og:image" content="https://marathon-navi.com/images/ogp.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://marathon-navi.com/images/ogp.png" />
       </Helmet>
       {/* ヒーロー */}
       <section
