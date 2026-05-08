@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
-  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package,
+  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe,
 } from 'lucide-react';
 import { getAllDisplayableEvents, allProducts, formatEventDate } from '../data';
 import type { MarathonEvent, Accommodation, ModelPlan, LocalProduct } from '../types';
@@ -942,8 +942,15 @@ const EVENT_SUBTABS: { id: EventSubTab; label: string; icon: React.ReactNode }[]
   { id: 'localProductsAdmin', label: '独自特産品', icon: <Package size={14} /> },
 ];
 
+function getAllEventsForAdmin(): MarathonEvent[] {
+  const adminCreated = getAdminCreatedEvents();
+  const adminIds = new Set(adminCreated.map((e) => e.id));
+  const staticEvents = getAllDisplayableEvents().filter((e) => !adminIds.has(e.id));
+  return [...staticEvents, ...adminCreated];
+}
+
 function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
-  const [events, setEvents] = useState<MarathonEvent[]>(() => getAllDisplayableEvents());
+  const [events, setEvents] = useState<MarathonEvent[]>(() => getAllEventsForAdmin());
   const [adminIds, setAdminIds] = useState<Set<string>>(
     () => new Set(getAdminCreatedEvents().map((e) => e.id))
   );
@@ -954,16 +961,22 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
   const [adminEditId, setAdminEditId] = useState<string | null>(null);
   const [adminEditForm, setAdminEditForm] = useState({ ...INIT_FORM });
 
-  const [selectedEventId, setSelectedEventId] = useState(() => getAllDisplayableEvents()[0]?.id ?? '');
+  const [selectedEventId, setSelectedEventId] = useState(() => getAllEventsForAdmin()[0]?.id ?? '');
   const [subTab, setSubTab] = useState<EventSubTab>('visual');
 
   const refresh = () => {
-    const updated = getAllDisplayableEvents();
+    const updated = getAllEventsForAdmin();
     setEvents(updated);
     setAdminIds(new Set(getAdminCreatedEvents().map((e) => e.id)));
     if (updated.length > 0 && !updated.find((e) => e.id === selectedEventId)) {
       setSelectedEventId(updated[0].id);
     }
+  };
+
+  const handleTogglePublish = (event: MarathonEvent) => {
+    saveAdminCreatedEvent({ ...event, draft: !event.draft });
+    refresh();
+    onSave(event.draft ? '公開しました' : '下書きに戻しました');
   };
 
   const handleDelete = (eventId: string, name: string) => {
@@ -1096,12 +1109,13 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
         : [],
       localProducts: [],
       modelPlans: [],
+      draft: true,
     };
     saveAdminCreatedEvent(newEvent);
     refresh();
     setForm({ ...INIT_FORM });
     setShowForm(false);
-    onSave('大会を登録しました');
+    onSave('下書きとして保存しました');
   };
 
   return (
@@ -1127,7 +1141,27 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
                   </div>
                   <div className="flex items-center gap-2">
                     {adminIds.has(event.id) && (
-                      <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">管理登録</span>
+                      event.draft
+                        ? <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full">下書き</span>
+                        : <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">公開中</span>
+                    )}
+                    {adminIds.has(event.id) && (
+                      <button
+                        onClick={() => window.open(`/events/${event.id}`, '_blank')}
+                        className="text-gray-400 hover:text-blue-500 p-1 rounded transition-colors"
+                        title="プレビュー"
+                      >
+                        <Eye size={14} />
+                      </button>
+                    )}
+                    {adminIds.has(event.id) && (
+                      <button
+                        onClick={() => handleTogglePublish(event)}
+                        className={`p-1 rounded transition-colors ${event.draft ? 'text-gray-400 hover:text-green-500' : 'text-green-500 hover:text-gray-400'}`}
+                        title={event.draft ? '公開する' : '下書きに戻す'}
+                      >
+                        <Globe size={14} />
+                      </button>
                     )}
                     <button
                       onClick={() => {

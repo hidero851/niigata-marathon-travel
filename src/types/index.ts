@@ -86,6 +86,7 @@ export type MarathonEvent = {
   accommodations: Accommodation[];
   localProducts: LocalProduct[];
   modelPlans: ModelPlan[];
+  draft?: boolean;
 };
 
 export type EventProductAssignment = {

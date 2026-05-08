@@ -74,7 +74,7 @@ function applyAdminOverrides(event: MarathonEvent, visualSettings: ReturnType<ty
 export function getAllDisplayableEvents(): MarathonEvent[] {
   try {
     const hidden = getHiddenEventIds();
-    const adminCreated = getAdminCreatedEvents();
+    const adminCreated = getAdminCreatedEvents().filter((e) => !e.draft);
     const visualSettings = getEventVisualSettings();
     const staticEvents = getDisplayableEvents().filter((e) => !hidden.includes(e.id));
     return [...staticEvents, ...adminCreated].map((e) => applyAdminOverrides(e, visualSettings));
