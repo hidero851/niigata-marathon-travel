@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
 import { getAllDisplayableEvents, ALL_TAGS } from '../data';
+import EntryAlertSection from '../components/EntryAlertSection';
 import { getFeaturedSettings } from '../utils/adminSettings';
 import EventCard from '../components/EventCard';
 import { trackEvent } from '../utils/analytics';
@@ -195,6 +196,9 @@ export default function TopPage() {
           </div>
         </div>
       </section>
+
+      {/* エントリーアラート */}
+      <EntryAlertSection events={events} />
 
       {/* ③ コンセプト */}
       <section className="bg-white py-20">

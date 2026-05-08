@@ -35,12 +35,16 @@ import {
   saveEventModelPlanOverride,
   getEventAdminLocalProducts,
   saveEventAdminLocalProducts,
+  getEventEntryDates,
+  saveEventEntryDate,
+  getEntryAlertDays,
+  saveEntryAlertDays,
 } from '../utils/adminSettings';
 import { getLogs, clearLogs } from '../utils/analytics';
 import { logoutAdmin } from '../utils/auth';
 
 type Tab = 'featured' | 'eventManage' | 'data';
-type EventSubTab = 'visual' | 'accommodations' | 'modelPlans' | 'products' | 'productAssign' | 'localProductsAdmin';
+type EventSubTab = 'visual' | 'accommodations' | 'modelPlans' | 'products' | 'productAssign' | 'localProductsAdmin' | 'entryDates';
 
 // --- Toast ---
 
@@ -940,7 +944,111 @@ const EVENT_SUBTABS: { id: EventSubTab; label: string; icon: React.ReactNode }[]
   { id: 'products', label: '特産品設定', icon: <ShoppingBag size={14} /> },
   { id: 'productAssign', label: '特産品紐づけ', icon: <Link2 size={14} /> },
   { id: 'localProductsAdmin', label: '独自特産品', icon: <Package size={14} /> },
+  { id: 'entryDates', label: 'エントリー日程', icon: <CalendarDays size={14} /> },
 ];
+
+// --- EntryDatesPanel ---
+
+function EntryDatesPanel({ onSave }: { onSave: (msg: string) => void }) {
+  const allEvts = getAllEventsForAdmin();
+  const [alertDays, setAlertDays] = useState(() => getEntryAlertDays());
+  const [entries, setEntries] = useState<Record<string, { start: string; end: string }>>(() => {
+    const stored = getEventEntryDates();
+    const map: Record<string, { start: string; end: string }> = {};
+    for (const e of stored) {
+      map[e.eventId] = { start: e.entryStartDate ?? '', end: e.entryEndDate ?? '' };
+    }
+    return map;
+  });
+
+  const getEntry = (id: string) => entries[id] ?? { start: '', end: '' };
+  const setField = (id: string, field: 'start' | 'end', val: string) => {
+    setEntries((prev) => ({ ...prev, [id]: { ...getEntry(id), [field]: val } }));
+  };
+
+  const handleSaveEvent = (eventId: string) => {
+    const e = getEntry(eventId);
+    saveEventEntryDate({ eventId, entryStartDate: e.start || undefined, entryEndDate: e.end || undefined });
+    onSave('エントリー日程を保存しました');
+  };
+
+  const handleSaveAlertDays = () => {
+    saveEntryAlertDays(alertDays);
+    onSave(`アラート日数を${alertDays}日に設定しました`);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Alert threshold */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-4 flex-wrap">
+        <div className="flex-1">
+          <p className="text-sm font-bold text-amber-800">アラート表示日数</p>
+          <p className="text-xs text-amber-700 mt-0.5">トップページに何日前から表示するか</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={1}
+            max={60}
+            value={alertDays}
+            onChange={(e) => setAlertDays(Number(e.target.value))}
+            className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400 text-center"
+          />
+          <span className="text-sm text-gray-600">日前</span>
+          <button
+            onClick={handleSaveAlertDays}
+            className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <Save size={13} /> 保存
+          </button>
+        </div>
+      </div>
+
+      {/* Per-event entry dates */}
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <span className="text-sm font-medium text-gray-700">大会別エントリー日程</span>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {allEvts.map((event) => {
+            const entry = getEntry(event.id);
+            return (
+              <div key={event.id} className="px-4 py-3">
+                <div className="text-sm font-medium text-navy-800 mb-2">{event.name}</div>
+                <div className="flex flex-wrap gap-3 items-end">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">エントリー開始日</label>
+                    <input
+                      type="date"
+                      value={entry.start}
+                      onChange={(e) => setField(event.id, 'start', e.target.value)}
+                      className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-orange-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">エントリー締切日</label>
+                    <input
+                      type="date"
+                      value={entry.end}
+                      onChange={(e) => setField(event.id, 'end', e.target.value)}
+                      className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-orange-400"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleSaveEvent(event.id)}
+                    className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Save size={13} /> 保存
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function getAllEventsForAdmin(): MarathonEvent[] {
   const adminCreated = getAdminCreatedEvents();
@@ -1364,6 +1472,9 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
             )}
             {subTab === 'localProductsAdmin' && (
               <LocalProductAdminPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
+            )}
+            {subTab === 'entryDates' && (
+              <EntryDatesPanel onSave={onSave} />
             )}
           </div>
         </div>

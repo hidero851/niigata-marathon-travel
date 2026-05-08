@@ -231,3 +231,30 @@ export function saveEventAdminLocalProducts(eventId: string, localProducts: Loca
   if (idx >= 0) { all[idx] = { eventId, localProducts }; } else { all.push({ eventId, localProducts }); }
   persist(KEYS.eventAdminProducts, all);
 }
+
+// --- Entry Date Settings ---
+
+export type EntryDateEntry = { eventId: string; entryStartDate?: string; entryEndDate?: string };
+
+export function getEventEntryDates(): EntryDateEntry[] {
+  return load<EntryDateEntry>('eventEntryDates');
+}
+
+export function saveEventEntryDate(entry: EntryDateEntry): void {
+  const all = getEventEntryDates();
+  const idx = all.findIndex((e) => e.eventId === entry.eventId);
+  if (idx >= 0) { all[idx] = entry; } else { all.push(entry); }
+  persist('eventEntryDates', all);
+}
+
+export function getEntryAlertDays(): number {
+  try {
+    const raw = localStorage.getItem('entryAlertDays');
+    return raw ? Number(JSON.parse(raw)) : 14;
+  } catch { return 14; }
+}
+
+export function saveEntryAlertDays(days: number): void {
+  localStorage.setItem('entryAlertDays', JSON.stringify(days));
+  saveToSupabase('entryAlertDays', days);
+}
