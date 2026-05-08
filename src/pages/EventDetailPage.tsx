@@ -284,9 +284,9 @@ export default function EventDetailPage() {
   return (
     <div className="pb-16">
       <Helmet>
-        <title>{event.name} | マラソン旅ナビ新潟</title>
+        <title>{event.name} | 新潟マラソンナビ</title>
         <meta name="description" content={`${event.name}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
-        <meta property="og:title" content={`${event.name} | マラソン旅ナビ新潟`} />
+        <meta property="og:title" content={`${event.name} | 新潟マラソンナビ`} />
         <meta property="og:description" content={`${event.name}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://marathon-navi.com/events/${event.id}`} />

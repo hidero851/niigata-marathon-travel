@@ -57,9 +57,9 @@ export default function EventListPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <Helmet>
-        <title>新潟のマラソン大会一覧 | マラソン旅ナビ新潟</title>
+        <title>新潟のマラソン大会一覧 | 新潟マラソンナビ</title>
         <meta name="description" content="新潟県内のマラソン・ランニング大会を一覧で紹介。距離・地域・開催月で絞り込んで、あなたにぴったりの大会を見つけよう。" />
-        <meta property="og:title" content="新潟のマラソン大会一覧 | マラソン旅ナビ新潟" />
+        <meta property="og:title" content="新潟のマラソン大会一覧 | 新潟マラソンナビ" />
         <meta property="og:description" content="新潟県内のマラソン・ランニング大会を一覧で紹介。距離・地域・開催月で絞り込んで、あなたにぴったりの大会を見つけよう。" />
         <meta property="og:url" content="https://marathon-navi.com/events" />
       </Helmet>
