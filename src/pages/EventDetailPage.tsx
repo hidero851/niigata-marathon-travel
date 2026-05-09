@@ -6,7 +6,7 @@ import {
   Banknote, Flag, Building2, FileText, Hotel,
 } from 'lucide-react';
 import { getEventByIdAll, allProducts } from '../data';
-import { getEventVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
+import { getEventVisualSetting, getEventProductAssignment, getEventEntryDates } from '../utils/adminSettings';
 import TagBadge from '../components/TagBadge';
 import ProductCard from '../components/ProductCard';
 import { trackEvent } from '../utils/analytics';
@@ -270,10 +270,14 @@ export default function EventDetailPage() {
     { icon: <Banknote size={16} />, label: '参加費', value: event.fee || '確認中' },
     { icon: <MapPin size={16} />, label: 'スタート', value: event.startPoint || '確認中' },
     { icon: <MapPin size={16} />, label: 'ゴール', value: event.goalPoint || '確認中' },
-    { icon: <Users size={16} />, label: '定員', value: event.capacity || '確認中' },
   ];
   if (event.venue) allInfoItems.push({ icon: <Building2 size={16} />, label: '会場', value: event.venue });
   if (event.entryPeriod) allInfoItems.push({ icon: <Calendar size={16} />, label: '申込期間', value: event.entryPeriod });
+  const entryDateEntry = getEventEntryDates().find((e) => e.eventId === event.id);
+  const fmtDate = (iso: string) => { const d = new Date(iso); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
+  if (entryDateEntry?.entryStartDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー開始', value: fmtDate(entryDateEntry.entryStartDate) });
+  if (entryDateEntry?.entryEndDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー締切', value: fmtDate(entryDateEntry.entryEndDate) });
+  allInfoItems.push({ icon: <Users size={16} />, label: '定員', value: event.capacity || '確認中' });
   if (event.organizer) allInfoItems.push({ icon: <Users size={16} />, label: '主催者', value: event.organizer });
   if (event.access) allInfoItems.push({ icon: <MapPin size={16} />, label: 'アクセス', value: event.access });
 
