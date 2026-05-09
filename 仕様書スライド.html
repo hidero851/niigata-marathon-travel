@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>新潟マラソントラベル 機能仕様書</title>
+<title>新潟マラソンナビ 機能仕様書</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Hiragino Sans', 'Meiryo', sans-serif; background: #f0f4f8; }
@@ -19,113 +19,81 @@
     page-break-after: always;
   }
 
-  /* ヘッダー */
   .slide-header {
     padding: 28px 40px 20px;
     border-bottom: 3px solid #f0f0f0;
   }
-  .slide-header.navy  { background: #1a2e5a; color: white; }
+  .slide-header.navy   { background: #1a2e5a; color: white; }
   .slide-header.orange { background: #f97316; color: white; }
-  .slide-header.teal  { background: #0f766e; color: white; }
+  .slide-header.teal   { background: #0f766e; color: white; }
   .slide-header.purple { background: #6d28d9; color: white; }
-  .slide-header.green { background: #15803d; color: white; }
-  .slide-header.rose  { background: #be123c; color: white; }
+  .slide-header.green  { background: #15803d; color: white; }
+  .slide-header.rose   { background: #be123c; color: white; }
+  .slide-header.indigo { background: #3730a3; color: white; }
 
-  .slide-num { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+  .slide-num  { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
   .slide-title { font-size: 26px; font-weight: 900; }
   .slide-sub   { font-size: 14px; opacity: 0.85; margin-top: 4px; }
   .slide-url   { display: inline-block; font-size: 12px; background: rgba(255,255,255,0.2);
                  padding: 2px 10px; border-radius: 20px; margin-top: 8px; }
 
-  /* ボディ */
   .slide-body { padding: 28px 40px 32px; display: flex; gap: 32px; }
-  .col { flex: 1; }
+  .col      { flex: 1; }
   .col-wide { flex: 1.5; }
 
-  /* セクション */
   .section-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
     text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;
   }
 
-  /* 機能カード */
   .feature-card {
     background: #f8fafc; border: 1px solid #e2e8f0;
     border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
   }
-  .feature-card .name {
-    font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px;
-  }
-  .feature-card .desc {
-    font-size: 12px; color: #64748b; line-height: 1.6;
-  }
+  .feature-card .name { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .feature-card .desc { font-size: 12px; color: #64748b; line-height: 1.6; }
   .feature-card.highlight { border-left: 4px solid #f97316; background: #fff7ed; }
-  .feature-card.note { border-left: 4px solid #f59e0b; background: #fffbeb; }
-  .feature-card.warn { border-left: 4px solid #ef4444; background: #fef2f2; }
-  .feature-card.good { border-left: 4px solid #22c55e; background: #f0fdf4; }
+  .feature-card.note      { border-left: 4px solid #f59e0b; background: #fffbeb; }
+  .feature-card.warn      { border-left: 4px solid #ef4444; background: #fef2f2; }
+  .feature-card.good      { border-left: 4px solid #22c55e; background: #f0fdf4; }
+  .feature-card.info      { border-left: 4px solid #3b82f6; background: #eff6ff; }
 
-  /* スクリーンモック */
   .mock {
     background: #1e293b; border-radius: 8px; padding: 10px;
-    font-size: 11px; color: #94a3b8; line-height: 1.8;
-    font-family: monospace;
+    font-size: 11px; color: #94a3b8; line-height: 1.8; font-family: monospace;
   }
-  .mock .hero { background: #1a2e5a; color: white; padding: 8px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 12px; }
-  .mock .section-block {
-    background: #334155; color: #e2e8f0; padding: 6px 10px;
-    border-radius: 4px; margin-bottom: 4px; font-size: 11px;
-  }
-  .mock .cta-block {
-    background: #f97316; color: white; padding: 5px 10px;
-    border-radius: 4px; margin-bottom: 4px; font-size: 11px; text-align: center;
-  }
-  .mock .green-block {
-    background: #15803d; color: white; padding: 5px 10px;
-    border-radius: 4px; margin-bottom: 4px; font-size: 11px;
-  }
-  .mock .sticky {
-    background: #1a2e5a; color: white; padding: 5px 10px;
-    border-radius: 4px; font-size: 11px; text-align: center;
-    border: 2px dashed #f97316;
-  }
+  .mock .hero          { background: #1a2e5a; color: white; padding: 8px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 12px; }
+  .mock .alert-block   { background: #92400e; color: #fde68a; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 11px; }
+  .mock .section-block { background: #334155; color: #e2e8f0; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 11px; }
+  .mock .cta-block     { background: #f97316; color: white; padding: 5px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 11px; text-align: center; }
+  .mock .green-block   { background: #15803d; color: white; padding: 5px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 11px; }
+  .mock .sticky        { background: #1a2e5a; color: white; padding: 5px 10px; border-radius: 4px; font-size: 11px; text-align: center; border: 2px dashed #f97316; }
 
-  /* フロー */
   .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .flow-step {
-    background: #1a2e5a; color: white; border-radius: 6px;
-    padding: 6px 12px; font-size: 12px; font-weight: 700;
-  }
+  .flow-step  { background: #1a2e5a; color: white; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; }
   .flow-arrow { color: #94a3b8; font-size: 16px; }
 
-  /* バッジ */
-  .badge {
-    display: inline-block; font-size: 11px; font-weight: 700;
-    padding: 2px 8px; border-radius: 20px; margin-right: 4px;
-  }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-right: 4px; }
   .badge.blue   { background: #dbeafe; color: #1d4ed8; }
   .badge.orange { background: #fed7aa; color: #c2410c; }
   .badge.green  { background: #dcfce7; color: #15803d; }
   .badge.red    { background: #fee2e2; color: #b91c1c; }
+  .badge.purple { background: #ede9fe; color: #6d28d9; }
 
-  /* タグ一覧 */
   .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .tag { background: #e2e8f0; color: #475569; font-size: 11px;
-         padding: 3px 10px; border-radius: 20px; }
+  .tag { background: #e2e8f0; color: #475569; font-size: 11px; padding: 3px 10px; border-radius: 20px; }
 
-  /* 表 */
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   th { background: #f1f5f9; padding: 8px 10px; text-align: left; color: #475569; font-weight: 700; }
   td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
 
-  /* 表紙 */
   .cover { min-height: 540px; display: flex; flex-direction: column;
            justify-content: center; align-items: center; text-align: center;
            background: linear-gradient(135deg, #0a2540 0%, #1a2e5a 60%, #1a5276 100%); color: white; }
-  .cover h1 { font-size: 40px; font-weight: 900; margin-bottom: 12px; }
-  .cover p  { font-size: 18px; opacity: 0.8; }
+  .cover h1   { font-size: 40px; font-weight: 900; margin-bottom: 12px; }
+  .cover p    { font-size: 18px; opacity: 0.8; }
   .cover .date { font-size: 13px; opacity: 0.5; margin-top: 24px; }
 
-  /* 印刷用 */
   @media print {
     body { background: white; }
     .slide { margin: 0; box-shadow: none; border-radius: 0; width: 100%; }
@@ -137,10 +105,10 @@
 <!-- ===== 表紙 ===== -->
 <div class="slide">
   <div class="cover">
-    <div style="font-size:13px;letter-spacing:0.15em;opacity:0.6;margin-bottom:16px;">NIIGATA MARATHON TRAVEL</div>
+    <div style="font-size:13px;letter-spacing:0.15em;opacity:0.6;margin-bottom:16px;">NIIGATA MARATHON NAVI</div>
     <h1>機能仕様書</h1>
     <p>各画面でできること・見えるもの</p>
-    <div class="date">2026年5月 / MVP版</div>
+    <div class="date">2026年5月 / MVP版（商用公開準備中）</div>
   </div>
 </div>
 
@@ -149,7 +117,7 @@
   <div class="slide-header navy">
     <div class="slide-num">SLIDE 01</div>
     <div class="slide-title">サービス全体像</div>
-    <div class="slide-sub">6つの画面と、ユーザーの動線</div>
+    <div class="slide-sub">8つの画面と、ユーザーの動線</div>
   </div>
   <div class="slide-body">
     <div class="col-wide">
@@ -170,7 +138,9 @@
           <tr><td>📋 大会一覧</td><td>/events</td><td>条件を絞って大会を探す</td></tr>
           <tr><td>🏃 大会詳細</td><td>/events/:id</td><td>宿泊・エントリーへの導線</td></tr>
           <tr><td>🛍 特産品詳細</td><td>/products/:id</td><td>特産品・お土産の情報</td></tr>
-          <tr><td>⚙️ 管理画面</td><td>/admin</td><td>コンテンツ設定（運営者用）</td></tr>
+          <tr><td>🔒 プライバシーポリシー</td><td>/privacy</td><td>GA4・アフィリエイト開示</td></tr>
+          <tr><td>🔑 管理ログイン</td><td>/admin/login</td><td>Supabase認証</td></tr>
+          <tr><td>⚙️ 管理画面</td><td>/admin</td><td>コンテンツ設定（認証済みのみ）</td></tr>
           <tr><td>📄 データ確認</td><td>/datasource</td><td>出典・利用規約の確認</td></tr>
         </table>
       </div>
@@ -181,10 +151,10 @@
         <div class="name">💰 楽天トラベルアフィリエイト</div>
         <div class="desc">大会詳細ページの宿泊CTAボタンをクリックして楽天で予約が成立すると報酬が発生する。</div>
       </div>
-      <div class="section-label" style="margin-top:16px;">現在のデータ状態</div>
-      <div class="feature-card warn">
-        <div class="name">⚠️ 全データが仮データ</div>
-        <div class="desc">大会情報・宿泊・特産品はすべてサンプル。正式公開前に実データへの差し替えが必要。</div>
+      <div class="section-label" style="margin-top:16px;">インフラ</div>
+      <div class="feature-card info">
+        <div class="name">🌐 marathon-navi.com</div>
+        <div class="desc">Vercel + お名前.com カスタムドメイン。Supabase Auth + DB で管理機能を実現。</div>
       </div>
       <div class="feature-card good">
         <div class="name">✅ 高田城ロードレース</div>
@@ -207,6 +177,7 @@
       <div class="section-label">画面の構成（上から）</div>
       <div class="mock">
         <div class="hero">🏔 ヒーローセクション<br>「走る旅で、新潟をもっと好きになる。」<br>[ 地域 ▼ ] [ 開催月 ▼ ] [ 距離 ▼ ]<br>[ 🔍 大会から旅を探す ]<br>🐟日本海グルメ ♨温泉 🍶地酒 ...</div>
+        <div class="alert-block">⏰ もうすぐエントリー開始 / 🔴 もうすぐエントリー締切<br>（設定がある場合のみ表示・横スクロールカード）</div>
         <div class="section-block">📖 How It Works（3ステップ説明）</div>
         <div class="section-block">⭐ 注目の大会（3件カード表示）</div>
         <div class="section-block">🏷 魅力で大会を探す（タグ一覧）</div>
@@ -226,6 +197,10 @@
       <div class="feature-card highlight">
         <div class="name">⭐ 注目の大会（固定表示）</div>
         <div class="desc">高田城ロードレース・南魚沼グルメマラソン・佐渡トキマラソンを常に表示。管理画面で上書き可能。</div>
+      </div>
+      <div class="feature-card info">
+        <div class="name">⏰ エントリーアラート（NEW）</div>
+        <div class="desc">管理画面でエントリー日程を設定した大会のうち、期日が近いものをカード形式で表示。残日数に応じて赤→オレンジ→グレーで色変化。</div>
       </div>
     </div>
   </div>
@@ -263,21 +238,21 @@
       </div>
       <div class="feature-card">
         <div class="name">🔗 URLで条件を共有</div>
-        <div class="desc">フィルター結果はURLパラメータに反映される。例：/events?region=上越市&tag=城下町</div>
+        <div class="desc">フィルター結果はURLパラメータに反映される。例：/events?region=上越市&amp;tag=城下町</div>
       </div>
       <div class="feature-card">
         <div class="name">🃏 大会カードをクリック</div>
         <div class="desc">大会詳細ページへ遷移。</div>
       </div>
       <div class="feature-card note">
-        <div class="name">📌 現在の大会数</div>
-        <div class="desc">高田城 / 越後くびき野100km / 南魚沼グルメ / 柏崎潮風 / 佐渡トキ ＋ 旧データ数件</div>
+        <div class="name">📌 表示される大会</div>
+        <div class="desc">静的データ＋管理画面で「公開中」に設定したイベントが表示される。下書きイベントは非表示。</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== スライド4: 大会詳細ページ（上半分）===== -->
+<!-- ===== スライド4: 大会詳細ページ ===== -->
 <div class="slide">
   <div class="slide-header rose">
     <div class="slide-num">SLIDE 04</div>
@@ -305,7 +280,7 @@
     <div class="col">
       <div class="section-label">楽天アフィリエイトCTAの設置箇所</div>
       <div class="feature-card highlight">
-        <div class="name">💰 CTAが全6箇所</div>
+        <div class="name">💰 CTAが全7箇所</div>
         <div class="desc">
           1. 前泊推奨日カード（日程付き検索URL）<br>
           2. 参加プランカード（プランごと）<br>
@@ -319,107 +294,147 @@
       <div class="section-label" style="margin-top:12px;">条件付き表示の要素</div>
       <div class="feature-card note">
         <div class="name">📅 前泊推奨日カード</div>
-        <div class="desc">大会データに <code>eventDate</code>（ISO日付）が設定されている場合のみ表示。現在: 高田城のみ対応済み。</div>
+        <div class="desc"><code>eventDate</code>（ISO日付）が設定されている場合のみ表示。現在: 高田城のみ対応済み。</div>
       </div>
       <div class="feature-card good">
         <div class="name">✅ エントリー誘導カード（緑）</div>
-        <div class="desc"><code>entryUrl</code> または <code>officialUrl</code> が設定されている場合のみ表示。現在: 高田城のみ対応済み。</div>
+        <div class="desc"><code>entryUrl</code> または <code>officialUrl</code> が設定されている場合のみ表示。</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== スライド5: スティッキーバナー詳細 ===== -->
+<!-- ===== スライド5: 管理画面（認証・大会管理） ===== -->
 <div class="slide">
-  <div class="slide-header rose">
+  <div class="slide-header purple">
     <div class="slide-num">SLIDE 05</div>
-    <div class="slide-title">📌 スティッキーCTAバナー</div>
-    <div class="slide-sub">大会詳細ページの画面下部に常時固定表示される宿泊誘導バナー</div>
+    <div class="slide-title">⚙️ 管理画面 ① ログイン・大会管理</div>
+    <div class="slide-sub">Supabase 認証 ＋ 大会の新規作成・下書き・公開管理</div>
+    <div class="slide-url">URL: /admin/login → /admin</div>
   </div>
   <div class="slide-body">
     <div class="col">
-      <div class="section-label">見た目のイメージ</div>
-      <div style="background:#1a2e5a;border-radius:8px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div style="color:white;font-size:14px;">🏨 この大会の宿泊を今すぐ予約</div>
-        <div style="background:#f97316;color:white;font-size:13px;font-weight:700;padding:8px 16px;border-radius:8px;">予約する →</div>
+      <div class="section-label">ログイン（Supabase Auth）</div>
+      <div class="feature-card info">
+        <div class="name">🔑 メール＋パスワード認証</div>
+        <div class="desc">Supabase の signInWithPassword を使用。認証済みの場合は /admin に直接アクセス可能。未認証は /admin/login にリダイレクト。</div>
       </div>
+      <div class="section-label" style="margin-top:12px;">大会一覧の操作</div>
       <div class="feature-card">
-        <div class="name">表示位置</div>
-        <div class="desc">画面の一番下に固定（position: fixed, bottom: 0）。スクロールしても常に見える。</div>
+        <div class="name">🆕 新規大会を作成</div>
+        <div class="desc">管理画面のフォームから大会情報を入力して登録。作成直後は「下書き」状態。</div>
       </div>
-      <div class="feature-card">
-        <div class="name">ボタンの動作</div>
-        <div class="desc">クリックすると宿泊セクション（🥇🥈🥉のあるエリア）までスムーズスクロールする。</div>
+      <div class="feature-card good">
+        <div class="name">👁 プレビュー（Eye ボタン）</div>
+        <div class="desc">下書きのまま詳細ページを別タブで確認できる。大会運営者への事前確認に使用。</div>
+      </div>
+      <div class="feature-card highlight">
+        <div class="name">🌐 公開トグル（Globe ボタン）</div>
+        <div class="desc">「下書き」⇔「公開中」を切り替え。公開中のみ一般ユーザーに表示される。</div>
       </div>
     </div>
     <div class="col">
-      <div class="section-label">表示・非表示のルール</div>
-      <div class="feature-card highlight">
-        <div class="name">🟠 宿泊セクションが画面外 → バナー表示</div>
-        <div class="desc">ページ上部〜宿泊セクションの手前までスクロール中はバナーが表示される。</div>
+      <div class="section-label">ステータスバッジ</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <span class="badge orange">下書き</span>
+        <span style="font-size:12px;color:#64748b;line-height:2;">非公開・プレビューのみ</span>
       </div>
-      <div class="feature-card good">
-        <div class="name">✅ 宿泊セクションが画面内 → バナー非表示</div>
-        <div class="desc">宿泊エリアセクションが画面に入ったら自動でバナーが消える（重複を避けるため）。</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <span class="badge blue">公開中</span>
+        <span style="font-size:12px;color:#64748b;line-height:2;">一般ユーザーに表示</span>
       </div>
-      <div class="feature-card note">
-        <div class="name">🔧 技術的な仕組み</div>
-        <div class="desc">IntersectionObserver API を使って宿泊セクションの表示状態を監視している。</div>
+      <div class="section-label" style="margin-top:4px;">静的データの操作</div>
+      <div class="feature-card">
+        <div class="name">✏️ 開催日の上書き（鉛筆ボタン）</div>
+        <div class="desc">静的データの大会は開催日のみ管理画面から変更可能。</div>
+      </div>
+      <div class="feature-card warn">
+        <div class="name">🗑 非表示（ゴミ箱ボタン）</div>
+        <div class="desc">静的データは削除ではなく非表示扱い。管理画面作成データは完全削除。</div>
+      </div>
+      <div class="section-label" style="margin-top:12px;">データ同期</div>
+      <div class="feature-card info">
+        <div class="name">☁️ Supabase DB へ自動同期</div>
+        <div class="desc">設定変更は localStorage と Supabase DB の両方に保存される。別デバイスからも設定が引き継がれる。</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== スライド6: 管理画面 ===== -->
+<!-- ===== スライド6: 管理画面（詳細設定サブタブ） ===== -->
 <div class="slide">
   <div class="slide-header purple">
     <div class="slide-num">SLIDE 06</div>
-    <div class="slide-title">⚙️ 管理画面</div>
-    <div class="slide-sub">運営者がコンテンツを設定・管理する画面（URLを知っている人のみアクセス可能）</div>
-    <div class="slide-url">URL: /admin</div>
+    <div class="slide-title">⚙️ 管理画面 ② 大会詳細設定（サブタブ）</div>
+    <div class="slide-sub">大会を選んで各種コンテンツを管理画面から上書き設定</div>
+    <div class="slide-url">URL: /admin（大会管理タブ）</div>
   </div>
-  <div class="slide-body">
-    <div class="col">
-      <div class="section-label">できること（全5機能）</div>
-      <div class="feature-card">
-        <div class="name">① おすすめ大会の設定</div>
-        <div class="desc">トップページの「注目の大会」に表示する大会を指定できる。順番も設定可能。<br><span class="badge red">注意</span>設定はこのブラウザのみ有効。他のデバイスには反映されない。</div>
-      </div>
-      <div class="feature-card">
-        <div class="name">② 大会ビジュアル設定</div>
-        <div class="desc">大会ごとにヒーロー画像URL・キャッチコピー・サブタイトル・公式URL・<strong>開催日（eventDate）</strong>を上書き設定できる。</div>
-      </div>
-      <div class="feature-card">
-        <div class="name">③ 大会の非表示設定</div>
-        <div class="desc">一覧から特定の大会を非表示にできる（削除ではなく非表示）。</div>
-      </div>
-    </div>
-    <div class="col">
-      <div style="margin-top:0px;">
-        <div class="feature-card">
-          <div class="name">④ 大会の新規作成</div>
-          <div class="desc">管理画面から新しい大会データを作成できる（このブラウザのみ保存）。</div>
+  <div class="slide-body" style="display:block;">
+    <table>
+      <tr>
+        <th>サブタブ</th>
+        <th>できること</th>
+        <th>効果</th>
+      </tr>
+      <tr>
+        <td><strong>ビジュアル</strong></td>
+        <td>ヒーロー画像URL・キャッチコピー・サブタイトル・公式URL・開催日（eventDate）・ハイライトを上書き</td>
+        <td>大会詳細ページの見た目が即座に変わる</td>
+      </tr>
+      <tr>
+        <td><strong>宿泊エリア</strong></td>
+        <td>大会詳細の宿泊エリア（🥇🥈🥉）の情報・楽天URLを管理画面から上書き</td>
+        <td>コードを変更せずに宿泊情報を更新できる</td>
+      </tr>
+      <tr>
+        <td><strong>参加プラン</strong></td>
+        <td>モデルプラン（当日スケジュール）を管理画面から上書き</td>
+        <td>大会ごとの旅行プランをカスタマイズ</td>
+      </tr>
+      <tr>
+        <td><strong>特産品設定</strong></td>
+        <td>既存特産品のビジュアル（画像・説明文）を上書き</td>
+        <td>特産品カードの見た目を管理画面から変更</td>
+      </tr>
+      <tr>
+        <td><strong>特産品紐づけ</strong></td>
+        <td>大会詳細ページに表示する既存特産品を選択・設定</td>
+        <td>大会と特産品の対応関係を動的に管理</td>
+      </tr>
+      <tr>
+        <td><strong>独自特産品</strong></td>
+        <td>管理画面からのみ追加できる特産品を登録</td>
+        <td>データファイルを編集せずに特産品を追加</td>
+      </tr>
+      <tr>
+        <td><strong>エントリー日程</strong> <span class="badge blue">NEW</span></td>
+        <td>大会ごとのエントリー開始日・締切日を設定。アラート表示日数（全体設定）も変更可能</td>
+        <td>トップページのエントリーアラートセクションに反映</td>
+      </tr>
+    </table>
+    <div style="margin-top:20px;display:flex;gap:20px;">
+      <div style="flex:1;">
+        <div class="feature-card info">
+          <div class="name">📅 エントリー日程の仕組み</div>
+          <div class="desc">
+            アラート表示日数（デフォルト14日）以内にエントリー開始・締切が迫っている大会を、トップページに自動表示。<br><br>
+            残3日以内 → 赤<br>
+            残7日以内 → オレンジ<br>
+            残14日以内 → グレー
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="name">⑤ 特産品の紐付け</div>
-          <div class="desc">大会詳細ページに表示する特産品を選択・設定できる。</div>
-        </div>
       </div>
-      <div class="section-label" style="margin-top:8px;">重要な制約</div>
-      <div class="feature-card warn">
-        <div class="name">⚠️ localStorageに保存される</div>
-        <div class="desc">
-          管理画面の設定はブラウザのローカルストレージに保存される。<br>
-          <strong>→ 別のPCやスマホには反映されない</strong><br>
-          → ブラウザのデータ削除で消える<br><br>
-          確実に全ユーザーに反映させるには、<strong>コードを修正してgit push</strong>することが必要。
+      <div style="flex:1;">
+        <div class="feature-card good">
+          <div class="name">☁️ 全設定がSupabaseに同期</div>
+          <div class="desc">サブタブで保存した設定はすべてSupabase DBに自動保存される。PCを変えても設定が引き継がれる。</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== スライド7: データ構造と設定状況 ===== -->
+<!-- ===== スライド7: 大会データの現状 ===== -->
 <div class="slide">
   <div class="slide-header green">
     <div class="slide-num">SLIDE 07</div>
@@ -486,10 +501,10 @@
         </div>
       </div>
       <div style="flex:1;">
-        <div class="section-label">entryUrl / officialUrl を設定するとできること</div>
+        <div class="section-label">エントリー日程を設定するとできること</div>
         <div class="feature-card good">
-          <div class="name">✅ エントリー誘導カードが表示される</div>
-          <div class="desc">宿泊セクションの直後に「宿泊の手配が終わったら…大会にエントリーする」の緑カードが出現。</div>
+          <div class="name">⏰ トップページにアラート表示</div>
+          <div class="desc">エントリー開始・締切が近づくと、トップページのヒーロー直下にアラートカードが自動表示される。</div>
         </div>
       </div>
     </div>
@@ -527,6 +542,13 @@
           <div style="color:#64748b;font-size:12px;">Vercelが自動検知・ビルド・デプロイ（約1〜2分）</div>
         </div>
       </div>
+      <div class="section-label" style="margin-top:20px;">Supabase の役割</div>
+      <table>
+        <tr><th>機能</th><th>内容</th></tr>
+        <tr><td>Auth</td><td>管理画面ログイン（メール＋パスワード）</td></tr>
+        <tr><td>DB（admin_settings テーブル）</td><td>管理設定のクラウド保存・デバイス間同期</td></tr>
+        <tr><td>起動時同期</td><td>loadFromSupabase() で Supabase → localStorage に同期</td></tr>
+      </table>
     </div>
     <div class="col">
       <div class="section-label">環境の違い</div>
@@ -541,16 +563,16 @@
       <div class="feature-card highlight">
         <div class="name">🌐 Vercel（本番・常時稼働）</div>
         <div class="desc">
-          URL: niigata-marathon-travel.vercel.app<br>
+          URL: marathon-navi.com<br>
           特徴: 24時間365日稼働。PCの電源に関係なし。世界中からアクセス可能。
         </div>
       </div>
-      <div class="feature-card note">
-        <div class="name">📌 商用化時の検討事項</div>
+      <div class="feature-card info">
+        <div class="name">🔑 環境変数（Vercel）</div>
         <div class="desc">
-          独自ドメイン取得（例: niigata-marathon.jp）<br>
-          Vercel Hobby → Pro プランへの移行<br>
-          管理画面への認証追加
+          VITE_SUPABASE_URL<br>
+          VITE_SUPABASE_ANON_KEY<br>
+          ※ Vercel の Environment Variables に設定済み
         </div>
       </div>
     </div>
@@ -562,11 +584,11 @@
   <div class="slide-header orange">
     <div class="slide-num">SLIDE 09</div>
     <div class="slide-title">📋 今後の課題・ロードマップ</div>
-    <div class="slide-sub">MVP完成に向けてやるべきこと</div>
+    <div class="slide-sub">5月20日公開に向けてやるべきこと</div>
   </div>
   <div class="slide-body">
     <div class="col">
-      <div class="section-label">🔴 近期（すぐやること）</div>
+      <div class="section-label">🔴 公開前にやること</div>
       <div class="feature-card warn">
         <div class="name">各大会のURLを調査・設定</div>
         <div class="desc">南魚沼・佐渡トキ・柏崎・越後くびき野の<br>entryUrl / officialUrl を実URLに更新</div>
@@ -576,31 +598,39 @@
         <div class="desc">実開催日が分かっている大会に YYYY-MM-DD 形式で設定 → 前泊推奨日カードが表示される</div>
       </div>
       <div class="feature-card warn">
-        <div class="name">高田城ロードレースの実データ確認</div>
-        <div class="desc">仮置きのURL・日程・参加費等を公式情報に差し替え</div>
+        <div class="name">エントリー日程を管理画面から入力</div>
+        <div class="desc">管理画面「エントリー日程」タブから各大会の開始日・締切日を設定</div>
+      </div>
+      <div class="feature-card warn">
+        <div class="name">Google Search Console 登録</div>
+        <div class="desc">サイトマップ（sitemap.xml）を Search Console に送信してインデックス登録</div>
       </div>
     </div>
     <div class="col">
-      <div class="section-label">🟡 中期（商用化準備）</div>
+      <div class="section-label">🟡 公開後の営業・拡大</div>
       <div class="feature-card note">
-        <div class="name">独自ドメインの取得</div>
-        <div class="desc">niigata-marathon.jp 等の独自ドメインを取得してVercelに設定</div>
+        <div class="name">大会運営者への無料掲載提案</div>
+        <div class="desc">南魚沼グルメマラソンを第一弾として、大会公式サイトへのリンク掲載を依頼</div>
       </div>
       <div class="feature-card note">
-        <div class="name">管理画面に認証を追加</div>
-        <div class="desc">現在はURLを知っていれば誰でも管理画面にアクセス可能。パスワード認証が必要。</div>
+        <div class="name">アフィリエイトASP追加登録</div>
+        <div class="desc">じゃらん・アソビュー等への登録で収益源を多様化</div>
       </div>
       <div class="section-label" style="margin-top:12px;">🔵 長期（機能拡張）</div>
       <div class="feature-card">
-        <div class="name">バックエンド・DB の導入</div>
-        <div class="desc">管理設定をどのデバイスからでも反映できるようにする。おすすめ大会・ビジュアル設定をDB管理に移行。</div>
+        <div class="name">SSG（静的サイト生成）</div>
+        <div class="desc">大会ページをビルド時に静的HTMLに変換してSEOを強化。</div>
+      </div>
+      <div class="feature-card">
+        <div class="name">大会数の拡充</div>
+        <div class="desc">新潟県内の他大会追加 → 新潟県外（秋田・埼玉等）への展開</div>
       </div>
     </div>
   </div>
 </div>
 
 <div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
-  新潟マラソントラベル 機能仕様書 — 2026年5月 MVP版
+  新潟マラソンナビ 機能仕様書 — 2026年5月 MVP版（商用公開準備中）
 </div>
 
 </body>

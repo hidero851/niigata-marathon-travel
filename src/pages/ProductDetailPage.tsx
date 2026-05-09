@@ -5,6 +5,7 @@ import { getProductById, getEventById } from '../data';
 import { getProductVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
 import GradientImage from '../components/GradientImage';
 import { trackEvent } from '../utils/analytics';
+import { trackGA4 } from '../utils/ga4';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +55,7 @@ export default function ProductDetailPage() {
 
   const handleExternalClick = () => {
     trackEvent({ eventType: 'click_product_external', productId: product.id });
+    trackGA4('click_product_external', { product_id: product.id, product_name: product.name });
   };
 
   return (

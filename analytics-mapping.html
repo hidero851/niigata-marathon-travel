@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新潟マラソンナビ GAイベントマッピング</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Hiragino Sans', 'Meiryo', sans-serif; background: #f0f4f8; }
+
+  .slide {
+    width: 960px;
+    min-height: 540px;
+    margin: 32px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  .slide-header { padding: 28px 40px 20px; border-bottom: 3px solid #f0f0f0; }
+  .slide-header.navy   { background: #1a2e5a; color: white; }
+  .slide-header.orange { background: #f97316; color: white; }
+  .slide-header.teal   { background: #0f766e; color: white; }
+  .slide-header.purple { background: #6d28d9; color: white; }
+  .slide-header.green  { background: #15803d; color: white; }
+  .slide-header.rose   { background: #be123c; color: white; }
+  .slide-header.indigo { background: #3730a3; color: white; }
+  .slide-header.cyan   { background: #0e7490; color: white; }
+  .slide-header.amber  { background: #b45309; color: white; }
+
+  .slide-num   { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+  .slide-title { font-size: 26px; font-weight: 900; }
+  .slide-sub   { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+  .slide-url   { display: inline-block; font-size: 12px; background: rgba(255,255,255,0.2);
+                 padding: 2px 10px; border-radius: 20px; margin-top: 8px; }
+
+  .slide-body { padding: 28px 40px 32px; display: flex; gap: 32px; }
+  .col      { flex: 1; }
+  .col-wide { flex: 1.5; }
+  .col-narrow { flex: 0.7; }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;
+  }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700;
+           padding: 2px 8px; border-radius: 20px; margin-right: 4px; }
+  .badge.blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge.orange { background: #fed7aa; color: #c2410c; }
+  .badge.green  { background: #dcfce7; color: #15803d; }
+  .badge.red    { background: #fee2e2; color: #b91c1c; }
+  .badge.purple { background: #ede9fe; color: #6d28d9; }
+  .badge.gray   { background: #f1f5f9; color: #64748b; }
+  .badge.teal   { background: #ccfbf1; color: #0f766e; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #f1f5f9; padding: 8px 10px; text-align: left; color: #475569; font-weight: 700; }
+  td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+
+  .event-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+  .event-row:last-child { border-bottom: none; }
+  .event-name { font-family: monospace; font-size: 12px; font-weight: 700; color: #1d4ed8;
+                background: #eff6ff; padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+  .event-desc { font-size: 12px; color: #475569; line-height: 1.6; }
+  .event-trigger { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+  .screen-box {
+    border: 2px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+  }
+  .screen-box .screen-name { font-size: 13px; font-weight: 900; color: #1e293b; margin-bottom: 8px; }
+  .screen-box .screen-url  { font-size: 11px; color: #94a3b8; font-family: monospace; margin-bottom: 10px; }
+
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .flow-step  { background: #1a2e5a; color: white; border-radius: 6px; padding: 6px 12px;
+                font-size: 12px; font-weight: 700; }
+  .flow-arrow { color: #94a3b8; font-size: 16px; }
+
+  .mock {
+    background: #1e293b; border-radius: 8px; padding: 10px;
+    font-size: 11px; color: #94a3b8; line-height: 1.8; font-family: monospace;
+  }
+  .mock .hero          { background: #1a2e5a; color: white; padding: 8px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 12px; }
+  .mock .section-block { background: #334155; color: #e2e8f0; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 11px; }
+  .mock .cta-block     { background: #f97316; color: white; padding: 5px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 11px; text-align: center; }
+  .mock .sticky        { background: #1a2e5a; color: white; padding: 5px 10px; border-radius: 4px; font-size: 11px; text-align: center; border: 2px dashed #f97316; }
+  .mock .green-block   { background: #15803d; color: white; padding: 5px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 11px; }
+
+  .annotation {
+    font-size: 11px; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 6px; padding: 8px 12px; margin-top: 10px; line-height: 1.7;
+  }
+
+  .cover { min-height: 540px; display: flex; flex-direction: column;
+           justify-content: center; align-items: center; text-align: center;
+           background: linear-gradient(135deg, #0a2540 0%, #1a2e5a 60%, #0f766e 100%); color: white; }
+  .cover h1   { font-size: 40px; font-weight: 900; margin-bottom: 12px; }
+  .cover p    { font-size: 18px; opacity: 0.8; }
+  .cover .date { font-size: 13px; opacity: 0.5; margin-top: 24px; }
+
+  .kv-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
+             border-radius: 20px; padding: 3px 10px; margin: 2px; font-weight: 700; }
+  .kv-chip.ga4  { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+  .kv-chip.local{ background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+  .kv-chip.both { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 8px; }
+  .summary-card { border: 2px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+  .summary-card .sc-num { font-size: 28px; font-weight: 900; color: #1a2e5a; }
+  .summary-card .sc-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+  @media print {
+    body { background: white; }
+    .slide { margin: 0; box-shadow: none; border-radius: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 表紙 ===== -->
+<div class="slide">
+  <div class="cover">
+    <div style="font-size:13px;letter-spacing:0.15em;opacity:0.6;margin-bottom:16px;">NIIGATA MARATHON NAVI</div>
+    <h1>GAイベントマッピング</h1>
+    <p>画面ごとのGA4計測設計</p>
+    <div class="date">2026年5月 / v1.0</div>
+  </div>
+</div>
+
+<!-- ===== スライド1: 凡例・全体サマリー ===== -->
+<div class="slide">
+  <div class="slide-header navy">
+    <div class="slide-num">SLIDE 01</div>
+    <div class="slide-title">計測設計の概要</div>
+    <div class="slide-sub">送信先・イベント数・KPIの全体像</div>
+  </div>
+  <div class="slide-body">
+    <div class="col-wide">
+      <div class="section-label">送信先の種類</div>
+      <div style="margin-bottom: 20px;">
+        <div style="display:flex; gap:12px; margin-bottom:8px;">
+          <span class="kv-chip both">● GA4 + localStorage</span>
+          <span style="font-size:12px; color:#475569;">GA4のイベントレポートに反映 ＋ ローカルにも蓄積</span>
+        </div>
+        <div style="display:flex; gap:12px; margin-bottom:8px;">
+          <span class="kv-chip ga4">● GA4のみ</span>
+          <span style="font-size:12px; color:#475569;">gtag経由でGA4のみに送信（リアルタイム確認可）</span>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <span class="kv-chip local">● localStorageのみ</span>
+          <span style="font-size:12px; color:#475569;">ブラウザ内に蓄積（現状：管理画面DataSourceで閲覧可）</span>
+        </div>
+      </div>
+
+      <div class="section-label">イベント一覧（全画面）</div>
+      <table>
+        <tr>
+          <th>イベント名</th>
+          <th>画面</th>
+          <th>送信先</th>
+        </tr>
+        <tr><td><code>search</code></td><td>トップ</td><td><span class="kv-chip both" style="font-size:10px;">GA4 + local</span></td></tr>
+        <tr><td><code>filter</code></td><td>トップ・一覧</td><td><span class="kv-chip both" style="font-size:10px;">GA4 + local</span></td></tr>
+        <tr><td><code>click_featured_event</code></td><td>トップ</td><td><span class="kv-chip ga4" style="font-size:10px;">GA4</span></td></tr>
+        <tr><td><code>click_event_list</code></td><td>一覧</td><td><span class="kv-chip ga4" style="font-size:10px;">GA4</span></td></tr>
+        <tr><td><code>view_event_detail</code></td><td>大会詳細</td><td><span class="kv-chip both" style="font-size:10px;">GA4 + local</span></td></tr>
+        <tr><td><code>click_official_site</code></td><td>大会詳細</td><td><span class="kv-chip both" style="font-size:10px;">GA4 + local</span></td></tr>
+        <tr><td><code>click_entry_link</code></td><td>大会詳細</td><td><span class="kv-chip both" style="font-size:10px;">GA4 + local</span></td></tr>
+        <tr><td><code>click_entry_final_cta</code></td><td>大会詳細</td><td><span class="kv-chip both" style="font-size:10px;">GA4 + local</span></td></tr>
+        <tr><td><code>click_rakuten_prev_night</code></td><td>大会詳細</td><td><span class="kv-chip ga4" style="font-size:10px;">GA4</span></td></tr>
+        <tr><td><code>click_rakuten_plan</code></td><td>大会詳細</td><td><span class="kv-chip ga4" style="font-size:10px;">GA4</span></td></tr>
+        <tr><td><code>click_rakuten_area_*</code></td><td>大会詳細</td><td><span class="kv-chip ga4" style="font-size:10px;">GA4</span></td></tr>
+        <tr><td><code>click_rakuten_final_cta</code></td><td>大会詳細</td><td><span class="kv-chip ga4" style="font-size:10px;">GA4</span></td></tr>
+        <tr><td><code>click_sticky_banner</code></td><td>大会詳細</td><td><span class="kv-chip ga4" style="font-size:10px;">GA4</span></td></tr>
+        <tr><td><code>click_product_external</code></td><td>特産品詳細</td><td><span class="kv-chip both" style="font-size:10px;">GA4 + local</span></td></tr>
+      </table>
+    </div>
+
+    <div class="col-narrow">
+      <div class="section-label">サマリー</div>
+      <div class="summary-grid" style="grid-template-columns:1fr; gap:10px;">
+        <div class="summary-card">
+          <div class="sc-num">14</div>
+          <div class="sc-label">計測イベント総数</div>
+        </div>
+        <div class="summary-card">
+          <div class="sc-num">6</div>
+          <div class="sc-label">GA4 + localStorage<br>（両方に送信）</div>
+        </div>
+        <div class="summary-card">
+          <div class="sc-num">8</div>
+          <div class="sc-label">GA4のみ送信</div>
+        </div>
+      </div>
+
+      <div class="annotation" style="margin-top:14px;">
+        <strong>KPIとして見たい指標：</strong><br>
+        ① エントリーリンクCTR<br>
+        ② 楽天リンクCTR（宿泊転換）<br>
+        ③ 公式サイト誘導数<br>
+        ④ 特産品外部リンクCTR<br>
+        ⑤ 検索・フィルター利用率
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド2: トップページ ===== -->
+<div class="slide">
+  <div class="slide-header orange">
+    <div class="slide-num">SLIDE 02</div>
+    <div class="slide-title">トップページ（/）</div>
+    <div class="slide-sub">検索・タグ・注目の大会カード</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">画面モック</div>
+      <div class="mock">
+        <div class="hero">
+          🏃 ヒーローセクション<br>
+          <span style="font-size:10px;opacity:0.7;">地域 / 月 / 距離 ▼▼▼ → [大会から旅を探す] ← <span style="color:#fbbf24;">● search</span></span><br>
+          <span style="font-size:10px;opacity:0.7;">[温泉] [日本海グルメ] [地酒]… ← <span style="color:#fbbf24;">● filter</span></span>
+        </div>
+        <div class="section-block">
+          ⏰ エントリーアラートセクション<br>
+          <span style="font-size:10px;opacity:0.7;">（イベントなし時は非表示）</span>
+        </div>
+        <div class="section-block">
+          🌟 注目の大会（カード×3）<br>
+          <span style="font-size:10px;opacity:0.7;">[カードクリック] ← <span style="color:#86efac;">● click_featured_event</span></span>
+        </div>
+        <div class="section-block">
+          🏷 タグで探すセクション<br>
+          <span style="font-size:10px;opacity:0.7;">[タグクリック] ← <span style="color:#fbbf24;">● filter</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="section-label">GAイベント詳細</div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">search</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">「大会から旅を探す」ボタンクリック時</div>
+          <div class="event-trigger">パラメータ: tags（選択した地域・月・距離）</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">filter</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">ヒーロー・タグセクションのタグボタンクリック時</div>
+          <div class="event-trigger">パラメータ: tags（クリックしたタグ名）</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_featured_event</div>
+          <div style="margin-top:4px;"><span class="kv-chip ga4" style="font-size:10px;">GA4のみ</span></div>
+        </div>
+        <div>
+          <div class="event-desc">注目の大会カードをクリック時</div>
+          <div class="event-trigger">パラメータ: event_id, event_name</div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>GAで確認できること：</strong><br>
+        ・どの検索条件（地域・月・距離）が多く使われているか<br>
+        ・どのタグが人気か<br>
+        ・注目の大会カードのクリック率
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド3: 大会一覧ページ ===== -->
+<div class="slide">
+  <div class="slide-header teal">
+    <div class="slide-num">SLIDE 03</div>
+    <div class="slide-title">大会一覧ページ（/events）</div>
+    <div class="slide-sub">フィルター絞り込み・大会カード</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">画面モック</div>
+      <div class="mock">
+        <div class="section-block">
+          🔍 フィルターバー<br>
+          <span style="font-size:10px;opacity:0.7;">地域 / 月 / 距離 / タグ ← <span style="color:#fbbf24;">● filter</span></span>
+        </div>
+        <div class="section-block">
+          📋 大会カード一覧<br>
+          <span style="font-size:10px;opacity:0.7;">[カードクリック] ← <span style="color:#86efac;">● click_event_list</span></span>
+        </div>
+      </div>
+
+      <div class="annotation" style="margin-top:12px;">
+        <strong>注：</strong><br>
+        一覧ページ自体の <code>page_view</code> はGA4が自動計測（SPAのため gtag設定で有効）。<br>
+        フィルター変更のたびに <code>filter</code> イベントが発火する。
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="section-label">GAイベント詳細</div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">filter</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">フィルターバーの各項目変更時</div>
+          <div class="event-trigger">パラメータ: tags（選択値）</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_event_list</div>
+          <div style="margin-top:4px;"><span class="kv-chip ga4" style="font-size:10px;">GA4のみ</span></div>
+        </div>
+        <div>
+          <div class="event-desc">一覧の大会カードをクリック時</div>
+          <div class="event-trigger">パラメータ: event_id, event_name</div>
+        </div>
+      </div>
+
+      <div class="annotation" style="margin-top: 16px;">
+        <strong>GAで確認できること：</strong><br>
+        ・どの絞り込み条件が多く使われているか<br>
+        ・どの大会カードがよくクリックされているか（人気大会の把握）
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド4: 大会詳細ページ（前半）===== -->
+<div class="slide">
+  <div class="slide-header indigo">
+    <div class="slide-num">SLIDE 04</div>
+    <div class="slide-title">大会詳細ページ（/events/:id）前半</div>
+    <div class="slide-sub">ページ表示・公式サイト・エントリーリンク</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">画面モック（上部）</div>
+      <div class="mock">
+        <div class="sticky">📌 [宿泊を探す] ← click_sticky_banner</div>
+        <div style="margin-top:4px;"></div>
+        <div class="hero">
+          🖼 大会ヒーロー画像<br>
+          <span style="font-size:10px;opacity:0.7;">大会名 / 日付 / 会場</span><br>
+          <span style="font-size:10px;color:#fbbf24;">← view_event_detail（ページ表示時）</span>
+        </div>
+        <div class="section-block">
+          📋 大会情報テーブル<br>
+          <span style="font-size:10px;opacity:0.7;">距離 / 制限時間 / 参加費 / 定員</span>
+        </div>
+        <div class="cta-block">[公式サイトを見る] ← click_official_site</div>
+        <div class="green-block">[エントリーはこちら] ← click_entry_link</div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="section-label">GAイベント詳細</div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">view_event_detail</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">大会詳細ページを開いた瞬間（useEffect）</div>
+          <div class="event-trigger">パラメータ: event_id, event_name</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_sticky_banner</div>
+          <div style="margin-top:4px;"><span class="kv-chip ga4" style="font-size:10px;">GA4のみ</span></div>
+        </div>
+        <div>
+          <div class="event-desc">上部スティッキーバナーの「宿泊を探す」クリック</div>
+          <div class="event-trigger">パラメータ: event_id</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_official_site</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">「公式サイトを見る」リンクをクリック</div>
+          <div class="event-trigger">パラメータ: event_id</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_entry_link</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">エントリーセクション内の「エントリーはこちら」クリック</div>
+          <div class="event-trigger">パラメータ: event_id</div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>GAで確認できること：</strong><br>
+        ・どの大会がよく見られているか（PV）<br>
+        ・公式サイト誘導率（view → click_official_site）<br>
+        ・エントリー誘導率（view → click_entry_link）
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド5: 大会詳細ページ（後半）===== -->
+<div class="slide">
+  <div class="slide-header purple">
+    <div class="slide-num">SLIDE 05</div>
+    <div class="slide-title">大会詳細ページ（/events/:id）後半</div>
+    <div class="slide-sub">宿泊・楽天トラベルリンク・下部CTA</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">画面モック（宿泊〜下部）</div>
+      <div class="mock">
+        <div class="section-block">
+          🏨 前泊おすすめホテル<br>
+          <span style="font-size:10px;opacity:0.7;">[前泊で楽天を探す] ← <span style="color:#86efac;">click_rakuten_prev_night</span></span>
+        </div>
+        <div class="section-block">
+          🗺 モデルプラン（滞在エリア別）<br>
+          <span style="font-size:10px;opacity:0.7;">[楽天で探す] ← <span style="color:#86efac;">click_rakuten_plan</span></span>
+        </div>
+        <div class="section-block">
+          🗾 エリア別宿泊カード<br>
+          <span style="font-size:10px;opacity:0.7;">[エリアカードクリック] ← <span style="color:#86efac;">click_rakuten_area_*</span></span>
+        </div>
+        <div class="cta-block">
+          [宿泊を楽天トラベルで探す] ← click_rakuten_final_cta<br>
+          [エントリーする] ← click_entry_final_cta
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="section-label">GAイベント詳細</div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_rakuten_prev_night</div>
+          <div style="margin-top:4px;"><span class="kv-chip ga4" style="font-size:10px;">GA4のみ</span></div>
+        </div>
+        <div>
+          <div class="event-desc">前泊セクションの楽天リンクをクリック</div>
+          <div class="event-trigger">パラメータ: event_id</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_rakuten_plan</div>
+          <div style="margin-top:4px;"><span class="kv-chip ga4" style="font-size:10px;">GA4のみ</span></div>
+        </div>
+        <div>
+          <div class="event-desc">モデルプランの楽天ボタンをクリック</div>
+          <div class="event-trigger">パラメータ: event_id, plan_title</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_rakuten_area_*</div>
+          <div style="margin-top:4px;"><span class="kv-chip ga4" style="font-size:10px;">GA4のみ</span></div>
+        </div>
+        <div>
+          <div class="event-desc">エリア別宿泊カードをクリック（*=gaKeyの値）</div>
+          <div class="event-trigger">パラメータ: event_id</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_rakuten_final_cta</div>
+          <div style="margin-top:4px;"><span class="kv-chip ga4" style="font-size:10px;">GA4のみ</span></div>
+        </div>
+        <div>
+          <div class="event-desc">ページ下部「宿泊を楽天トラベルで探す」クリック</div>
+          <div class="event-trigger">パラメータ: event_id</div>
+        </div>
+      </div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_entry_final_cta</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">ページ下部「エントリーする」ボタンクリック</div>
+          <div class="event-trigger">パラメータ: event_id</div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>GAで確認できること：</strong><br>
+        ・楽天リンクのどの位置がよくクリックされるか<br>
+        　（前泊 vs プラン別 vs エリア別 vs 下部CTA）<br>
+        ・最終エントリーCTAのクリック率
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド6: 特産品詳細ページ ===== -->
+<div class="slide">
+  <div class="slide-header green">
+    <div class="slide-num">SLIDE 06</div>
+    <div class="slide-title">特産品詳細ページ（/products/:id）</div>
+    <div class="slide-sub">外部ECサイト・通販リンクのクリック計測</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <div class="section-label">画面モック</div>
+      <div class="mock">
+        <div class="hero">
+          🛍 特産品ヒーロー<br>
+          <span style="font-size:10px;opacity:0.7;">商品名 / 産地 / 説明</span>
+        </div>
+        <div class="section-block">
+          📦 商品詳細情報<br>
+          <span style="font-size:10px;opacity:0.7;">価格 / 賞味期限 / 販売店</span>
+        </div>
+        <div class="cta-block">
+          [オンラインで購入する / 公式サイトへ]<br>
+          ← click_product_external
+        </div>
+        <div class="section-block">
+          🔗 関連する大会<br>
+          <span style="font-size:10px;opacity:0.7;">（大会詳細ページへのリンク）</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="section-label">GAイベント詳細</div>
+
+      <div class="event-row">
+        <div>
+          <div class="event-name">click_product_external</div>
+          <div style="margin-top:4px;"><span class="kv-chip both" style="font-size:10px;">GA4 + localStorage</span></div>
+        </div>
+        <div>
+          <div class="event-desc">外部リンク（EC・公式サイト等）をクリック時</div>
+          <div class="event-trigger">パラメータ: product_id, product_name</div>
+        </div>
+      </div>
+
+      <div class="annotation" style="margin-top: 16px;">
+        <strong>GAで確認できること：</strong><br>
+        ・どの特産品が外部リンクまでクリックされているか<br>
+        ・大会詳細ページから特産品への遷移率（参照元で識別）
+      </div>
+
+      <div class="annotation" style="margin-top: 10px; border-color: #fde68a; background: #fffbeb;">
+        <strong>⚠ 今回のアップデート：</strong><br>
+        以前は <code>localStorage</code> のみに記録されていたが、<br>
+        GA4（gtag）への送信を追加。<br>
+        GA4のイベントレポートで特産品CTRが確認できるようになった。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スライド7: GAでの確認方法 ===== -->
+<div class="slide">
+  <div class="slide-header amber">
+    <div class="slide-num">SLIDE 07</div>
+    <div class="slide-title">GA4での確認方法</div>
+    <div class="slide-sub">KPI別のレポート操作ガイド</div>
+  </div>
+  <div class="slide-body">
+    <div class="col-wide">
+      <div class="section-label">KPI別・見るべきレポート</div>
+      <table>
+        <tr>
+          <th>見たいKPI</th>
+          <th>GA4の場所</th>
+          <th>確認するイベント</th>
+        </tr>
+        <tr>
+          <td>どの大会が人気か</td>
+          <td>レポート → エンゲージメント → イベント</td>
+          <td><code>view_event_detail</code>（event_idで絞る）</td>
+        </tr>
+        <tr>
+          <td>エントリー誘導率</td>
+          <td>レポート → エンゲージメント → イベント</td>
+          <td><code>click_entry_link</code> / <code>click_entry_final_cta</code></td>
+        </tr>
+        <tr>
+          <td>楽天リンクのCTR</td>
+          <td>レポート → エンゲージメント → イベント</td>
+          <td><code>click_rakuten_*</code>（複数）</td>
+        </tr>
+        <tr>
+          <td>どの検索条件が多いか</td>
+          <td>レポート → エンゲージメント → イベント</td>
+          <td><code>search</code>（パラメータ: tags）</td>
+        </tr>
+        <tr>
+          <td>人気タグ・フィルター</td>
+          <td>レポート → エンゲージメント → イベント</td>
+          <td><code>filter</code>（パラメータ: tags）</td>
+        </tr>
+        <tr>
+          <td>特産品の購買意欲</td>
+          <td>レポート → エンゲージメント → イベント</td>
+          <td><code>click_product_external</code></td>
+        </tr>
+        <tr>
+          <td>流入元（SNS/検索等）</td>
+          <td>レポート → 集客 → トラフィック獲得</td>
+          <td>セッションのデフォルト チャネル グループ</td>
+        </tr>
+        <tr>
+          <td>リアルタイム動作確認</td>
+          <td>レポート → リアルタイム</td>
+          <td>全イベント（操作と同時に反映）</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="col-narrow">
+      <div class="section-label">パラメータの確認方法</div>
+      <div class="annotation">
+        GA4でイベント名をクリック<br>
+        → 「パラメータ」タブで<br>
+        　<code>event_id</code> ごとの内訳が確認できる。<br><br>
+        ただし <strong>カスタムディメンション</strong> を設定しないとレポートに表示されない場合がある。<br><br>
+        設定手順：<br>
+        管理 → カスタム定義<br>
+        → 「カスタムディメンション」を作成<br>
+        → スコープ: イベント<br>
+        → イベントパラメータ: <code>event_id</code>
+      </div>
+
+      <div class="annotation" style="margin-top:10px;">
+        <strong>ローカルログの確認：</strong><br>
+        <code>/datasource</code> ページ（管理画面）でlocalStorageに蓄積したログを一覧表示できる。
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

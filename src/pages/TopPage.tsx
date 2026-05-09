@@ -197,10 +197,7 @@ export default function TopPage() {
         </div>
       </section>
 
-      {/* エントリーアラート */}
-      <EntryAlertSection events={events} />
-
-      {/* ③ コンセプト */}
+      {/* コンセプト */}
       <section className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <p className="text-amber-600 font-bold text-xs tracking-widest mb-3 uppercase">How It Works</p>
@@ -227,7 +224,10 @@ export default function TopPage() {
         </div>
       </section>
 
-      {/* ④ 注目の大会 */}
+      {/* エントリーアラート */}
+      <EntryAlertSection events={events} />
+
+      {/* 注目の大会 */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
