@@ -10,8 +10,6 @@ export default function Navbar() {
 
   const links = [
     { to: '/events', label: '大会を探す' },
-    { to: '/datasource', label: 'データ確認' },
-    { to: '/admin', label: '管理' },
   ];
 
   const [logoError, setLogoError] = useState(false);

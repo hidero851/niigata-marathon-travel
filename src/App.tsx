@@ -55,7 +55,7 @@ function App() {
           <Route path="/events" element={<EventListPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
-          <Route path="/datasource" element={<DataSourcePage />} />
+          <Route path="/datasource" element={<ProtectedRoute><DataSourcePage /></ProtectedRoute>} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
