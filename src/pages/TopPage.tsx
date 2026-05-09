@@ -157,13 +157,13 @@ export default function TopPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-blue-200 mb-1 font-medium">距離</label>
+                  <label className="block text-xs text-blue-200 mb-1 font-medium">種目</label>
                   <select
                     value={searchDistance}
                     onChange={(e) => setSearchDistance(e.target.value)}
                     className="w-full bg-white/20 text-white border border-white/30 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
                   >
-                    <option value="" className="text-gray-800">すべての距離</option>
+                    <option value="" className="text-gray-800">すべての種目</option>
                     <option value="フルマラソン" className="text-gray-800">フルマラソン</option>
                     <option value="ハーフマラソン" className="text-gray-800">ハーフマラソン</option>
                     <option value="10km" className="text-gray-800">10km</option>

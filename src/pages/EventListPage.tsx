@@ -29,14 +29,27 @@ export default function EventListPage() {
 
   const allEvents = getAllDisplayableEvents();
 
-  const filtered = useMemo(() => {
-    return allEvents.filter((e) => {
-      if (region && e.location !== region) return false;
+  const { filtered, fallbackLevel } = useMemo(() => {
+    const hasAnyFilter = !!(region || month || distance || selectedTag);
+
+    const match = (e: typeof allEvents[0], useRegion: boolean) => {
+      if (useRegion && region && e.location !== region) return false;
       if (month && e.month !== month) return false;
       if (distance && !e.distances.some((d) => d.includes(distance))) return false;
       if (selectedTag && !e.tags.includes(selectedTag)) return false;
       return true;
-    });
+    };
+
+    // Stage 1: 全条件一致
+    const stage1 = allEvents.filter((e) => match(e, true));
+    if (stage1.length > 0 || !hasAnyFilter) return { filtered: stage1, fallbackLevel: 0 };
+
+    // Stage 2: 地域条件を外す
+    const stage2 = allEvents.filter((e) => match(e, false));
+    if (stage2.length > 0) return { filtered: stage2, fallbackLevel: 2 };
+
+    // Stage 3: 全件表示
+    return { filtered: allEvents, fallbackLevel: 3 };
   }, [allEvents, region, month, distance, selectedTag]);
 
   const applyFilter = (key: string, value: string) => {
@@ -143,7 +156,7 @@ export default function EventListPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-600 mb-2">距離</label>
+            <label className="block text-xs font-bold text-gray-600 mb-2">種目</label>
             <select
               value={distance}
               onChange={(e) => { setDistance(e.target.value); applyFilter('distance', e.target.value); }}
@@ -167,22 +180,24 @@ export default function EventListPage() {
         </div>
       )}
 
-      {/* Events grid */}
-      {filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-500">
-          <div className="text-5xl mb-4">🔍</div>
-          <p className="font-bold text-lg mb-2">条件に合う大会が見つかりませんでした</p>
-          <button onClick={clearAll} className="text-orange-500 hover:text-orange-600 text-sm font-medium mt-2">
-            絞り込みをクリアする
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
+      {/* フォールバックバナー */}
+      {fallbackLevel === 2 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800 flex items-center gap-2">
+          💡 <span>「{region}」ではヒットしなかったため、地域条件を外して表示しています</span>
         </div>
       )}
+      {fallbackLevel === 3 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800 flex items-center gap-2">
+          💡 <span>条件に合う大会が見つからなかったため、すべての大会を表示しています</span>
+        </div>
+      )}
+
+      {/* Events grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filtered.map((event) => (
+          <EventCard key={event.id} event={event} />
+        ))}
+      </div>
 
       {/* Disclaimer */}
       <div className="mt-12 bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">

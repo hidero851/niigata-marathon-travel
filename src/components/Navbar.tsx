@@ -8,9 +8,7 @@ export default function Navbar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
-  const links = [
-    { to: '/events', label: '大会を探す' },
-  ];
+  const links: { to: string; label: string }[] = [];
 
   const [logoError, setLogoError] = useState(false);
 
