@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
 
   const handleExternalClick = () => {
     trackEvent({ eventType: 'click_product_external', productId: product.id });
-    trackGA4('click_product_external', { product_id: product.id, product_name: product.name });
+    trackGA4('click_product_external', { product_id: product.id, product_name: product.name, event_id: fromEventId });
   };
 
   return (
