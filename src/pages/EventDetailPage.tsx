@@ -617,9 +617,11 @@ export default function EventDetailPage() {
             <p className="text-gray-500 text-sm mb-6 -mt-3">
               帰る前に立ち寄りたい、{event.location}ならではの特産品。
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4">
               {displayableProducts.map((product) => (
-                <ProductCard key={product.id} product={product} marathonEventId={event.id} />
+                <div key={product.id} className="flex-shrink-0 w-44">
+                  <ProductCard product={product} marathonEventId={event.id} />
+                </div>
               ))}
             </div>
           </section>

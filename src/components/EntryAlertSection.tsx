@@ -2,6 +2,15 @@ import { Link } from 'react-router-dom';
 import type { MarathonEvent } from '../types';
 import { getEventEntryDates, getEntryAlertDays } from '../utils/adminSettings';
 
+const DEFAULT_GRADIENT = 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
+
+function buildBgImage(imageUrl: string, fallback: string): string {
+  const alt = imageUrl.endsWith('.png')
+    ? imageUrl.replace('.png', '.jpg')
+    : imageUrl.replace(/\.jpe?g$/, '.png');
+  return `url("${imageUrl}"), url("${alt}"), ${fallback}`;
+}
+
 function daysUntil(dateStr: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -19,14 +28,26 @@ function DaysLabel({ days }: { days: number }) {
 }
 
 function EntryCard({ event, days }: { event: MarathonEvent; days: number }) {
+  const bgImage = event.heroImageUrl
+    ? buildBgImage(event.heroImageUrl, event.imageGradient ?? DEFAULT_GRADIENT)
+    : event.imageGradient ?? DEFAULT_GRADIENT;
+
   return (
     <Link
       to={`/events/${event.id}`}
-      className="flex-shrink-0 w-48 bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-shadow"
+      className="flex-shrink-0 w-48 bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
     >
-      <div className="text-xs text-gray-500 mb-1">{event.location}</div>
-      <div className="text-sm font-bold text-navy-800 leading-snug mb-3 line-clamp-2">{event.name}</div>
-      <DaysLabel days={days} />
+      <div
+        className="h-24 bg-cover bg-center bg-no-repeat relative"
+        style={{ backgroundImage: bgImage }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+      </div>
+      <div className="p-3">
+        <div className="text-xs text-gray-500 mb-0.5">{event.location}</div>
+        <div className="text-sm font-bold text-navy-800 leading-snug mb-2 line-clamp-2">{event.name}</div>
+        <DaysLabel days={days} />
+      </div>
     </Link>
   );
 }
