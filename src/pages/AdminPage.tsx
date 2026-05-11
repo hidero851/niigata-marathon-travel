@@ -947,7 +947,7 @@ const ADMIN_SOURCE = {
 const INIT_FORM = {
   name: '', eventDate: '', location: '', venue: '',
   distances: '', catchCopy: '', fee: '', capacity: '', timeLimit: '',
-  startPoint: '', goalPoint: '', entryPeriod: '', organizer: '',
+  startPoint: '', goalPoint: '', access: '', entryPeriod: '', organizer: '',
   officialUrl: '', rakutenTravelUrl: '', heroImageUrl: '', tags: '', notes: '',
   entryStartDate: '', entryEndDate: '',
 };
@@ -1125,7 +1125,7 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       name: event.name, eventDate: event.eventDate ?? '', location: event.location,
       venue: event.venue ?? '', distances: event.distances.join(', '), catchCopy: event.catchCopy,
       fee: event.fee, capacity: event.capacity, timeLimit: event.timeLimit,
-      startPoint: event.startPoint, goalPoint: event.goalPoint,
+      startPoint: event.startPoint, goalPoint: event.goalPoint, access: event.access ?? '',
       entryPeriod: event.entryPeriod ?? '', organizer: event.organizer ?? '',
       officialUrl: event.officialUrl, rakutenTravelUrl: event.accommodations[0]?.rakutenTravelUrl ?? '',
       heroImageUrl: event.heroImageUrl ?? '', tags: event.tags.join(', '), notes: event.notes ?? '',
@@ -1146,7 +1146,8 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       distances: f.distances ? f.distances.split(',').map((s) => s.trim()).filter(Boolean) : stored.distances,
       catchCopy: f.catchCopy, fee: f.fee || stored.fee, capacity: f.capacity || stored.capacity,
       timeLimit: f.timeLimit || stored.timeLimit, startPoint: f.startPoint || stored.startPoint,
-      goalPoint: f.goalPoint || stored.goalPoint, entryPeriod: f.entryPeriod || undefined,
+      goalPoint: f.goalPoint || stored.goalPoint, access: f.access || undefined,
+      entryPeriod: f.entryPeriod || undefined,
       organizer: f.organizer || undefined, officialUrl: f.officialUrl, entryUrl: f.officialUrl,
       heroImageUrl: f.heroImageUrl || undefined,
       tags: f.tags ? f.tags.split(',').map((s) => s.trim()).filter(Boolean) : stored.tags,
@@ -1370,6 +1371,7 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
                       </div>
                       <FormField label="スタート地点" value={adminEditForm.startPoint} onChange={(v) => setAdminEditForm((p) => ({ ...p, startPoint: v }))} />
                       <FormField label="ゴール地点" value={adminEditForm.goalPoint} onChange={(v) => setAdminEditForm((p) => ({ ...p, goalPoint: v }))} />
+                      <div className="md:col-span-2"><FormField label="アクセス" value={adminEditForm.access} onChange={(v) => setAdminEditForm((p) => ({ ...p, access: v }))} /></div>
                       <FormField label="公式サイトURL" value={adminEditForm.officialUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, officialUrl: v }))} />
                       <FormField label="楽天トラベルURL" value={adminEditForm.rakutenTravelUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, rakutenTravelUrl: v }))} />
                       <div className="md:col-span-2"><FormField label="ヒーロー画像URL" value={adminEditForm.heroImageUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, heroImageUrl: v }))} /></div>
