@@ -186,7 +186,7 @@ export function parseExcelToEvent(buffer: ArrayBuffer): ImportedEventData {
     organizer: v(29),
     access: v(30),
     notes: v(31),
-    draft: false,
+    draft: true,
     sourceInfo: [{
       sourceName: '大会運営者提供情報',
       sourceUrl: v(35),
