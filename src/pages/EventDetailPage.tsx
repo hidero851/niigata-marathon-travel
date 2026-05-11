@@ -149,7 +149,8 @@ export default function EventDetailPage() {
     return () => observer.disconnect();
   }, [id]);
 
-  if (!event && !synced) {
+  // version === 0 は Supabase 未ロード → ローカルに無くても 404 を出さずスピナーを返す
+  if (!event && (!synced || version === 0)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent" />
