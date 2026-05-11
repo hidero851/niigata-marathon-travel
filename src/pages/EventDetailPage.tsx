@@ -454,7 +454,7 @@ export default function EventDetailPage() {
                 </span>
               </div>
               <a
-                href={rakutenSearchUrl}
+                href={visualSetting?.prevNightRakutenUrl || rakutenSearchUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackGA4('click_rakuten_prev_night', { event_id: event.id })}
@@ -535,7 +535,7 @@ export default function EventDetailPage() {
                     <RakutenButton
                       label="楽天トラベルで宿泊エリアを探す"
                       className="w-full"
-                      href={venueRakutenUrl}
+                      href={plan.rakutenUrl || venueRakutenUrl}
                       onClick={() => trackGA4('click_rakuten_plan', { event_id: event.id, plan_title: plan.title })}
                     />
                   </div>
@@ -570,7 +570,7 @@ export default function EventDetailPage() {
               ].map((item) => (
                 <a
                   key={item.gaKey}
-                  href={buildRakutenSearchUrl(venueKeyword)}
+                  href={visualSetting?.areaRakutenUrl || buildRakutenSearchUrl(venueKeyword)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackGA4(`click_rakuten_area_${item.gaKey}`, { event_id: event.id })}

@@ -52,6 +52,7 @@ export type EventHighlight = {
 export type ModelPlan = {
   title: string;
   steps: string[];
+  rakutenUrl?: string;
 };
 
 export type MarathonEvent = {
@@ -143,6 +144,8 @@ export type EventVisualSetting = {
   subtitle: string;
   officialUrl: string;
   eventDate?: string;
+  prevNightRakutenUrl?: string;
+  areaRakutenUrl?: string;
   highlights: EventHighlightSetting[];
 };
 

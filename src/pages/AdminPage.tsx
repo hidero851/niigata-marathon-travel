@@ -217,6 +217,8 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
       subtitle: saved?.subtitle ?? '',
       officialUrl: saved?.officialUrl ?? event?.officialUrl ?? '',
       eventDate: saved?.eventDate ?? event?.eventDate ?? '',
+      prevNightRakutenUrl: saved?.prevNightRakutenUrl ?? '',
+      areaRakutenUrl: saved?.areaRakutenUrl ?? '',
       highlights: saved?.highlights ?? (event?.highlights ?? []).map((h, i) => ({
         id: String(i),
         title: h.title,
@@ -306,6 +308,16 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         label="サブタイトル（任意）"
         value={form.subtitle}
         onChange={(v) => setField('subtitle', v)}
+      />
+      <FormField
+        label="前泊推奨リンク（楽天トラベルURL）"
+        value={form.prevNightRakutenUrl ?? ''}
+        onChange={(v) => setField('prevNightRakutenUrl', v)}
+      />
+      <FormField
+        label="エリアの魅力リンク（楽天トラベルURL）"
+        value={form.areaRakutenUrl ?? ''}
+        onChange={(v) => setField('areaRakutenUrl', v)}
       />
 
       <div>
@@ -709,7 +721,7 @@ function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg
 
 // --- ModelPlanPanel ---
 
-const EMPTY_PLAN = { title: '', steps: [''] };
+const EMPTY_PLAN = { title: '', steps: [''], rakutenUrl: '' };
 
 function ModelPlanPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
   const events = getAllDisplayableEvents();
@@ -725,20 +737,20 @@ function ModelPlanPanel({ eventId, onSave }: { eventId: string; onSave: (msg: st
 
   const handleAdd = () => {
     if (!form.title.trim()) { alert('タイトルは必須です'); return; }
-    persistPlans([...plans, { title: form.title, steps: form.steps.filter((s) => s.trim()) }]);
+    persistPlans([...plans, { title: form.title, steps: form.steps.filter((s) => s.trim()), rakutenUrl: form.rakutenUrl || undefined }]);
     setForm({ ...EMPTY_PLAN }); setShowAddForm(false); onSave('プランを追加しました');
   };
 
   const handleEditSave = () => {
     if (editIdx === null) return;
     if (!form.title.trim()) { alert('タイトルは必須です'); return; }
-    persistPlans(plans.map((p, i) => i === editIdx ? { title: form.title, steps: form.steps.filter((s) => s.trim()) } : p));
+    persistPlans(plans.map((p, i) => i === editIdx ? { title: form.title, steps: form.steps.filter((s) => s.trim()), rakutenUrl: form.rakutenUrl || undefined } : p));
     setEditIdx(null); setForm({ ...EMPTY_PLAN }); onSave('プランを更新しました');
   };
 
   const handleEditStart = (idx: number) => {
     const p = plans[idx];
-    setForm({ title: p.title, steps: p.steps.length > 0 ? [...p.steps] : [''] });
+    setForm({ title: p.title, steps: p.steps.length > 0 ? [...p.steps] : [''], rakutenUrl: p.rakutenUrl ?? '' });
     setEditIdx(idx); setShowAddForm(false);
   };
 
@@ -754,6 +766,7 @@ function ModelPlanPanel({ eventId, onSave }: { eventId: string; onSave: (msg: st
   const PlanForm = () => (
     <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-3 mt-2">
       <FormField label="プランタイトル *" value={form.title} onChange={(v) => setForm((p) => ({ ...p, title: v }))} />
+      <FormField label="楽天トラベルURL（任意）" value={form.rakutenUrl} onChange={(v) => setForm((p) => ({ ...p, rakutenUrl: v }))} />
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium text-gray-700">ステップ</label>
