@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
-  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe,
+  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe, FileSpreadsheet,
 } from 'lucide-react';
+import ImportPanel from '../components/admin/ImportPanel';
 import { getAllDisplayableEvents, allProducts, formatEventDate } from '../data';
 import type { MarathonEvent, Accommodation, ModelPlan, LocalProduct } from '../types';
 import type {
@@ -43,7 +44,7 @@ import {
 import { getLogs, clearLogs } from '../utils/analytics';
 import { logoutAdmin } from '../utils/auth';
 
-type Tab = 'featured' | 'eventManage' | 'data';
+type Tab = 'featured' | 'eventManage' | 'import' | 'data';
 type EventSubTab = 'visual' | 'accommodations' | 'modelPlans' | 'products' | 'productAssign' | 'localProductsAdmin' | 'entryDates';
 
 // --- Toast ---
@@ -1686,6 +1687,7 @@ function DataTab({ onSave }: { onSave: (msg: string) => void }) {
 const MAIN_TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'featured', label: 'トップ表示', icon: <Star size={15} /> },
   { id: 'eventManage', label: '大会管理', icon: <CalendarDays size={15} /> },
+  { id: 'import', label: 'インポート', icon: <FileSpreadsheet size={15} /> },
   { id: 'data', label: 'データ確認', icon: <BarChart2 size={15} /> },
 ];
 
@@ -1736,6 +1738,7 @@ export default function AdminPage() {
       <div>
         {tab === 'featured' && <FeaturedTab onSave={showToast} />}
         {tab === 'eventManage' && <EventManageContainer onSave={showToast} />}
+        {tab === 'import' && <ImportPanel />}
         {tab === 'data' && <DataTab onSave={showToast} />}
       </div>
 
