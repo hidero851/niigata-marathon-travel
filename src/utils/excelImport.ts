@@ -148,7 +148,8 @@ export function parseExcelToEvent(buffer: ArrayBuffer): ImportedEventData {
     ? v(40).split(/[,、,]/).map((t) => t.trim()).filter(Boolean)
     : [];
 
-  const id = `imported-${Date.now()}`;
+  // Row 46 (0-indexed: 45) = 大会ID入力欄
+  const id = v(45).trim() || `imported-${Date.now()}`;
 
   const highlights = parseHighlights(wb.Sheets[wb.SheetNames[1]]);
   const localProducts = parseLocalProducts(wb.Sheets[wb.SheetNames[2]]);

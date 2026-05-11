@@ -203,15 +203,20 @@ export default function ImportPanel() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-navy-800 mb-4">Step 2：内容確認・ID設定</h3>
           <div className="mb-4">
-            <label className="block text-sm font-bold text-gray-700 mb-1">大会ID（URLに使用・英数字とハイフン）</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">大会ID（Excelから自動読み取り・編集可）</label>
             <input
               type="text"
               value={eventId}
               onChange={(e) => setEventId(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono"
+              className={`w-full border rounded-lg px-3 py-2 text-sm font-mono ${eventId.startsWith('imported-') ? 'border-orange-300 bg-orange-50' : 'border-gray-300'}`}
               placeholder="例: takada-castle-road-race"
             />
-            <p className="text-xs text-gray-400 mt-1">既存のIDを入力すると上書きになります</p>
+            {eventId.startsWith('imported-') && (
+              <p className="text-xs text-orange-500 mt-1">⚠ ExcelのシートにIDが未入力です。このまま登録すると自動IDになります。</p>
+            )}
+            {!eventId.startsWith('imported-') && (
+              <p className="text-xs text-gray-400 mt-1">既存のIDを入力すると上書きになります</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {[
