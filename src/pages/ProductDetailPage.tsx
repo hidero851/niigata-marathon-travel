@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Star, Store } from 'lucide-react';
-import { getProductById, getEventById } from '../data';
+import { getProductById, getEventByIdAll } from '../data';
 import { getProductVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
 import GradientImage from '../components/GradientImage';
 import { trackEvent } from '../utils/analytics';
@@ -50,7 +50,7 @@ export default function ProductDetailPage() {
   };
 
   const relatedEvents = product.relatedEventIds
-    .map((eid) => getEventById(eid))
+    .map((eid) => getEventByIdAll(eid))
     .filter(Boolean);
 
   const handleExternalClick = () => {

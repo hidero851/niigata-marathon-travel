@@ -39,7 +39,9 @@ export function getEventById(id: string): MarathonEvent | undefined {
 export function getProductById(id: string): LocalProduct | undefined {
   const global = allProducts.find((p) => p.id === id);
   if (global) return global;
-  for (const event of allEvents) {
+  // 静的イベント + Supabase管理イベント両方のlocalProductsを検索
+  const allSources = [...allEvents, ...getAdminCreatedEvents()];
+  for (const event of allSources) {
     const local = event.localProducts.find((p) => p.id === id);
     if (local) return local;
   }
