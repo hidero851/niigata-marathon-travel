@@ -948,7 +948,7 @@ const INIT_FORM = {
   name: '', eventDate: '', location: '', venue: '',
   distances: '', catchCopy: '', fee: '', capacity: '', timeLimit: '',
   startPoint: '', goalPoint: '', access: '', entryPeriod: '', organizer: '',
-  officialUrl: '', rakutenTravelUrl: '', heroImageUrl: '', tags: '', notes: '',
+  officialUrl: '', entryUrl: '', rakutenTravelUrl: '', heroImageUrl: '', tags: '', notes: '',
   entryStartDate: '', entryEndDate: '',
 };
 
@@ -1127,7 +1127,7 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       fee: event.fee, capacity: event.capacity, timeLimit: event.timeLimit,
       startPoint: event.startPoint, goalPoint: event.goalPoint, access: event.access ?? '',
       entryPeriod: event.entryPeriod ?? '', organizer: event.organizer ?? '',
-      officialUrl: event.officialUrl, rakutenTravelUrl: event.accommodations[0]?.rakutenTravelUrl ?? '',
+      officialUrl: event.officialUrl, entryUrl: event.entryUrl ?? '', rakutenTravelUrl: event.accommodations[0]?.rakutenTravelUrl ?? '',
       heroImageUrl: event.heroImageUrl ?? '', tags: event.tags.join(', '), notes: event.notes ?? '',
       entryStartDate: entryDateEntry?.entryStartDate ?? '',
       entryEndDate: entryDateEntry?.entryEndDate ?? '',
@@ -1148,7 +1148,7 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       timeLimit: f.timeLimit || stored.timeLimit, startPoint: f.startPoint || stored.startPoint,
       goalPoint: f.goalPoint || stored.goalPoint, access: f.access || undefined,
       entryPeriod: f.entryPeriod || undefined,
-      organizer: f.organizer || undefined, officialUrl: f.officialUrl, entryUrl: f.officialUrl,
+      organizer: f.organizer || undefined, officialUrl: f.officialUrl, entryUrl: f.entryUrl || f.officialUrl,
       heroImageUrl: f.heroImageUrl || undefined,
       tags: f.tags ? f.tags.split(',').map((s) => s.trim()).filter(Boolean) : stored.tags,
       notes: f.notes || undefined,
@@ -1213,7 +1213,7 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       imageGradient: 'linear-gradient(135deg, #1e3a5f, #0d2d6b)',
       heroImageUrl: form.heroImageUrl || undefined,
       tags: form.tags ? form.tags.split(',').map((s) => s.trim()).filter(Boolean) : [],
-      entryUrl: form.officialUrl,
+      entryUrl: form.entryUrl || form.officialUrl,
       officialUrl: form.officialUrl,
       fee: form.fee || '要確認',
       capacity: form.capacity || '要確認',
@@ -1373,6 +1373,7 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
                       <FormField label="ゴール地点" value={adminEditForm.goalPoint} onChange={(v) => setAdminEditForm((p) => ({ ...p, goalPoint: v }))} />
                       <div className="md:col-span-2"><FormField label="アクセス" value={adminEditForm.access} onChange={(v) => setAdminEditForm((p) => ({ ...p, access: v }))} /></div>
                       <FormField label="公式サイトURL" value={adminEditForm.officialUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, officialUrl: v }))} />
+                      <FormField label="エントリーURL（公式と異なる場合）" value={adminEditForm.entryUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, entryUrl: v }))} />
                       <FormField label="楽天トラベルURL" value={adminEditForm.rakutenTravelUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, rakutenTravelUrl: v }))} />
                       <div className="md:col-span-2"><FormField label="ヒーロー画像URL" value={adminEditForm.heroImageUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, heroImageUrl: v }))} /></div>
                       <div className="md:col-span-2"><FormField label="キャッチコピー" value={adminEditForm.catchCopy} onChange={(v) => setAdminEditForm((p) => ({ ...p, catchCopy: v }))} multiline /></div>
@@ -1442,6 +1443,7 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
               <FormField label="スタート地点" value={form.startPoint} onChange={(v) => setField('startPoint', v)} />
               <FormField label="ゴール地点" value={form.goalPoint} onChange={(v) => setField('goalPoint', v)} />
               <FormField label="公式サイトURL" value={form.officialUrl} onChange={(v) => setField('officialUrl', v)} />
+              <FormField label="エントリーURL（公式と異なる場合）" value={form.entryUrl} onChange={(v) => setField('entryUrl', v)} />
               <FormField label="楽天トラベルURL" value={form.rakutenTravelUrl} onChange={(v) => setField('rakutenTravelUrl', v)} />
               <FormField label="ヒーロー画像URL" value={form.heroImageUrl} onChange={(v) => setField('heroImageUrl', v)} />
               <FormField label="タグ（カンマ区切り）" value={form.tags} onChange={(v) => setField('tags', v)} />
