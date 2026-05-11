@@ -18,10 +18,10 @@ const DRAFT_SOURCE = {
 export const niigataMarathonEventsDraft: MarathonEvent[] = [
   {
     id: 'takada-castle-road-race',
-    name: '高田城ロードレース',
+    name: '高田城ロードレース大会',
     location: '上越市',
     prefecture: '新潟県',
-    date: '2026年6月7日（日）予定',
+    date: '2026年6月7日（日）',
     eventDate: '2026-06-07',
     month: '6',
     distances: ['ハーフ', '10km', '5km'],
@@ -31,12 +31,14 @@ export const niigataMarathonEventsDraft: MarathonEvent[] = [
     heroImageUrl: '/images/events/takada-castle-hero.png',
     tags: ['城下町', '高田城址公園', '上越グルメ', '家族向け', '初夏'],
     entryUrl: 'https://runnet.jp/',
-    officialUrl: 'https://www.city.joetsu.niigata.jp/',
+    officialUrl: 'https://www.joetsu-taikyo.jp/',
     fee: '要確認',
     capacity: '要確認',
     timeLimit: '要確認',
-    startPoint: '要確認',
-    goalPoint: '要確認',
+    startPoint: '高田城址公園',
+    goalPoint: '高田城址公園',
+    entryPeriod: '2026年2月1日（日）〜3月31日（火）',
+    organizer: '第27回高田城ロードレース大会実行委員会',
     rakutenSearchKeyword: '高田',
     highlights: [
       {
