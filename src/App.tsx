@@ -16,7 +16,7 @@ import { loadFromSupabase } from './utils/syncDB'
 // AdminPage はXLSX等を含むため遅延ロード（初期バンドルから除外）
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 
-export const SyncedContext = createContext(false)
+export const SyncedContext = createContext({ synced: false, version: 0 })
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -46,9 +46,13 @@ function App() {
   const [synced, setSynced] = useState(
     () => localStorage.getItem('adminCreatedEvents') !== null
   )
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
-    loadFromSupabase().finally(() => setSynced(true))
+    loadFromSupabase().finally(() => {
+      setSynced(true)
+      setVersion(v => v + 1)  // Supabase完了後に全ページを最新データで再描画
+    })
   }, [])
 
   if (!synced) {
@@ -60,7 +64,7 @@ function App() {
   }
 
   return (
-    <SyncedContext.Provider value={synced}>
+    <SyncedContext.Provider value={{ synced, version }}>
       <HelmetProvider>
         <Layout>
           <ScrollToTop />

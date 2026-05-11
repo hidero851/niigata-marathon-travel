@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SyncedContext } from '../App';
 import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -125,8 +125,8 @@ function StayCard({ rank, priority, area, description, experiences, priceRange, 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const synced = useContext(SyncedContext);
-  const event = id ? getEventByIdAll(id) : undefined;
+  const { synced, version } = useContext(SyncedContext);
+  const event = useMemo(() => id ? getEventByIdAll(id) : undefined, [id, version]);
   const stayRef = useRef<HTMLElement>(null);
   const [isStayVisible, setIsStayVisible] = useState(false);
 
