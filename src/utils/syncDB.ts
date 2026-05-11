@@ -1,8 +1,8 @@
-import { supabase } from './supabase';
+import { supabaseAdmin } from './supabaseAdmin';
 
 export async function saveToSupabase(key: string, value: unknown): Promise<void> {
   try {
-    await supabase.from('admin_settings').upsert({ id: key, value, updated_at: new Date().toISOString() });
+    await supabaseAdmin.from('admin_settings').upsert({ id: key, value, updated_at: new Date().toISOString() });
   } catch {
     // localStorage is the fallback
   }
@@ -10,7 +10,7 @@ export async function saveToSupabase(key: string, value: unknown): Promise<void>
 
 export async function loadFromSupabase(): Promise<void> {
   try {
-    const { data } = await supabase.from('admin_settings').select('id, value');
+    const { data } = await supabaseAdmin.from('admin_settings').select('id, value');
     if (!data) return;
     for (const row of data) {
       localStorage.setItem(row.id, JSON.stringify(row.value));
