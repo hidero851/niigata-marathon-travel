@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { SyncedContext } from '../App';
 import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
@@ -124,6 +125,7 @@ function StayCard({ rank, priority, area, description, experiences, priceRange, 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const synced = useContext(SyncedContext);
   const event = id ? getEventByIdAll(id) : undefined;
   const stayRef = useRef<HTMLElement>(null);
   const [isStayVisible, setIsStayVisible] = useState(false);
@@ -146,6 +148,14 @@ export default function EventDetailPage() {
     observer.observe(el);
     return () => observer.disconnect();
   }, [id]);
+
+  if (!event && !synced) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!event) {
     return (

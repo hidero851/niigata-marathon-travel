@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { createContext, lazy, Suspense, useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import type { Session } from '@supabase/supabase-js'
@@ -8,11 +8,15 @@ import EventListPage from './pages/EventListPage'
 import EventDetailPage from './pages/EventDetailPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import DataSourcePage from './pages/DataSourcePage'
-import AdminPage from './pages/AdminPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import { supabase } from './utils/supabase'
 import { loadFromSupabase } from './utils/syncDB'
+
+// AdminPage はXLSX等を含むため遅延ロード（初期バンドルから除外）
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+
+export const SyncedContext = createContext(false)
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -38,30 +42,47 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const [synced, setSynced] = useState(false)
+  // localStorageに管理データがあればすぐに表示（再訪問者）、なければSpinner
+  const [synced, setSynced] = useState(
+    () => localStorage.getItem('adminCreatedEvents') !== null
+  )
 
   useEffect(() => {
     loadFromSupabase().finally(() => setSynced(true))
   }, [])
 
-  if (!synced) return null
+  if (!synced) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent" />
+      </div>
+    )
+  }
 
   return (
-    <HelmetProvider>
-      <Layout>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<TopPage />} />
-          <Route path="/events" element={<EventListPage />} />
-          <Route path="/events/:id" element={<EventDetailPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
-          <Route path="/datasource" element={<ProtectedRoute><DataSourcePage /></ProtectedRoute>} />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-        </Routes>
-      </Layout>
-    </HelmetProvider>
+    <SyncedContext.Provider value={synced}>
+      <HelmetProvider>
+        <Layout>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<TopPage />} />
+            <Route path="/events" element={<EventListPage />} />
+            <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/datasource" element={<ProtectedRoute><DataSourcePage /></ProtectedRoute>} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent" /></div>}>
+                  <AdminPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          </Routes>
+        </Layout>
+      </HelmetProvider>
+    </SyncedContext.Provider>
   )
 }
 
