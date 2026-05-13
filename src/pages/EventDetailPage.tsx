@@ -187,6 +187,7 @@ export default function EventDetailPage() {
   );
 
   const visualSetting = getEventVisualSetting(event.id);
+  const hiddenSections = visualSetting?.hiddenSections ?? [];
   const displayCatchCopy = visualSetting?.catchCopy || event.catchCopy;
   const displayHeroImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
   const displayHighlights =
@@ -478,7 +479,7 @@ export default function EventDetailPage() {
         </section>
 
         {/* ③ このレースで楽しめること */}
-        {displayHighlights && displayHighlights.length > 0 && (
+        {!hiddenSections.includes('highlights') && displayHighlights && displayHighlights.length > 0 && (
           <section className="mb-14">
             <h2 className="section-title">このレースで楽しめること</h2>
             <p className="text-gray-500 text-sm mb-6 -mt-3">
@@ -509,7 +510,7 @@ export default function EventDetailPage() {
         )}
 
         {/* ④ 参加プラン */}
-        {event.modelPlans.length > 0 && (
+        {!hiddenSections.includes('modelPlans') && event.modelPlans.length > 0 && (
           <section id="plan" className="mb-14 scroll-mt-20">
             <h2 className="section-title">おすすめ参加プラン</h2>
             <p className="text-gray-500 text-sm mb-6 -mt-3">
@@ -557,47 +558,51 @@ export default function EventDetailPage() {
         )}
 
         {/* ④ 宿泊セクション */}
-        <section id="stay" ref={stayRef as React.RefObject<HTMLDivElement>} className="mb-8 scroll-mt-20">
-          <h2 className="section-title">ランナー向けおすすめ宿泊エリア</h2>
-          <p className="text-gray-500 text-sm mb-6 -mt-3">
-            宿泊先が決まると参加への迷いがなくなります。目的に合わせて選んでください。
-          </p>
+        {!hiddenSections.includes('accommodations') && (
+          <section id="stay" ref={stayRef as React.RefObject<HTMLDivElement>} className="mb-8 scroll-mt-20">
+            <h2 className="section-title">ランナー向けおすすめ宿泊エリア</h2>
+            <p className="text-gray-500 text-sm mb-6 -mt-3">
+              宿泊先が決まると参加への迷いがなくなります。目的に合わせて選んでください。
+            </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-            {stayCards.map((card) => (
-              <StayCard key={card.rank} {...card} />
-            ))}
-          </div>
-
-          <div className="bg-navy-50 border border-navy-100 rounded-2xl p-6">
-            <h3 className="font-black text-navy-800 text-lg mb-5">
-              {event.location}エリアの魅力
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: '🗺️', title: '観光', label: '観光スポットを探す', gaKey: 'kanko' },
-                { icon: '🍽️', title: '地元グルメ', label: 'グルメ・飲食店を探す', gaKey: 'gourmet' },
-                { icon: '📸', title: '旅の思い出', label: 'お土産・特産を探す', gaKey: 'memory' },
-              ].map((item) => (
-                <a
-                  key={item.gaKey}
-                  href={visualSetting?.areaRakutenUrl || buildRakutenSearchUrl(venueKeyword)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackGA4(`click_rakuten_area_${item.gaKey}`, { event_id: event.id })}
-                  className="flex flex-col items-center text-center bg-white rounded-xl p-3 md:p-4 border border-navy-100 hover:border-orange-300 hover:shadow-md transition-all group"
-                >
-                  <div className="text-3xl mb-2">{item.icon}</div>
-                  <div className="font-bold text-navy-800 text-xs md:text-sm mb-1">{item.title}</div>
-                  <div className="text-xs text-orange-500 group-hover:text-orange-600 font-medium">{item.label} →</div>
-                </a>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+              {stayCards.map((card) => (
+                <StayCard key={card.rank} {...card} />
               ))}
             </div>
-          </div>
-        </section>
+
+            {!hiddenSections.includes('areaAttraction') && (
+              <div className="bg-navy-50 border border-navy-100 rounded-2xl p-6">
+                <h3 className="font-black text-navy-800 text-lg mb-5">
+                  {event.location}エリアの魅力
+                </h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { icon: '🗺️', title: '観光', label: '観光スポットを探す', gaKey: 'kanko' },
+                    { icon: '🍽️', title: '地元グルメ', label: 'グルメ・飲食店を探す', gaKey: 'gourmet' },
+                    { icon: '📸', title: '旅の思い出', label: 'お土産・特産を探す', gaKey: 'memory' },
+                  ].map((item) => (
+                    <a
+                      key={item.gaKey}
+                      href={visualSetting?.areaRakutenUrl || buildRakutenSearchUrl(venueKeyword)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackGA4(`click_rakuten_area_${item.gaKey}`, { event_id: event.id })}
+                      className="flex flex-col items-center text-center bg-white rounded-xl p-3 md:p-4 border border-navy-100 hover:border-orange-300 hover:shadow-md transition-all group"
+                    >
+                      <div className="text-3xl mb-2">{item.icon}</div>
+                      <div className="font-bold text-navy-800 text-xs md:text-sm mb-1">{item.title}</div>
+                      <div className="text-xs text-orange-500 group-hover:text-orange-600 font-medium">{item.label} →</div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* ⑤ エントリー誘導（宿泊後） */}
-        {entryLink && (
+        {!hiddenSections.includes('entryCta') && entryLink && (
           <div
             className="mb-12 rounded-xl border-l-4 border-green-400 p-5"
             style={{ background: '#f0fdf4' }}
@@ -622,7 +627,7 @@ export default function EventDetailPage() {
         )}
 
         {/* ⑦ お土産・特産 */}
-        {displayableProducts.length > 0 && (
+        {!hiddenSections.includes('products') && displayableProducts.length > 0 && (
           <section className="mb-14">
             <h2 className="section-title">食・特産・お土産</h2>
             <p className="text-gray-500 text-sm mb-6 -mt-3">

@@ -147,6 +147,7 @@ export type EventVisualSetting = {
   prevNightRakutenUrl?: string;
   areaRakutenUrl?: string;
   highlights: EventHighlightSetting[];
+  hiddenSections?: string[];
 };
 
 export type ProductVisualSetting = {

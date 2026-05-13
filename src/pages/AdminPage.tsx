@@ -227,6 +227,7 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         imageAlt: '',
         gradient: h.gradient,
       })),
+      hiddenSections: saved?.hiddenSections ?? [],
     };
   }
 
@@ -319,6 +320,40 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         value={form.areaRakutenUrl ?? ''}
         onChange={(v) => setField('areaRakutenUrl', v)}
       />
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">セクション表示制御</label>
+        <p className="text-xs text-gray-400 mb-3">チェックを入れたセクションは大会詳細ページで非表示になります。</p>
+        <div className="space-y-2">
+          {([
+            { id: 'highlights', label: 'このレースで楽しめること' },
+            { id: 'modelPlans', label: 'おすすめ参加プラン' },
+            { id: 'accommodations', label: 'ランナー向けおすすめ宿泊エリア' },
+            { id: 'areaAttraction', label: 'エリアの魅力（宿泊セクション内）' },
+            { id: 'products', label: '食・特産・お土産' },
+            { id: 'entryCta', label: 'エントリー誘導バナー' },
+          ] as const).map(({ id, label }) => {
+            const hidden = (form.hiddenSections ?? []).includes(id);
+            return (
+              <label key={id} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hidden}
+                  onChange={(e) => {
+                    const current = form.hiddenSections ?? [];
+                    setField(
+                      'hiddenSections',
+                      e.target.checked ? [...current, id] : current.filter((s) => s !== id)
+                    );
+                  }}
+                  className="w-4 h-4 rounded"
+                />
+                <span className="text-sm text-gray-700">{label}を非表示</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
 
       <div>
         <div className="flex items-center justify-between mb-2">
