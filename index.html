@@ -17,9 +17,46 @@
       gtag('js', new Date());
       gtag('config', 'G-F3DYQK153E');
     </script>
+    <!-- Google Translate widget styles -->
+    <style>
+      #google_translate_element {
+        position: fixed;
+        bottom: 72px;
+        right: 16px;
+        z-index: 9998;
+      }
+      /* デフォルトの上部バーを非表示 */
+      .goog-te-banner-frame { display: none !important; }
+      body { top: 0 !important; }
+      /* ウィジェットの見た目を整える */
+      .goog-te-gadget-simple {
+        background: rgba(255,255,255,0.95) !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 10px !important;
+        padding: 5px 10px !important;
+        font-size: 13px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        cursor: pointer !important;
+      }
+      .goog-te-gadget-simple span { color: #374151 !important; }
+      .goog-te-gadget-simple .goog-te-menu-value span:last-child { display: none; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <!-- Google Translate widget -->
+    <div id="google_translate_element"></div>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'ja',
+          includedLanguages: 'en,zh-CN,zh-TW,ko',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false
+        }, 'google_translate_element');
+      }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
