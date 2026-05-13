@@ -4,7 +4,7 @@ import {
   Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe, FileSpreadsheet,
 } from 'lucide-react';
 import ImportPanel from '../components/admin/ImportPanel';
-import { getAllDisplayableEvents, allProducts, formatEventDate } from '../data';
+import { getAllDisplayableEvents, getEventByIdAll, allProducts, formatEventDate } from '../data';
 import type { MarathonEvent, Accommodation, ModelPlan, LocalProduct } from '../types';
 import type {
   FeaturedEventSetting,
@@ -204,11 +204,9 @@ const EMPTY_HIGHLIGHT: EventHighlightSetting = {
 };
 
 function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
-  const events = getAllDisplayableEvents();
-
   function buildForm(id: string): EventVisualSetting {
     const saved = getEventVisualSetting(id);
-    const event = events.find((e) => e.id === id);
+    const event = getEventByIdAll(id);
     return {
       eventId: id,
       heroImageUrl: saved?.heroImageUrl ?? event?.heroImageUrl ?? '',
@@ -657,8 +655,7 @@ function ProductAssignPanel({ eventId, onSave }: { eventId: string; onSave: (msg
 const EMPTY_ACC = { label: '', areaName: '', distanceToVenue: '', description: '', priceRange: '', externalUrl: '', rakutenTravelUrl: '' };
 
 function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
-  const events = getAllDisplayableEvents();
-  const event = events.find((e) => e.id === eventId);
+  const event = getEventByIdAll(eventId);
   const [items, setItems] = useState<Accommodation[]>(() => getEventAccommodationOverride(eventId) ?? event?.accommodations ?? []);
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -759,8 +756,7 @@ function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg
 const EMPTY_PLAN = { title: '', steps: [''], rakutenUrl: '' };
 
 function ModelPlanPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
-  const events = getAllDisplayableEvents();
-  const event = events.find((e) => e.id === eventId);
+  const event = getEventByIdAll(eventId);
   const [plans, setPlans] = useState<ModelPlan[]>(() => getEventModelPlanOverride(eventId) ?? event?.modelPlans ?? []);
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
