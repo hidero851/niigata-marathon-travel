@@ -146,6 +146,9 @@ export type EventVisualSetting = {
   eventDate?: string;
   prevNightRakutenUrl?: string;
   areaRakutenUrl?: string;
+  areaKankoUrl?: string;
+  areaGourmetUrl?: string;
+  areaMemoryUrl?: string;
   highlights: EventHighlightSetting[];
   hiddenSections?: string[];
 };

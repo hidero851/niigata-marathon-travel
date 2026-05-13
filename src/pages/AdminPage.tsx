@@ -217,6 +217,9 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
       eventDate: saved?.eventDate ?? event?.eventDate ?? '',
       prevNightRakutenUrl: saved?.prevNightRakutenUrl ?? '',
       areaRakutenUrl: saved?.areaRakutenUrl ?? '',
+      areaKankoUrl: saved?.areaKankoUrl ?? '',
+      areaGourmetUrl: saved?.areaGourmetUrl ?? '',
+      areaMemoryUrl: saved?.areaMemoryUrl ?? '',
       highlights: saved?.highlights ?? (event?.highlights ?? []).map((h, i) => ({
         id: String(i),
         title: h.title,
@@ -313,11 +316,15 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         value={form.prevNightRakutenUrl ?? ''}
         onChange={(v) => setField('prevNightRakutenUrl', v)}
       />
-      <FormField
-        label="エリアの魅力リンク（楽天トラベルURL）"
-        value={form.areaRakutenUrl ?? ''}
-        onChange={(v) => setField('areaRakutenUrl', v)}
-      />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">エリアの魅力リンク</label>
+        <div className="space-y-2">
+          <FormField label="🗺️ 観光URL" value={form.areaKankoUrl ?? ''} onChange={(v) => setField('areaKankoUrl', v)} />
+          <FormField label="🍽️ 地元グルメURL" value={form.areaGourmetUrl ?? ''} onChange={(v) => setField('areaGourmetUrl', v)} />
+          <FormField label="📸 旅の思い出（お土産）URL" value={form.areaMemoryUrl ?? ''} onChange={(v) => setField('areaMemoryUrl', v)} />
+          <FormField label="共通URL（個別未設定時のフォールバック）" value={form.areaRakutenUrl ?? ''} onChange={(v) => setField('areaRakutenUrl', v)} />
+        </div>
+      </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">セクション表示制御</label>

@@ -578,13 +578,13 @@ export default function EventDetailPage() {
                 </h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { icon: '🗺️', title: '観光', label: '観光スポットを探す', gaKey: 'kanko' },
-                    { icon: '🍽️', title: '地元グルメ', label: 'グルメ・飲食店を探す', gaKey: 'gourmet' },
-                    { icon: '📸', title: '旅の思い出', label: 'お土産・特産を探す', gaKey: 'memory' },
+                    { icon: '🗺️', title: '観光', label: '観光スポットを探す', gaKey: 'kanko', url: visualSetting?.areaKankoUrl },
+                    { icon: '🍽️', title: '地元グルメ', label: 'グルメ・飲食店を探す', gaKey: 'gourmet', url: visualSetting?.areaGourmetUrl },
+                    { icon: '📸', title: '旅の思い出', label: 'お土産・特産を探す', gaKey: 'memory', url: visualSetting?.areaMemoryUrl },
                   ].map((item) => (
                     <a
                       key={item.gaKey}
-                      href={visualSetting?.areaRakutenUrl || buildRakutenSearchUrl(venueKeyword)}
+                      href={item.url || visualSetting?.areaRakutenUrl || buildRakutenSearchUrl(venueKeyword)}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => trackGA4(`click_rakuten_area_${item.gaKey}`, { event_id: event.id })}
