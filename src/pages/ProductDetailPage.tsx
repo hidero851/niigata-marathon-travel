@@ -49,6 +49,8 @@ export default function ProductDetailPage() {
         : baseProduct.salesLocations,
   };
   const galleryImages = visualSetting?.images && visualSetting.images.length > 0 ? visualSetting.images : [];
+  const shops = visualSetting?.shops ?? [];
+  const hiddenSections = visualSetting?.hiddenSections ?? [];
 
   const relatedEvents = product.relatedEventIds
     .map((eid) => getEventByIdAll(eid))
@@ -86,7 +88,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* 横スクロール画像ギャラリー */}
-      {galleryImages.length > 0 && (
+      {!hiddenSections.includes('gallery') && galleryImages.length > 0 && (
         <div className="mb-8">
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
             {galleryImages.map((url, i) => (
@@ -108,35 +110,91 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Main content */}
         <div className="md:col-span-2 space-y-8">
-          {/* Description */}
-          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="font-bold text-navy-800 text-lg mb-4 flex items-center gap-2">
-              <span className="text-orange-500">📖</span> この特産について
-            </h2>
-            <p className="text-gray-700 leading-relaxed">{product.description}</p>
-          </section>
 
-          {/* Sales locations (array) */}
-          {product.salesLocations && product.salesLocations.length > 0 ? (
+          {/* Description */}
+          {!hiddenSections.includes('description') && (
             <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h2 className="font-bold text-navy-800 text-lg mb-4 flex items-center gap-2">
-                <Store size={18} className="text-navy-500" /> 購入できる場所
+                <span className="text-orange-500">📖</span> この特産について
               </h2>
-              <ul className="space-y-2">
-                {product.salesLocations.map((loc, i) => (
-                  <li key={i} className="flex items-center gap-2 text-gray-700 text-sm">
-                    <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />
-                    {loc}
-                  </li>
-                ))}
-              </ul>
+              <p className="text-gray-700 leading-relaxed">{product.description}</p>
             </section>
-          ) : (
+          )}
+
+          {/* Sales locations */}
+          {!hiddenSections.includes('salesLocations') && (
+            product.salesLocations && product.salesLocations.length > 0 ? (
+              <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h2 className="font-bold text-navy-800 text-lg mb-4 flex items-center gap-2">
+                  <Store size={18} className="text-navy-500" /> 購入できる場所
+                </h2>
+                <ul className="space-y-2">
+                  {product.salesLocations.map((loc, i) => (
+                    <li key={i} className="flex items-center gap-2 text-gray-700 text-sm">
+                      <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />
+                      {loc}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : (
+              <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h2 className="font-bold text-navy-800 text-lg mb-4 flex items-center gap-2">
+                  <ShoppingBag size={18} className="text-navy-500" /> どこで買えるか
+                </h2>
+                <p className="text-gray-700 leading-relaxed">{product.whereToBuy}</p>
+              </section>
+            )
+          )}
+
+          {/* お店情報・地図 */}
+          {!hiddenSections.includes('shops') && shops.length > 0 && (
             <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h2 className="font-bold text-navy-800 text-lg mb-4 flex items-center gap-2">
-                <ShoppingBag size={18} className="text-navy-500" /> どこで買えるか
+              <h2 className="font-bold text-navy-800 text-lg mb-5 flex items-center gap-2">
+                <span className="text-orange-500">🏪</span> お店で買う
               </h2>
-              <p className="text-gray-700 leading-relaxed">{product.whereToBuy}</p>
+              <div className="space-y-8">
+                {shops.map((shop, i) => (
+                  <div key={i} className={i < shops.length - 1 ? 'pb-8 border-b border-gray-100' : ''}>
+                    <h3 className="font-bold text-navy-800 text-base mb-2">{shop.name}</h3>
+                    {shop.address && (
+                      <p className="flex items-start gap-1.5 text-sm text-gray-500 mb-1">
+                        <MapPin size={13} className="flex-shrink-0 mt-0.5" /> {shop.address}
+                      </p>
+                    )}
+                    {shop.hours && (
+                      <p className="text-sm text-gray-500 mb-1">🕐 {shop.hours}</p>
+                    )}
+                    {shop.description && (
+                      <p className="text-sm text-gray-700 mt-2 mb-3 leading-relaxed">{shop.description}</p>
+                    )}
+                    {shop.mapEmbedUrl && (
+                      <div className="rounded-xl overflow-hidden mb-3 border border-gray-100">
+                        <iframe
+                          src={shop.mapEmbedUrl}
+                          width="100%"
+                          height="220"
+                          style={{ border: 0, display: 'block' }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title={shop.name}
+                        />
+                      </div>
+                    )}
+                    {shop.mapUrl && (
+                      <a
+                        href={shop.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm text-navy-600 hover:text-navy-800 font-medium transition-colors"
+                      >
+                        <MapPin size={13} /> Google Mapsで見る →
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
             </section>
           )}
         </div>
@@ -144,34 +202,36 @@ export default function ProductDetailPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* External link */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h3 className="font-bold text-navy-800 mb-4">外部リンク</h3>
-            <div className="space-y-3">
-              {product.externalUrl && product.externalUrl !== '#' ? (
-                <a
-                  href={product.externalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={handleExternalClick}
-                  className="flex items-center gap-2 w-full bg-navy-700 hover:bg-navy-800 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors"
-                >
-                  <ExternalLink size={15} />
-                  公式サイトを見る
-                </a>
-              ) : (
-                <span className="flex items-center gap-2 w-full bg-gray-100 text-gray-400 text-sm font-bold py-3 px-4 rounded-xl cursor-not-allowed">
-                  <ExternalLink size={15} />
-                  公式サイト（設定中）
-                </span>
-              )}
+          {!hiddenSections.includes('externalLink') && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+              <h3 className="font-bold text-navy-800 mb-4">公式サイト</h3>
+              <div className="space-y-3">
+                {product.externalUrl && product.externalUrl !== '#' ? (
+                  <a
+                    href={product.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleExternalClick}
+                    className="flex items-center gap-2 w-full bg-navy-700 hover:bg-navy-800 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors"
+                  >
+                    <ExternalLink size={15} />
+                    公式サイトを見る
+                  </a>
+                ) : (
+                  <span className="flex items-center gap-2 w-full bg-gray-100 text-gray-400 text-sm font-bold py-3 px-4 rounded-xl cursor-not-allowed">
+                    <ExternalLink size={15} />
+                    公式サイト（設定中）
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-400 mt-3">
+                ※ 外部リンクは参考です。購入は公式サイトや現地でご確認ください。
+              </p>
             </div>
-            <p className="text-xs text-gray-400 mt-3">
-              ※ 外部リンクは参考です。購入は公式サイトや現地でご確認ください。
-            </p>
-          </div>
+          )}
 
           {/* Related events */}
-          {relatedEvents.length > 0 && (
+          {!hiddenSections.includes('relatedEvents') && relatedEvents.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
               <h3 className="font-bold text-navy-800 mb-4">関連する大会</h3>
               <div className="space-y-3">

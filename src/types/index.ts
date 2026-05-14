@@ -153,6 +153,15 @@ export type EventVisualSetting = {
   hiddenSections?: string[];
 };
 
+export type ProductShop = {
+  name: string;
+  address?: string;
+  hours?: string;
+  description?: string;
+  mapUrl?: string;
+  mapEmbedUrl?: string;
+};
+
 export type ProductVisualSetting = {
   productId: string;
   imageUrl: string;
@@ -163,4 +172,6 @@ export type ProductVisualSetting = {
   salesLocations?: string[];
   whereToBuy?: string;
   images?: string[];
+  shops?: ProductShop[];
+  hiddenSections?: string[];
 };

@@ -11,6 +11,7 @@ import type {
   EventVisualSetting,
   EventHighlightSetting,
   ProductVisualSetting,
+  ProductShop,
 } from '../types';
 import {
   getFeaturedSettings,
@@ -448,6 +449,8 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       salesLocations: saved?.salesLocations ?? product?.salesLocations ?? [],
       whereToBuy: saved?.whereToBuy ?? product?.whereToBuy ?? '',
       images: saved?.images ?? [],
+      shops: saved?.shops ?? [],
+      hiddenSections: saved?.hiddenSections ?? [],
     };
   }
 
@@ -458,6 +461,19 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
 
   const setField = <K extends keyof ProductVisualSetting>(key: K, value: ProductVisualSetting[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const addShop = () => {
+    setField('shops', [...(form.shops ?? []), { name: '', address: '', hours: '', description: '', mapUrl: '', mapEmbedUrl: '' }]);
+  };
+
+  const removeShop = (idx: number) => {
+    setField('shops', (form.shops ?? []).filter((_, i) => i !== idx));
+  };
+
+  const setShopField = (idx: number, key: keyof ProductShop, value: string) => {
+    const updated = (form.shops ?? []).map((s, i) => i === idx ? { ...s, [key]: value } : s);
+    setField('shops', updated);
   };
 
   const handleSave = () => {
@@ -548,6 +564,114 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
             placeholder={`道の駅\n駅構内の売店\n観光物産センター`}
             className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none"
           />
+        </div>
+
+        {/* セクション表示制御 */}
+        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <label className="block text-sm font-medium text-gray-700 mb-2">セクション表示制御</label>
+          <p className="text-xs text-gray-400 mb-3">チェックを入れたセクションは特産品詳細ページで非表示になります。</p>
+          <div className="space-y-2">
+            {([
+              { id: 'gallery', label: '商品画像ギャラリー' },
+              { id: 'description', label: 'この特産について（説明文）' },
+              { id: 'salesLocations', label: '購入できる場所 / どこで買えるか' },
+              { id: 'shops', label: 'お店で買う（店舗情報・地図）' },
+              { id: 'externalLink', label: '公式サイトリンク' },
+              { id: 'relatedEvents', label: '関連する大会' },
+            ] as const).map(({ id, label }) => {
+              const hidden = (form.hiddenSections ?? []).includes(id);
+              return (
+                <label key={id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hidden}
+                    onChange={(e) => {
+                      const current = form.hiddenSections ?? [];
+                      setField(
+                        'hiddenSections',
+                        e.target.checked ? [...current, id] : current.filter((s) => s !== id)
+                      );
+                    }}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm text-gray-700">{label}を非表示</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* お店情報 */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-700">お店情報</label>
+            <button
+              onClick={addShop}
+              className="flex items-center gap-1 text-xs text-orange-500 hover:text-orange-600 font-medium"
+            >
+              <Plus size={13} /> お店を追加
+            </button>
+          </div>
+          <div className="space-y-4">
+            {(form.shops ?? []).map((shop, idx) => (
+              <div key={idx} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-gray-500">店舗 {idx + 1}</span>
+                  <button onClick={() => removeShop(idx)} className="text-red-400 hover:text-red-600">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="店名（必須）"
+                    value={shop.name}
+                    onChange={(e) => setShopField(idx, 'name', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="住所"
+                    value={shop.address ?? ''}
+                    onChange={(e) => setShopField(idx, 'address', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="営業時間（例: 9:00〜18:00）"
+                    value={shop.hours ?? ''}
+                    onChange={(e) => setShopField(idx, 'hours', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
+                  <textarea
+                    placeholder="店舗の説明（任意）"
+                    value={shop.description ?? ''}
+                    onChange={(e) => setShopField(idx, 'description', e.target.value)}
+                    rows={2}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400 resize-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Google Maps URL（地図リンク）"
+                    value={shop.mapUrl ?? ''}
+                    onChange={(e) => setShopField(idx, 'mapUrl', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Google Maps 埋め込みURL（iframeで地図表示）"
+                    value={shop.mapEmbedUrl ?? ''}
+                    onChange={(e) => setShopField(idx, 'mapEmbedUrl', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
+                  <p className="text-xs text-gray-400">埋め込みURLはGoogle Mapsの「共有」→「地図を埋め込む」から取得したsrcの値を貼り付けてください。</p>
+                </div>
+              </div>
+            ))}
+            {(form.shops ?? []).length === 0 && (
+              <p className="text-xs text-gray-400 text-center py-4">店舗情報なし。「お店を追加」で作成できます。</p>
+            )}
+          </div>
         </div>
       </div>
 
