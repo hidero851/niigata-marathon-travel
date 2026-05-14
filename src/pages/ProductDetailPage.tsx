@@ -72,11 +72,20 @@ export default function ProductDetailPage() {
 
       {/* Hero */}
       <div className="card mb-8 overflow-hidden">
-        <GradientImage
-          gradient={baseProduct.imageGradient}
-          name={product.name}
-          height="h-64"
-        />
+        <div className="relative">
+          <GradientImage
+            gradient={baseProduct.imageGradient}
+            name={product.name}
+            height="h-64"
+          />
+          {!visualSetting?.hideImageNote && (
+            <div className="absolute top-3 right-3 z-10">
+              <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
+                ※ 画像はイメージです
+              </span>
+            </div>
+          )}
+        </div>
         <div className="p-6 md:p-8">
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
             <MapPin size={14} />

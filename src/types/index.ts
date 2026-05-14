@@ -151,6 +151,8 @@ export type EventVisualSetting = {
   areaMemoryUrl?: string;
   highlights: EventHighlightSetting[];
   hiddenSections?: string[];
+  hideHeroImageNote?: boolean;
+  hideHighlightImageNote?: boolean;
 };
 
 export type ProductShop = {
@@ -174,4 +176,5 @@ export type ProductVisualSetting = {
   images?: string[];
   shops?: ProductShop[];
   hiddenSections?: string[];
+  hideImageNote?: boolean;
 };

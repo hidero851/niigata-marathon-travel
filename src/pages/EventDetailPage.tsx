@@ -339,11 +339,13 @@ export default function EventDetailPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/85 md:hidden" />
         <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
-        <div className="absolute top-4 right-4 z-20">
-          <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
-            ※ 画像はイメージです
-          </span>
-        </div>
+        {!visualSetting?.hideHeroImageNote && (
+          <div className="absolute top-4 right-4 z-20">
+            <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
+              ※ 画像はイメージです
+            </span>
+          </div>
+        )}
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-6 md:px-12 pb-16 pt-24">
           <button
@@ -497,6 +499,13 @@ export default function EventDetailPage() {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                  {!visualSetting?.hideHighlightImageNote && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded-full">
+                        ※ イメージ
+                      </span>
+                    </div>
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
                     <p className="text-white font-bold text-sm leading-tight">{h.title}</p>
                     <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">

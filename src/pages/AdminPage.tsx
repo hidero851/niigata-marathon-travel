@@ -275,6 +275,8 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         gradient: h.gradient,
       })),
       hiddenSections: saved?.hiddenSections ?? [],
+      hideHeroImageNote: saved?.hideHeroImageNote ?? false,
+      hideHighlightImageNote: saved?.hideHighlightImageNote ?? false,
     };
   }
 
@@ -355,6 +357,15 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
           />
         )}
       </div>
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={form.hideHeroImageNote ?? false}
+          onChange={(e) => setField('hideHeroImageNote', e.target.checked)}
+          className="w-4 h-4 rounded"
+        />
+        <span className="text-sm text-gray-700">ヒーロー画像の「※ 画像はイメージです」を非表示</span>
+      </label>
       <FormField
         label="ヒーロー画像 Alt テキスト"
         value={form.heroImageAlt}
@@ -418,6 +429,16 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
           })}
         </div>
       </div>
+
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={form.hideHighlightImageNote ?? false}
+          onChange={(e) => setField('hideHighlightImageNote', e.target.checked)}
+          className="w-4 h-4 rounded"
+        />
+        <span className="text-sm text-gray-700">ハイライト画像の「※ 画像はイメージです」を非表示</span>
+      </label>
 
       <div>
         <div className="flex items-center justify-between mb-2">
@@ -515,6 +536,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       images: saved?.images ?? [],
       shops: saved?.shops ?? [],
       hiddenSections: saved?.hiddenSections ?? [],
+      hideImageNote: saved?.hideImageNote ?? false,
     };
   }
 
@@ -649,6 +671,16 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
             className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none"
           />
         </div>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.hideImageNote ?? false}
+            onChange={(e) => setField('hideImageNote', e.target.checked)}
+            className="w-4 h-4 rounded"
+          />
+          <span className="text-sm text-gray-700">「※ 画像はイメージです」を非表示</span>
+        </label>
 
         {/* セクション表示制御 */}
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
