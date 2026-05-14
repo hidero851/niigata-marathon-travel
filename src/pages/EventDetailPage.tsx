@@ -422,7 +422,7 @@ export default function EventDetailPage() {
                 <FileText size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <div className="text-xs text-amber-700 mb-0.5">備考</div>
-                  <div className="text-sm text-amber-900">{event.notes}</div>
+                  <div className="text-sm text-amber-900 whitespace-pre-wrap">{event.notes}</div>
                 </div>
               </div>
             )}
