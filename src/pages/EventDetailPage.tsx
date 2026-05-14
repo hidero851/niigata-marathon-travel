@@ -679,7 +679,7 @@ export default function EventDetailPage() {
             <RakutenButton
               label="宿泊を楽天トラベルで探す"
               className="flex-1 py-4 text-base"
-              href={venueRakutenUrl}
+              href={visualSetting?.prevNightRakutenUrl || venueRakutenUrl}
               onClick={() => trackGA4('click_rakuten_final_cta', { event_id: event.id })}
             />
             {entryLink ? (
