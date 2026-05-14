@@ -190,15 +190,22 @@ export default function EventDetailPage() {
   const hiddenSections = visualSetting?.hiddenSections ?? [];
   const displayCatchCopy = visualSetting?.catchCopy || event.catchCopy;
   const displayHeroImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
-  const displayHighlights =
+  type DisplayHighlight = { title: string; description: string; imageUrl: string; gradient?: string; hideImageNote?: boolean };
+  const displayHighlights: DisplayHighlight[] | undefined =
     visualSetting?.highlights && visualSetting.highlights.length > 0
       ? visualSetting.highlights.map((h) => ({
           title: h.title,
           description: h.description,
           imageUrl: h.imageUrl,
           gradient: h.gradient,
+          hideImageNote: h.hideImageNote,
         }))
-      : event.highlights;
+      : event.highlights?.map((h) => ({
+          title: h.title,
+          description: h.description,
+          imageUrl: h.imageUrl,
+          gradient: h.gradient,
+        }));
 
   const displayOfficialUrl =
     visualSetting?.officialUrl && visualSetting.officialUrl.trim() !== ''
@@ -499,7 +506,7 @@ export default function EventDetailPage() {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                  {!visualSetting?.hideHighlightImageNote && (
+                  {!h.hideImageNote && (
                     <div className="absolute top-2 right-2 z-10">
                       <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded-full">
                         ※ イメージ

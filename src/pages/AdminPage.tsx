@@ -276,7 +276,6 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
       })),
       hiddenSections: saved?.hiddenSections ?? [],
       hideHeroImageNote: saved?.hideHeroImageNote ?? false,
-      hideHighlightImageNote: saved?.hideHighlightImageNote ?? false,
     };
   }
 
@@ -300,7 +299,7 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
     }));
   };
 
-  const setHighlightField = (idx: number, key: keyof EventHighlightSetting, value: string) => {
+  const setHighlightField = (idx: number, key: keyof EventHighlightSetting, value: string | boolean) => {
     setForm((prev) => ({
       ...prev,
       highlights: prev.highlights.map((h, i) => (i === idx ? { ...h, [key]: value } : h)),
@@ -430,16 +429,6 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         </div>
       </div>
 
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={form.hideHighlightImageNote ?? false}
-          onChange={(e) => setField('hideHighlightImageNote', e.target.checked)}
-          className="w-4 h-4 rounded"
-        />
-        <span className="text-sm text-gray-700">ハイライト画像の「※ 画像はイメージです」を非表示</span>
-      </label>
-
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium text-gray-700">見どころカード</label>
@@ -494,6 +483,15 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
                   style={{ backgroundImage: `url("${h.imageUrl}")` }}
                 />
               )}
+              <label className="flex items-center gap-2 cursor-pointer mt-2">
+                <input
+                  type="checkbox"
+                  checked={!!h.hideImageNote}
+                  onChange={(e) => setHighlightField(idx, 'hideImageNote', e.target.checked)}
+                  className="w-4 h-4 rounded"
+                />
+                <span className="text-xs text-gray-600">「※ イメージ」を非表示</span>
+              </label>
             </div>
           ))}
           {form.highlights.length === 0 && (
