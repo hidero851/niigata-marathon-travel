@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
-  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe, FileSpreadsheet,
+  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe, FileSpreadsheet, Upload,
 } from 'lucide-react';
+import { uploadEventImage, uploadProductImage } from '../utils/imageUpload';
 import ImportPanel from '../components/admin/ImportPanel';
 import { getAllDisplayableEvents, getEventByIdAll, allProducts, formatEventDate } from '../data';
 import type { MarathonEvent, Accommodation, ModelPlan, LocalProduct } from '../types';
@@ -99,6 +100,50 @@ function FormField({ label, value, onChange, preview, previewUrl, multiline }: F
         />
       )}
     </div>
+  );
+}
+
+// --- Shared ImageUploadButton ---
+
+function ImageUploadButton({
+  uploadFn,
+  onUploaded,
+  label = 'アップロード',
+}: {
+  uploadFn: (file: File) => Promise<string>;
+  onUploaded: (url: string) => void;
+  label?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLoading(true);
+    try {
+      const url = await uploadFn(file);
+      onUploaded(url);
+    } catch (err) {
+      alert('アップロード失敗: ' + String(err));
+    } finally {
+      setLoading(false);
+      if (ref.current) ref.current.value = '';
+    }
+  };
+
+  return (
+    <>
+      <input type="file" accept="image/*" ref={ref} onChange={handleChange} className="hidden" />
+      <button
+        type="button"
+        onClick={() => ref.current?.click()}
+        disabled={loading}
+        className="flex items-center gap-1 flex-shrink-0 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap"
+      >
+        <Upload size={11} /> {loading ? '処理中...' : label}
+      </button>
+    </>
   );
 }
 
@@ -290,13 +335,26 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
           <p className="text-xs text-gray-500 mt-1">表示: {formatEventDate(form.eventDate)}</p>
         )}
       </div>
-      <FormField
-        label="ヒーロー画像URL"
-        value={form.heroImageUrl}
-        onChange={(v) => setField('heroImageUrl', v)}
-        preview={!!form.heroImageUrl}
-        previewUrl={form.heroImageUrl}
-      />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">ヒーロー画像URL</label>
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            value={form.heroImageUrl}
+            onChange={(e) => setField('heroImageUrl', e.target.value)}
+            className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+          />
+          <ImageUploadButton
+            uploadFn={(file) => uploadEventImage(eventId, 'hero', file)}
+            onUploaded={(url) => setField('heroImageUrl', url)}
+          />
+        </div>
+        {form.heroImageUrl && (
+          <div className="mt-2 h-28 rounded-xl bg-cover bg-center border border-gray-200"
+            style={{ backgroundImage: `url("${form.heroImageUrl}")` }}
+          />
+        )}
+      </div>
       <FormField
         label="ヒーロー画像 Alt テキスト"
         value={form.heroImageAlt}
@@ -388,13 +446,19 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
                   onChange={(e) => setHighlightField(idx, 'title', e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
                 />
-                <input
-                  type="text"
-                  placeholder="画像URL"
-                  value={h.imageUrl}
-                  onChange={(e) => setHighlightField(idx, 'imageUrl', e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
-                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    placeholder="画像URL"
+                    value={h.imageUrl}
+                    onChange={(e) => setHighlightField(idx, 'imageUrl', e.target.value)}
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
+                  <ImageUploadButton
+                    uploadFn={(file) => uploadEventImage(eventId, `highlight-${idx}`, file)}
+                    onUploaded={(url) => setHighlightField(idx, 'imageUrl', url)}
+                  />
+                </div>
                 <input
                   type="text"
                   placeholder="説明文"
@@ -506,13 +570,26 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       </div>
 
       <div className="space-y-5">
-        <FormField
-          label="画像URL"
-          value={form.imageUrl}
-          onChange={(v) => setField('imageUrl', v)}
-          preview={!!form.imageUrl}
-          previewUrl={form.imageUrl}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">画像URL</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={form.imageUrl}
+              onChange={(e) => setField('imageUrl', e.target.value)}
+              className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+            />
+            <ImageUploadButton
+              uploadFn={(file) => uploadProductImage(selectedId, 'main', file)}
+              onUploaded={(url) => setField('imageUrl', url)}
+            />
+          </div>
+          {form.imageUrl && (
+            <div className="mt-2 h-28 rounded-xl bg-cover bg-center border border-gray-200"
+              style={{ backgroundImage: `url("${form.imageUrl}")` }}
+            />
+          )}
+        </div>
         <FormField
           label="画像 Alt テキスト"
           value={form.imageAlt}
@@ -535,7 +612,14 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           onChange={(v) => setField('externalUrl', v)}
         />
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">商品画像リスト（1行1URL・横スクロール表示）</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-sm font-medium text-gray-700">商品画像リスト（横スクロール表示）</label>
+            <ImageUploadButton
+              uploadFn={(file) => uploadProductImage(selectedId, `gallery-${(form.images ?? []).length}`, file)}
+              onUploaded={(url) => setField('images', [...(form.images ?? []), url])}
+              label="画像を追加"
+            />
+          </div>
           <textarea
             value={(form.images ?? []).join('\n')}
             onChange={(e) =>
@@ -545,7 +629,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
             placeholder={'https://example.com/image1.jpg\nhttps://example.com/image2.jpg'}
             className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none"
           />
-          <p className="text-xs text-gray-400 mt-1">設定すると特産品ページに横スクロールの画像ギャラリーが表示されます。</p>
+          <p className="text-xs text-gray-400 mt-1">アップロードボタンで画像を追加するか、URLを直接1行1件で入力できます。</p>
         </div>
         <FormField
           label="購入場所テキスト（共通・文章形式）"

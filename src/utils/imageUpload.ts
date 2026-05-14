@@ -1,6 +1,7 @@
 import { supabaseAdmin, STORAGE_BUCKET, STORAGE_PUBLIC_BASE } from './supabaseAdmin';
 
 export type ImageRole = 'hero' | `highlight-${number}` | `product-${number}`;
+export type ProductImageRole = 'main' | `gallery-${number}`;
 
 export async function uploadEventImage(
   eventId: string,
@@ -9,6 +10,23 @@ export async function uploadEventImage(
 ): Promise<string> {
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
   const path = `${eventId}/${role}.${ext}`;
+
+  const { error } = await supabaseAdmin.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type });
+
+  if (error) throw new Error(`画像アップロード失敗: ${error.message}`);
+
+  return `${STORAGE_PUBLIC_BASE}/${path}`;
+}
+
+export async function uploadProductImage(
+  productId: string,
+  role: ProductImageRole,
+  file: File,
+): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+  const path = `products/${productId}/${role}.${ext}`;
 
   const { error } = await supabaseAdmin.storage
     .from(STORAGE_BUCKET)
