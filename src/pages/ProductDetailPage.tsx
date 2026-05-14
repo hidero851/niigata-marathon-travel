@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Star, Store } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Store } from 'lucide-react';
 import { getProductById, getEventByIdAll } from '../data';
 import { getProductVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
 import GradientImage from '../components/GradientImage';
@@ -48,6 +48,7 @@ export default function ProductDetailPage() {
         ? visualSetting.salesLocations
         : baseProduct.salesLocations,
   };
+  const galleryImages = visualSetting?.images && visualSetting.images.length > 0 ? visualSetting.images : [];
 
   const relatedEvents = product.relatedEventIds
     .map((eid) => getEventByIdAll(eid))
@@ -84,6 +85,26 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
+      {/* 横スクロール画像ギャラリー */}
+      {galleryImages.length > 0 && (
+        <div className="mb-8">
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+            {galleryImages.map((url, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 w-56 h-40 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100"
+              >
+                <img
+                  src={url}
+                  alt={`${product.name} ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Main content */}
         <div className="md:col-span-2 space-y-8">
@@ -93,15 +114,6 @@ export default function ProductDetailPage() {
               <span className="text-orange-500">📖</span> この特産について
             </h2>
             <p className="text-gray-700 leading-relaxed">{product.description}</p>
-          </section>
-
-          {/* Recommended point */}
-          <section className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
-            <h2 className="font-bold text-orange-800 text-lg mb-3 flex items-center gap-2">
-              <Star size={18} className="text-orange-500 fill-orange-500" />
-              マラソンとの相性
-            </h2>
-            <p className="text-orange-900 leading-relaxed">{product.recommendedPoint}</p>
           </section>
 
           {/* Sales locations (array) */}
@@ -144,7 +156,7 @@ export default function ProductDetailPage() {
                   className="flex items-center gap-2 w-full bg-navy-700 hover:bg-navy-800 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors"
                 >
                   <ExternalLink size={15} />
-                  公式サイト・購入先を見る
+                  公式サイトを見る
                 </a>
               ) : (
                 <span className="flex items-center gap-2 w-full bg-gray-100 text-gray-400 text-sm font-bold py-3 px-4 rounded-xl cursor-not-allowed">

@@ -447,6 +447,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       externalUrl: saved?.externalUrl ?? product?.externalUrl ?? '',
       salesLocations: saved?.salesLocations ?? product?.salesLocations ?? [],
       whereToBuy: saved?.whereToBuy ?? product?.whereToBuy ?? '',
+      images: saved?.images ?? [],
     };
   }
 
@@ -513,10 +514,23 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           multiline
         />
         <FormField
-          label="外部リンクURL"
+          label="公式サイトURL"
           value={form.externalUrl}
           onChange={(v) => setField('externalUrl', v)}
         />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">商品画像リスト（1行1URL・横スクロール表示）</label>
+          <textarea
+            value={(form.images ?? []).join('\n')}
+            onChange={(e) =>
+              setField('images', e.target.value.split('\n').map((s) => s.trim()).filter(Boolean))
+            }
+            rows={4}
+            placeholder={'https://example.com/image1.jpg\nhttps://example.com/image2.jpg'}
+            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none"
+          />
+          <p className="text-xs text-gray-400 mt-1">設定すると特産品ページに横スクロールの画像ギャラリーが表示されます。</p>
+        </div>
         <FormField
           label="購入場所テキスト（共通・文章形式）"
           value={form.whereToBuy ?? ''}

@@ -162,4 +162,5 @@ export type ProductVisualSetting = {
   externalUrl: string;
   salesLocations?: string[];
   whereToBuy?: string;
+  images?: string[];
 };
