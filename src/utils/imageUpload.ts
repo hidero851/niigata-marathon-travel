@@ -17,7 +17,7 @@ export async function uploadEventImage(
 
   if (error) throw new Error(`画像アップロード失敗: ${error.message}`);
 
-  return `${STORAGE_PUBLIC_BASE}/${path}`;
+  return `${STORAGE_PUBLIC_BASE}/${path}?t=${Date.now()}`;
 }
 
 export async function uploadProductImage(
@@ -34,7 +34,7 @@ export async function uploadProductImage(
 
   if (error) throw new Error(`画像アップロード失敗: ${error.message}`);
 
-  return `${STORAGE_PUBLIC_BASE}/${path}`;
+  return `${STORAGE_PUBLIC_BASE}/${path}?t=${Date.now()}`;
 }
 
 export async function deleteEventImage(eventId: string, role: ImageRole): Promise<void> {
