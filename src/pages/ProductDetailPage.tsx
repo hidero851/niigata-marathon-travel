@@ -75,9 +75,10 @@ export default function ProductDetailPage() {
         <div className="relative">
           {product.imageUrl ? (
             <div
-              className="h-64 bg-cover bg-no-repeat"
+              className="h-64 bg-no-repeat"
               style={{
                 backgroundImage: `url("${product.imageUrl}")`,
+                backgroundSize: visualSetting?.imageSize || 'cover',
                 backgroundPosition: visualSetting?.imagePosition || 'center',
               }}
             />

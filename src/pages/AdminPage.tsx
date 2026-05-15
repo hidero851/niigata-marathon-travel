@@ -147,39 +147,97 @@ function ImageUploadButton({
   );
 }
 
-// --- Shared ImagePositionPicker ---
+// --- Shared ImageAdjustPanel ---
 
-const POSITION_PRESETS = [
-  { label: '左上', value: 'top left' },
-  { label: '上', value: 'top center' },
-  { label: '右上', value: 'top right' },
-  { label: '左', value: 'center left' },
-  { label: '中央', value: 'center' },
-  { label: '右', value: 'center right' },
-  { label: '左下', value: 'bottom left' },
-  { label: '下', value: 'bottom center' },
-  { label: '右下', value: 'bottom right' },
-];
+function parsePos(pos: string): [number, number] {
+  const m = pos.match(/^(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%$/);
+  if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+  const kw: Record<string, [number, number]> = {
+    'top left': [0, 0], 'top center': [50, 0], 'top right': [100, 0],
+    'center left': [0, 50], 'center': [50, 50], 'center right': [100, 50],
+    'bottom left': [0, 100], 'bottom center': [50, 100], 'bottom right': [100, 100],
+    top: [50, 0], bottom: [50, 100], left: [0, 50], right: [100, 50],
+  };
+  return kw[pos] ?? [50, 50];
+}
 
-function ImagePositionPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function parseSizeNum(size: string): number {
+  if (!size || size === 'cover') return 100;
+  const m = size.match(/(\d+)/);
+  return m ? parseInt(m[1]) : 100;
+}
+
+function sizeToCSS(n: number): string {
+  return n === 100 ? 'cover' : `${n}%`;
+}
+
+function ImageAdjustPanel({
+  imageUrl,
+  previewHeight = 'h-48',
+  position,
+  size,
+  onPositionChange,
+  onSizeChange,
+}: {
+  imageUrl: string;
+  previewHeight?: string;
+  position: string;
+  size: string;
+  onPositionChange: (v: string) => void;
+  onSizeChange: (v: string) => void;
+}) {
+  const [px, py] = parsePos(position);
+  const zoom = parseSizeNum(size);
+  const POS_STEP = 5;
+  const ZOOM_STEP = 10;
+  const btn = 'w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-25 text-sm font-bold select-none';
+
   return (
-    <div className="mt-2">
-      <p className="text-xs text-gray-500 mb-1">表示位置</p>
-      <div className="grid grid-cols-3 gap-1 w-36">
-        {POSITION_PRESETS.map((p) => (
+    <div className="mt-2 space-y-2">
+      {imageUrl && (
+        <div
+          className={`w-full ${previewHeight} rounded-xl border border-gray-200`}
+          style={{
+            backgroundImage: `url("${imageUrl}")`,
+            backgroundSize: sizeToCSS(zoom),
+            backgroundPosition: `${px}% ${py}%`,
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      )}
+      <div className="flex gap-6 items-start flex-wrap">
+        <div>
+          <p className="text-xs text-gray-500 mb-1.5">
+            表示位置 <span className="text-gray-400 font-mono">左右{px}% 上下{py}%</span>
+          </p>
+          <div className="grid grid-cols-3 gap-1" style={{ width: 100 }}>
+            <div />
+            <button type="button" className={btn} onClick={() => onPositionChange(`${px}% ${Math.max(0, py - POS_STEP)}%`)}>↑</button>
+            <div />
+            <button type="button" className={btn} onClick={() => onPositionChange(`${Math.max(0, px - POS_STEP)}% ${py}%`)}>←</button>
+            <div className="w-8 h-8 flex items-center justify-center text-lg text-gray-300">·</div>
+            <button type="button" className={btn} onClick={() => onPositionChange(`${Math.min(100, px + POS_STEP)}% ${py}%`)}>→</button>
+            <div />
+            <button type="button" className={btn} onClick={() => onPositionChange(`${px}% ${Math.min(100, py + POS_STEP)}%`)}>↓</button>
+            <div />
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 mb-1.5">
+            ズーム <span className="text-gray-400 font-mono">{zoom === 100 ? 'カバー' : `${zoom}%`}</span>
+          </p>
+          <div className="flex gap-1">
+            <button type="button" className={btn} disabled={zoom <= 100} onClick={() => onSizeChange(sizeToCSS(Math.max(100, zoom - ZOOM_STEP)))}>−</button>
+            <button type="button" className={btn} disabled={zoom >= 300} onClick={() => onSizeChange(sizeToCSS(Math.min(300, zoom + ZOOM_STEP)))}>＋</button>
+          </div>
           <button
-            key={p.value}
             type="button"
-            onClick={() => onChange(p.value)}
-            className={`text-xs py-1 rounded border transition-colors ${
-              value === p.value
-                ? 'bg-orange-500 text-white border-orange-500 font-bold'
-                : 'bg-white text-gray-600 border-gray-300 hover:border-orange-400'
-            }`}
+            className="mt-1 text-xs text-gray-400 hover:text-gray-600"
+            onClick={() => { onPositionChange('50% 50%'); onSizeChange('cover'); }}
           >
-            {p.label}
+            リセット
           </button>
-        ))}
+        </div>
       </div>
     </div>
   );
@@ -311,11 +369,13 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         imageUrl: h.imageUrl ?? '',
         imageAlt: '',
         gradient: h.gradient,
-        imagePosition: 'center',
+        imagePosition: '50% 50%',
+        imageSize: 'cover',
       })),
       hiddenSections: saved?.hiddenSections ?? [],
       hideHeroImageNote: saved?.hideHeroImageNote ?? false,
-      heroImagePosition: saved?.heroImagePosition ?? 'center',
+      heroImagePosition: saved?.heroImagePosition ?? '50% 50%',
+      heroImageSize: saved?.heroImageSize ?? 'cover',
     };
   }
 
@@ -390,18 +450,13 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
             onUploaded={(url) => setField('heroImageUrl', url)}
           />
         </div>
-        {form.heroImageUrl && (
-          <div className="mt-2 h-28 rounded-xl bg-no-repeat border border-gray-200"
-            style={{
-              backgroundImage: `url("${form.heroImageUrl}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: form.heroImagePosition || 'center',
-            }}
-          />
-        )}
-        <ImagePositionPicker
-          value={form.heroImagePosition ?? 'center'}
-          onChange={(v) => setField('heroImagePosition', v)}
+        <ImageAdjustPanel
+          imageUrl={form.heroImageUrl}
+          previewHeight="h-56"
+          position={form.heroImagePosition ?? '50% 50%'}
+          size={form.heroImageSize ?? 'cover'}
+          onPositionChange={(v) => setField('heroImagePosition', v)}
+          onSizeChange={(v) => setField('heroImageSize', v)}
         />
       </div>
       <label className="flex items-center gap-2 cursor-pointer">
@@ -525,19 +580,13 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
                   className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400 md:col-span-2"
                 />
               </div>
-              {h.imageUrl && (
-                <div
-                  className="mt-2 h-16 rounded-lg bg-no-repeat"
-                  style={{
-                    backgroundImage: `url("${h.imageUrl}")`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: h.imagePosition || 'center',
-                  }}
-                />
-              )}
-              <ImagePositionPicker
-                value={h.imagePosition ?? 'center'}
-                onChange={(v) => setHighlightField(idx, 'imagePosition', v)}
+              <ImageAdjustPanel
+                imageUrl={h.imageUrl}
+                previewHeight="h-48"
+                position={h.imagePosition ?? '50% 50%'}
+                size={h.imageSize ?? 'cover'}
+                onPositionChange={(v) => setHighlightField(idx, 'imagePosition', v)}
+                onSizeChange={(v) => setHighlightField(idx, 'imageSize', v)}
               />
               <label className="flex items-center gap-2 cursor-pointer mt-2">
                 <input
@@ -591,7 +640,8 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       shops: saved?.shops ?? [],
       hiddenSections: saved?.hiddenSections ?? [],
       hideImageNote: saved?.hideImageNote ?? false,
-      imagePosition: saved?.imagePosition ?? 'center',
+      imagePosition: saved?.imagePosition ?? '50% 50%',
+      imageSize: saved?.imageSize ?? 'cover',
     };
   }
 
@@ -661,18 +711,13 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
               onUploaded={(url) => setField('imageUrl', url)}
             />
           </div>
-          {form.imageUrl && (
-            <div className="mt-2 h-28 rounded-xl bg-no-repeat border border-gray-200"
-              style={{
-                backgroundImage: `url("${form.imageUrl}")`,
-                backgroundSize: 'cover',
-                backgroundPosition: form.imagePosition || 'center',
-              }}
-            />
-          )}
-          <ImagePositionPicker
-            value={form.imagePosition ?? 'center'}
-            onChange={(v) => setField('imagePosition', v)}
+          <ImageAdjustPanel
+            imageUrl={form.imageUrl}
+            previewHeight="h-64"
+            position={form.imagePosition ?? '50% 50%'}
+            size={form.imageSize ?? 'cover'}
+            onPositionChange={(v) => setField('imagePosition', v)}
+            onSizeChange={(v) => setField('imageSize', v)}
           />
         </div>
         <FormField

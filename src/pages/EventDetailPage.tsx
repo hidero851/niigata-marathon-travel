@@ -190,7 +190,7 @@ export default function EventDetailPage() {
   const hiddenSections = visualSetting?.hiddenSections ?? [];
   const displayCatchCopy = visualSetting?.catchCopy || event.catchCopy;
   const displayHeroImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
-  type DisplayHighlight = { title: string; description: string; imageUrl: string; gradient?: string; hideImageNote?: boolean; imagePosition?: string };
+  type DisplayHighlight = { title: string; description: string; imageUrl: string; gradient?: string; hideImageNote?: boolean; imagePosition?: string; imageSize?: string };
   const displayHighlights: DisplayHighlight[] | undefined =
     visualSetting?.highlights && visualSetting.highlights.length > 0
       ? visualSetting.highlights.map((h) => ({
@@ -200,6 +200,7 @@ export default function EventDetailPage() {
           gradient: h.gradient,
           hideImageNote: h.hideImageNote,
           imagePosition: h.imagePosition,
+          imageSize: h.imageSize,
         }))
       : event.highlights?.map((h) => ({
           title: h.title,
@@ -338,11 +339,12 @@ export default function EventDetailPage() {
       {/* ① ヒーロー */}
       <div className="relative min-h-[85vh] flex items-end">
         <div
-          className="absolute inset-0 bg-cover bg-no-repeat"
+          className="absolute inset-0 bg-no-repeat"
           style={{
             backgroundImage: displayHeroImageUrl
               ? buildBgImage(displayHeroImageUrl, heroBg)
               : heroBg,
+            backgroundSize: visualSetting?.heroImageSize || 'cover',
             backgroundPosition: visualSetting?.heroImagePosition || 'center',
           }}
         />
@@ -500,11 +502,12 @@ export default function EventDetailPage() {
               {displayHighlights.map((h) => (
                 <div key={h.title} className="relative rounded-2xl overflow-hidden h-48 shadow-md">
                   <div
-                    className="absolute inset-0 bg-cover bg-no-repeat"
+                    className="absolute inset-0 bg-no-repeat"
                     style={{
                       backgroundImage: h.imageUrl
                         ? buildBgImage(h.imageUrl, h.gradient || DEFAULT_GRADIENT)
                         : h.gradient || DEFAULT_GRADIENT,
+                      backgroundSize: h.imageSize || 'cover',
                       backgroundPosition: h.imagePosition || 'center',
                     }}
                   />
