@@ -224,10 +224,10 @@ function ImageAdjustPanel({
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1.5">
-            ズーム <span className="text-gray-400 font-mono">{zoom === 100 ? 'カバー' : `${zoom}%`}</span>
+            ズーム <span className="text-gray-400 font-mono">{zoom === 100 ? 'カバー(100%)' : zoom < 100 ? `広域 ${zoom}%` : `${zoom}%`}</span>
           </p>
           <div className="flex gap-1">
-            <button type="button" className={btn} disabled={zoom <= 100} onClick={() => onSizeChange(sizeToCSS(Math.max(100, zoom - ZOOM_STEP)))}>−</button>
+            <button type="button" className={btn} disabled={zoom <= 20} onClick={() => onSizeChange(sizeToCSS(Math.max(20, zoom - ZOOM_STEP)))}>−</button>
             <button type="button" className={btn} disabled={zoom >= 300} onClick={() => onSizeChange(sizeToCSS(Math.min(300, zoom + ZOOM_STEP)))}>＋</button>
           </div>
           <button
