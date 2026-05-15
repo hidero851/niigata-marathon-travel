@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Store } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Store, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProductById, getEventByIdAll } from '../data';
 import { getProductVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
 import GradientImage from '../components/GradientImage';
@@ -19,9 +19,20 @@ export default function ProductDetailPage() {
       ? getEventProductAssignment(fromEventId)?.productOverrides?.[id]?.whereToBuy
       : undefined;
 
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIndex(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxIndex]);
 
   if (!baseProduct) {
     return (
@@ -117,7 +128,8 @@ export default function ProductDetailPage() {
             {galleryImages.map((img, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-56 h-40 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100 bg-no-repeat"
+                onClick={() => setLightboxIndex(i)}
+                className="flex-shrink-0 w-56 h-40 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100 bg-no-repeat cursor-pointer hover:opacity-90 transition-opacity"
                 style={{
                   backgroundImage: `url("${img.url}")`,
                   backgroundSize: img.size || 'cover',
@@ -291,6 +303,46 @@ export default function ProductDetailPage() {
           </div>
         ))}
       </div>
+
+      {/* ライトボックス */}
+      {lightboxIndex !== null && galleryImages[lightboxIndex] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={() => setLightboxIndex(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white/80 hover:text-white p-2"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <X size={28} />
+          </button>
+          {lightboxIndex > 0 && (
+            <button
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2"
+              onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}
+            >
+              <ChevronLeft size={36} />
+            </button>
+          )}
+          {lightboxIndex < galleryImages.length - 1 && (
+            <button
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2"
+              onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}
+            >
+              <ChevronRight size={36} />
+            </button>
+          )}
+          <img
+            src={galleryImages[lightboxIndex].url}
+            alt={`${product.name} ${lightboxIndex + 1}`}
+            className="max-w-[92vw] max-h-[88vh] rounded-xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="absolute bottom-4 text-white/50 text-sm">
+            {lightboxIndex + 1} / {galleryImages.length}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
