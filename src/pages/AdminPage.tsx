@@ -878,6 +878,19 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
                     onPositionChange={(v) => update({ position: v })}
                     onSizeChange={(v) => update({ size: v })}
                   />
+                  {img.url && (
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-500 mb-1.5">ギャラリープレビュー（実際の表示）</p>
+                      <div
+                        className="w-56 h-40 rounded-2xl bg-no-repeat shadow-sm border border-gray-100"
+                        style={{
+                          backgroundImage: `url("${img.url}")`,
+                          backgroundSize: img.size || 'cover',
+                          backgroundPosition: img.position || 'center',
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}
