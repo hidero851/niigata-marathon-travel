@@ -591,6 +591,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       shops: saved?.shops ?? [],
       hiddenSections: saved?.hiddenSections ?? [],
       hideImageNote: saved?.hideImageNote ?? false,
+      imagePosition: saved?.imagePosition ?? 'center',
     };
   }
 
@@ -661,10 +662,18 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
             />
           </div>
           {form.imageUrl && (
-            <div className="mt-2 h-28 rounded-xl bg-cover bg-center border border-gray-200"
-              style={{ backgroundImage: `url("${form.imageUrl}")` }}
+            <div className="mt-2 h-28 rounded-xl bg-no-repeat border border-gray-200"
+              style={{
+                backgroundImage: `url("${form.imageUrl}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: form.imagePosition || 'center',
+              }}
             />
           )}
+          <ImagePositionPicker
+            value={form.imagePosition ?? 'center'}
+            onChange={(v) => setField('imagePosition', v)}
+          />
         </div>
         <FormField
           label="画像 Alt テキスト"

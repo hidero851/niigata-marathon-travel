@@ -75,8 +75,11 @@ export default function ProductDetailPage() {
         <div className="relative">
           {product.imageUrl ? (
             <div
-              className="h-64 bg-cover bg-center"
-              style={{ backgroundImage: `url("${product.imageUrl}")` }}
+              className="h-64 bg-cover bg-no-repeat"
+              style={{
+                backgroundImage: `url("${product.imageUrl}")`,
+                backgroundPosition: visualSetting?.imagePosition || 'center',
+              }}
             />
           ) : (
             <GradientImage

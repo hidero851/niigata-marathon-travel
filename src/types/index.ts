@@ -179,4 +179,5 @@ export type ProductVisualSetting = {
   shops?: ProductShop[];
   hiddenSections?: string[];
   hideImageNote?: boolean;
+  imagePosition?: string;
 };
