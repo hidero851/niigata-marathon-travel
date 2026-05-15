@@ -73,11 +73,18 @@ export default function ProductDetailPage() {
       {/* Hero */}
       <div className="card mb-8 overflow-hidden">
         <div className="relative">
-          <GradientImage
-            gradient={baseProduct.imageGradient}
-            name={product.name}
-            height="h-64"
-          />
+          {product.imageUrl ? (
+            <div
+              className="h-64 bg-cover bg-center"
+              style={{ backgroundImage: `url("${product.imageUrl}")` }}
+            />
+          ) : (
+            <GradientImage
+              gradient={baseProduct.imageGradient}
+              name={product.name}
+              height="h-64"
+            />
+          )}
           {!visualSetting?.hideImageNote && (
             <div className="absolute top-3 right-3 z-10">
               <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
