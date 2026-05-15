@@ -183,6 +183,36 @@ export const allProducts: LocalProduct[] = [
     ],
   },
   {
+    id: 'ohsugiya-yokan',
+    name: '越後高田の羊羹（大杉屋惣兵衛）',
+    area: '上越市',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #4a1a1a, #8b3a3a)',
+    shortDescription: '創業1592年・越後高田の老舗。上杉謙信公の書から名を取った黒羊羹「第一義」など、全国五つ星の手みやげ',
+    description:
+      '大杉屋惣兵衛は文禄元年（1592年）創業の越後高田を代表する老舗和菓子店。看板商品の黒羊羹「第一義」は、上杉謙信公の書からその名をとり、北海道産小豆と沖縄・波照間産の黒砂糖にこだわった濃厚な一品。小倉羊羹「春日山」は北海道産大納言小豆を自家炊きし、甘みを抑えた上品な味わい。どちらも最高級の寒天を使用し、60年以上にわたって愛される銘菓として『全国五つ星の手みやげ』にも選ばれています。',
+    recommendedPoint:
+      '上越エリアのマラソン参加者へのお土産に最適。400年以上続く越後の歴史と上杉謙信公ゆかりのストーリーが詰まった一本は、渡した相手の記憶に残ります。',
+    whereToBuy: '本店（上越市本町5-3-31）またはお馬出し店（上越市本町3丁目）で購入できます。',
+    salesLocations: [
+      '本店：新潟県上越市本町5丁目3-31（9:00〜17:00・木曜定休）',
+      'お馬出し店：上越市本町3丁目（10:00〜18:00・水曜定休）',
+    ],
+    externalUrl: 'https://ohsugiya.com/',
+    relatedEventIds: [],
+    sourceInfo: [
+      {
+        sourceName: '大杉屋惣兵衛 公式サイト',
+        sourceUrl: 'https://ohsugiya.com/',
+        sourceType: 'manual_created',
+        retrievedAt: '2026-05-15',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイトの公開情報をもとに手動作成。',
+      },
+    ],
+  },
+  {
     id: 'iwa-kaki',
     name: '岩牡蠣（笹川流れ）',
     area: '村上市・笹川流れ',
