@@ -174,6 +174,7 @@ function sizeToCSS(n: number): string {
 function ImageAdjustPanel({
   imageUrl,
   previewHeight = 'h-48',
+  label,
   position,
   size,
   onPositionChange,
@@ -181,6 +182,7 @@ function ImageAdjustPanel({
 }: {
   imageUrl: string;
   previewHeight?: string;
+  label?: string;
   position: string;
   size: string;
   onPositionChange: (v: string) => void;
@@ -194,6 +196,9 @@ function ImageAdjustPanel({
 
   return (
     <div className="mt-2 space-y-2">
+      {label && (
+        <p className="text-xs font-medium text-gray-500 border-t border-gray-100 pt-2">{label}</p>
+      )}
       {imageUrl && (
         <div
           className={`w-full ${previewHeight} rounded-xl border border-gray-200`}
@@ -453,6 +458,7 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         <ImageAdjustPanel
           imageUrl={form.heroImageUrl}
           previewHeight="h-56"
+          label="ヒーロー画像の表示設定"
           position={form.heroImagePosition ?? '50% 50%'}
           size={form.heroImageSize ?? 'cover'}
           onPositionChange={(v) => setField('heroImagePosition', v)}
@@ -583,6 +589,7 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
               <ImageAdjustPanel
                 imageUrl={h.imageUrl}
                 previewHeight="h-48"
+                label="ハイライト画像の表示設定"
                 position={h.imagePosition ?? '50% 50%'}
                 size={h.imageSize ?? 'cover'}
                 onPositionChange={(v) => setHighlightField(idx, 'imagePosition', v)}
@@ -714,6 +721,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           <ImageAdjustPanel
             imageUrl={form.imageUrl}
             previewHeight="h-64"
+            label="ヒーロー画像・商品カードの表示設定（両方に反映されます）"
             position={form.imagePosition ?? '50% 50%'}
             size={form.imageSize ?? 'cover'}
             onPositionChange={(v) => setField('imagePosition', v)}
