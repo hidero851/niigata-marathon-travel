@@ -48,7 +48,10 @@ export default function ProductDetailPage() {
         ? visualSetting.salesLocations
         : baseProduct.salesLocations,
   };
-  const galleryImages = visualSetting?.images && visualSetting.images.length > 0 ? visualSetting.images : [];
+  const rawImages: unknown[] = (visualSetting?.images as unknown as unknown[] | undefined) ?? [];
+  const galleryImages = rawImages.length > 0
+    ? rawImages.map((item) => typeof item === 'string' ? { url: item as string } : item as import('../types').GalleryImage)
+    : [];
   const shops = visualSetting?.shops ?? [];
   const hiddenSections = visualSetting?.hiddenSections ?? [];
 
@@ -111,18 +114,16 @@ export default function ProductDetailPage() {
       {!hiddenSections.includes('gallery') && galleryImages.length > 0 && (
         <div className="mb-8">
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
-            {galleryImages.map((url, i) => (
+            {galleryImages.map((img, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-56 h-40 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100"
-              >
-                <img
-                  src={url}
-                  alt={`${product.name} ${i + 1}`}
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: visualSetting?.imagePosition || 'center' }}
-                />
-              </div>
+                className="flex-shrink-0 w-56 h-40 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100 bg-no-repeat"
+                style={{
+                  backgroundImage: `url("${img.url}")`,
+                  backgroundSize: img.size || 'cover',
+                  backgroundPosition: img.position || 'center',
+                }}
+              />
             ))}
           </div>
         </div>

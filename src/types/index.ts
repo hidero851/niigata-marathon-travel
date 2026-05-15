@@ -168,19 +168,28 @@ export type ProductShop = {
   mapEmbedUrl?: string;
 };
 
+export type GalleryImage = {
+  url: string;
+  position?: string;
+  size?: string;
+};
+
 export type ProductVisualSetting = {
   productId: string;
-  imageUrl: string;
+  imageUrl: string;        // ヒーロー画像
   imageAlt: string;
+  imagePosition?: string;  // ヒーロー表示位置
+  imageSize?: string;      // ヒーローズーム
+  cardImageUrl?: string;   // カード画像（未設定時はヒーロー画像）
+  cardImagePosition?: string;
+  cardImageSize?: string;
   shortDescription: string;
   description: string;
   externalUrl: string;
   salesLocations?: string[];
   whereToBuy?: string;
-  images?: string[];
+  images?: GalleryImage[];
   shops?: ProductShop[];
   hiddenSections?: string[];
   hideImageNote?: boolean;
-  imagePosition?: string;
-  imageSize?: string;
 };

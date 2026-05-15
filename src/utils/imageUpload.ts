@@ -1,7 +1,7 @@
 import { supabaseAdmin, STORAGE_BUCKET, STORAGE_PUBLIC_BASE } from './supabaseAdmin';
 
 export type ImageRole = 'hero' | `highlight-${number}` | `product-${number}`;
-export type ProductImageRole = 'main' | `gallery-${number}`;
+export type ProductImageRole = 'main' | 'card' | `gallery-${number}`;
 
 export async function uploadEventImage(
   eventId: string,

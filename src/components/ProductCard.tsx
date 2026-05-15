@@ -19,6 +19,9 @@ export default function ProductCard({ product, marathonEventId, compact = false 
   const visualSetting = getProductVisualSetting(product.id);
   const displayImageUrl = visualSetting?.imageUrl || product.imageUrl;
   const displayShortDescription = visualSetting?.shortDescription || product.shortDescription;
+  const cardImageUrl = visualSetting?.cardImageUrl || displayImageUrl;
+  const cardImagePosition = visualSetting?.cardImagePosition || visualSetting?.imagePosition || 'center';
+  const cardImageSize = visualSetting?.cardImageSize || visualSetting?.imageSize || 'cover';
 
   const handleClick = () => {
     trackEvent({ eventType: 'click_product', productId: product.id, marathonEventId });
@@ -28,13 +31,13 @@ export default function ProductCard({ product, marathonEventId, compact = false 
 
   return (
     <div className="card cursor-pointer group" onClick={handleClick}>
-      {displayImageUrl ? (
+      {cardImageUrl ? (
         <div
           className={`${compact ? 'h-32' : 'h-40'} bg-no-repeat`}
           style={{
-            backgroundImage: `url("${displayImageUrl}"), ${product.imageGradient ?? DEFAULT_GRADIENT}`,
-            backgroundSize: visualSetting?.imageSize || 'cover',
-            backgroundPosition: visualSetting?.imagePosition || 'center',
+            backgroundImage: `url("${cardImageUrl}"), ${product.imageGradient ?? DEFAULT_GRADIENT}`,
+            backgroundSize: cardImageSize,
+            backgroundPosition: cardImagePosition,
           }}
         />
       ) : (

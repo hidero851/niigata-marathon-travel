@@ -634,21 +634,29 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
   function buildForm(productId: string): ProductVisualSetting {
     const saved = getProductVisualSetting(productId);
     const product = products.find((p) => p.id === productId);
+    // 旧フォーマット(string[])との後方互換
+    const rawImages: unknown[] = (saved?.images as unknown as unknown[] | undefined) ?? [];
+    const normalizedImages = rawImages.map((item) =>
+      typeof item === 'string' ? { url: item as string } : item
+    ) as import('../types').GalleryImage[];
     return {
       productId,
       imageUrl: saved?.imageUrl ?? product?.imageUrl ?? '',
       imageAlt: saved?.imageAlt ?? '',
+      imagePosition: saved?.imagePosition ?? '50% 50%',
+      imageSize: saved?.imageSize ?? 'cover',
+      cardImageUrl: saved?.cardImageUrl ?? '',
+      cardImagePosition: saved?.cardImagePosition ?? '50% 50%',
+      cardImageSize: saved?.cardImageSize ?? 'cover',
       shortDescription: saved?.shortDescription ?? product?.shortDescription ?? '',
       description: saved?.description ?? product?.description ?? '',
       externalUrl: saved?.externalUrl ?? product?.externalUrl ?? '',
       salesLocations: saved?.salesLocations ?? product?.salesLocations ?? [],
       whereToBuy: saved?.whereToBuy ?? product?.whereToBuy ?? '',
-      images: saved?.images ?? [],
+      images: normalizedImages,
       shops: saved?.shops ?? [],
       hiddenSections: saved?.hiddenSections ?? [],
       hideImageNote: saved?.hideImageNote ?? false,
-      imagePosition: saved?.imagePosition ?? '50% 50%',
-      imageSize: saved?.imageSize ?? 'cover',
     };
   }
 
@@ -704,8 +712,9 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       </div>
 
       <div className="space-y-5">
+        {/* ヒーロー画像 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">画像URL</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">ヒーロー画像URL（詳細ページ上部）</label>
           <div className="flex gap-2 items-center">
             <input
               type="text"
@@ -721,11 +730,41 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           <ImageAdjustPanel
             imageUrl={form.imageUrl}
             previewHeight="h-64"
-            label="ヒーロー画像・商品カードの表示設定（両方に反映されます）"
+            label="ヒーロー画像の表示設定"
             position={form.imagePosition ?? '50% 50%'}
             size={form.imageSize ?? 'cover'}
             onPositionChange={(v) => setField('imagePosition', v)}
             onSizeChange={(v) => setField('imageSize', v)}
+          />
+        </div>
+
+        {/* カード画像 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            商品カード画像URL
+            <span className="ml-2 text-xs font-normal text-gray-400">未設定の場合はヒーロー画像を使用</span>
+          </label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={form.cardImageUrl ?? ''}
+              onChange={(e) => setField('cardImageUrl', e.target.value)}
+              className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+              placeholder="未設定の場合はヒーロー画像を使用"
+            />
+            <ImageUploadButton
+              uploadFn={(file) => uploadProductImage(selectedId, 'card', file)}
+              onUploaded={(url) => setField('cardImageUrl', url)}
+            />
+          </div>
+          <ImageAdjustPanel
+            imageUrl={form.cardImageUrl || form.imageUrl}
+            previewHeight="h-40"
+            label="商品カードの表示設定"
+            position={form.cardImagePosition ?? '50% 50%'}
+            size={form.cardImageSize ?? 'cover'}
+            onPositionChange={(v) => setField('cardImagePosition', v)}
+            onSizeChange={(v) => setField('cardImageSize', v)}
           />
         </div>
         <FormField
@@ -758,14 +797,18 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
             {(form.images ?? []).length < 5 && (
               <ImageUploadButton
                 uploadFn={(file) => uploadProductImage(selectedId, `gallery-${(form.images ?? []).length}`, file)}
-                onUploaded={(url) => setField('images', [...(form.images ?? []), url])}
+                onUploaded={(url) => setField('images', [...(form.images ?? []), { url }])}
                 label="画像を追加"
               />
             )}
           </div>
-          <div className="space-y-2">
-            {(form.images ?? []).map((url, i) => {
+          <div className="space-y-4">
+            {(form.images ?? []).map((img, i) => {
               const imgs = form.images ?? [];
+              const update = (patch: Partial<import('../types').GalleryImage>) => {
+                const next = imgs.map((it, j) => j === i ? { ...it, ...patch } : it);
+                setField('images', next);
+              };
               const moveUp = () => {
                 if (i === 0) return;
                 const next = [...imgs];
@@ -778,51 +821,36 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
                 [next[i], next[i + 1]] = [next[i + 1], next[i]];
                 setField('images', next);
               };
-              const remove = () => setField('images', imgs.filter((_, j) => j !== i));
               return (
-                <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl p-2 border border-gray-200">
-                  {url && (
-                    <div
-                      className="w-14 h-10 rounded-lg bg-cover bg-center flex-shrink-0 border border-gray-200"
-                      style={{ backgroundImage: `url("${url}")` }}
+                <div key={i} className="bg-gray-50 rounded-xl border border-gray-200 p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-medium text-gray-500 w-5">{i + 1}</span>
+                    <input
+                      type="text"
+                      value={img.url}
+                      onChange={(e) => update({ url: e.target.value })}
+                      placeholder="画像URL"
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400"
                     />
-                  )}
-                  <input
-                    type="text"
-                    value={url}
-                    onChange={(e) => {
-                      const next = [...imgs];
-                      next[i] = e.target.value;
-                      setField('images', next);
-                    }}
-                    placeholder="画像URL"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400"
-                  />
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      type="button"
-                      onClick={moveUp}
-                      disabled={i === 0}
-                      className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"
-                    >
-                      <ChevronUp size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={moveDown}
-                      disabled={i === imgs.length - 1}
-                      className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"
-                    >
-                      <ChevronDown size={14} />
-                    </button>
+                    <ImageUploadButton
+                      uploadFn={(file) => uploadProductImage(selectedId, `gallery-${i}`, file)}
+                      onUploaded={(url) => update({ url })}
+                    />
+                    <div className="flex flex-col gap-0.5">
+                      <button type="button" onClick={moveUp} disabled={i === 0} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronUp size={14} /></button>
+                      <button type="button" onClick={moveDown} disabled={i === imgs.length - 1} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronDown size={14} /></button>
+                    </div>
+                    <button type="button" onClick={() => setField('images', imgs.filter((_, j) => j !== i))} className="p-1 text-red-400 hover:text-red-600 rounded"><Trash2 size={14} /></button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={remove}
-                    className="p-1 text-red-400 hover:text-red-600 rounded"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <ImageAdjustPanel
+                    imageUrl={img.url}
+                    previewHeight="h-36"
+                    label="この画像の表示設定"
+                    position={img.position ?? '50% 50%'}
+                    size={img.size ?? 'cover'}
+                    onPositionChange={(v) => update({ position: v })}
+                    onSizeChange={(v) => update({ size: v })}
+                  />
                 </div>
               );
             })}
