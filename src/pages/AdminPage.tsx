@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
-  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe, FileSpreadsheet, Upload,
+  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe, FileSpreadsheet, Upload, ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { uploadEventImage, uploadProductImage } from '../utils/imageUpload';
 import ImportPanel from '../components/admin/ImportPanel';
@@ -632,24 +632,87 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           onChange={(v) => setField('externalUrl', v)}
         />
         <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-medium text-gray-700">商品画像リスト（横スクロール表示）</label>
-            <ImageUploadButton
-              uploadFn={(file) => uploadProductImage(selectedId, `gallery-${(form.images ?? []).length}`, file)}
-              onUploaded={(url) => setField('images', [...(form.images ?? []), url])}
-              label="画像を追加"
-            />
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-700">
+              商品画像リスト（横スクロール表示）
+              <span className="ml-2 text-xs text-gray-400">{(form.images ?? []).length}/5枚</span>
+            </label>
+            {(form.images ?? []).length < 5 && (
+              <ImageUploadButton
+                uploadFn={(file) => uploadProductImage(selectedId, `gallery-${(form.images ?? []).length}`, file)}
+                onUploaded={(url) => setField('images', [...(form.images ?? []), url])}
+                label="画像を追加"
+              />
+            )}
           </div>
-          <textarea
-            value={(form.images ?? []).join('\n')}
-            onChange={(e) =>
-              setField('images', e.target.value.split('\n').map((s) => s.trim()).filter(Boolean))
-            }
-            rows={4}
-            placeholder={'https://example.com/image1.jpg\nhttps://example.com/image2.jpg'}
-            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none"
-          />
-          <p className="text-xs text-gray-400 mt-1">アップロードボタンで画像を追加するか、URLを直接1行1件で入力できます。</p>
+          <div className="space-y-2">
+            {(form.images ?? []).map((url, i) => {
+              const imgs = form.images ?? [];
+              const moveUp = () => {
+                if (i === 0) return;
+                const next = [...imgs];
+                [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                setField('images', next);
+              };
+              const moveDown = () => {
+                if (i === imgs.length - 1) return;
+                const next = [...imgs];
+                [next[i], next[i + 1]] = [next[i + 1], next[i]];
+                setField('images', next);
+              };
+              const remove = () => setField('images', imgs.filter((_, j) => j !== i));
+              return (
+                <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl p-2 border border-gray-200">
+                  {url && (
+                    <div
+                      className="w-14 h-10 rounded-lg bg-cover bg-center flex-shrink-0 border border-gray-200"
+                      style={{ backgroundImage: `url("${url}")` }}
+                    />
+                  )}
+                  <input
+                    type="text"
+                    value={url}
+                    onChange={(e) => {
+                      const next = [...imgs];
+                      next[i] = e.target.value;
+                      setField('images', next);
+                    }}
+                    placeholder="画像URL"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      type="button"
+                      onClick={moveUp}
+                      disabled={i === 0}
+                      className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"
+                    >
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={moveDown}
+                      disabled={i === imgs.length - 1}
+                      className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"
+                    >
+                      <ChevronDown size={14} />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={remove}
+                    className="p-1 text-red-400 hover:text-red-600 rounded"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              );
+            })}
+            {(form.images ?? []).length === 0 && (
+              <p className="text-xs text-gray-400 text-center py-3">画像なし。「画像を追加」でアップロードできます。</p>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mt-1">最大5枚。↑↓で順番を変更できます。</p>
         </div>
         <FormField
           label="購入場所テキスト（共通・文章形式）"
