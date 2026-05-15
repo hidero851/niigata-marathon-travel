@@ -30,9 +30,11 @@ export default function ProductCard({ product, marathonEventId, compact = false 
     <div className="card cursor-pointer group" onClick={handleClick}>
       {displayImageUrl ? (
         <div
-          className={`${compact ? 'h-32' : 'h-40'} bg-cover bg-center bg-no-repeat`}
+          className={`${compact ? 'h-32' : 'h-40'} bg-no-repeat`}
           style={{
             backgroundImage: `url("${displayImageUrl}"), ${product.imageGradient ?? DEFAULT_GRADIENT}`,
+            backgroundSize: visualSetting?.imageSize || 'cover',
+            backgroundPosition: visualSetting?.imagePosition || 'center',
           }}
         />
       ) : (

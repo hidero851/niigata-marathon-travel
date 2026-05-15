@@ -120,6 +120,7 @@ export default function ProductDetailPage() {
                   src={url}
                   alt={`${product.name} ${i + 1}`}
                   className="w-full h-full object-cover"
+                  style={{ objectPosition: visualSetting?.imagePosition || 'center' }}
                 />
               </div>
             ))}
