@@ -766,6 +766,33 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
             onPositionChange={(v) => setField('cardImagePosition', v)}
             onSizeChange={(v) => setField('cardImageSize', v)}
           />
+          {/* カードプレビュー */}
+          {(() => {
+            const p = products.find((pr) => pr.id === selectedId);
+            if (!p) return null;
+            const imgUrl = form.cardImageUrl || form.imageUrl;
+            return (
+              <div className="mt-3">
+                <p className="text-xs text-gray-500 mb-1.5">カードプレビュー（実際の表示）</p>
+                <div className="card overflow-hidden max-w-[220px] pointer-events-none select-none shadow-sm">
+                  <div
+                    className="h-40 bg-no-repeat"
+                    style={{
+                      backgroundImage: imgUrl ? `url("${imgUrl}"), ${p.imageGradient ?? 'linear-gradient(135deg,#1e3a5f,#0d2d6b)'}` : p.imageGradient ?? 'linear-gradient(135deg,#1e3a5f,#0d2d6b)',
+                      backgroundSize: form.cardImageSize ?? 'cover',
+                      backgroundPosition: form.cardImagePosition ?? 'center',
+                    }}
+                  />
+                  <div className="p-3">
+                    <div className="text-xs text-gray-500 mb-1">{p.area}</div>
+                    <div className="font-bold text-navy-800 text-sm leading-snug mb-1 line-clamp-2">{p.name}</div>
+                    <div className="text-xs text-gray-600 line-clamp-2 mb-2">{form.shortDescription || p.shortDescription}</div>
+                    <div className="text-xs font-bold text-orange-500">詳しく見る →</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
         <FormField
           label="画像 Alt テキスト"
