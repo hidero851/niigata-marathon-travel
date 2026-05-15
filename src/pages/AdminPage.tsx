@@ -721,16 +721,46 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           multiline
         />
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">販売場所リスト（1行1件）</label>
-          <textarea
-            value={(form.salesLocations ?? []).join('\n')}
-            onChange={(e) =>
-              setField('salesLocations', e.target.value.split('\n').map((s) => s.trim()).filter(Boolean))
-            }
-            rows={4}
-            placeholder={`道の駅\n駅構内の売店\n観光物産センター`}
-            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none"
-          />
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-700">販売場所リスト</label>
+            <button
+              type="button"
+              onClick={() => setField('salesLocations', [...(form.salesLocations ?? []), ''])}
+              className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-800 font-medium"
+            >
+              <Plus size={13} /> 追加
+            </button>
+          </div>
+          <div className="space-y-2">
+            {(form.salesLocations ?? []).map((loc, i) => {
+              const locs = form.salesLocations ?? [];
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={loc}
+                    onChange={(e) => {
+                      const next = [...locs];
+                      next[i] = e.target.value;
+                      setField('salesLocations', next);
+                    }}
+                    placeholder="例：道の駅、駅構内の売店"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setField('salesLocations', locs.filter((_, j) => j !== i))}
+                    className="p-1 text-red-400 hover:text-red-600 rounded"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              );
+            })}
+            {(form.salesLocations ?? []).length === 0 && (
+              <p className="text-xs text-gray-400 text-center py-2">「追加」で販売場所を入力できます。</p>
+            )}
+          </div>
         </div>
 
         <label className="flex items-center gap-2 cursor-pointer">
