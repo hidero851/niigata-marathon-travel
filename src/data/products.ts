@@ -156,6 +156,33 @@ export const allProducts: LocalProduct[] = [
     sourceInfo: [MOCK_SOURCE],
   },
   {
+    id: 'momofukudou',
+    name: 'キッテサブレ（百々福堂）',
+    area: '上越市',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #e91e63, #880e4f)',
+    shortDescription: '郵便の父・前島密ゆかりの上越発、やさしい味わいの焼き菓子',
+    description:
+      '百々福堂（ももふくどう）は「お菓子で心を笑顔に」をコンセプトに、上越市本町で営む焼き菓子の店。看板商品のキッテサブレは、上越市出身で「郵便の父」と称される前島密にちなんだ一品。地元の素材を活かしたやさしい甘さのサブレで、上越ならではのお土産として人気を集めています。雪下にんじんミルクゼリーなど、新潟の特産を使ったスイーツも揃えています。',
+    recommendedPoint:
+      'レース後のご褒美や仲間へのお土産に最適。前島密という地元の偉人ストーリーと一緒に渡すと話題になること間違いなし。',
+    whereToBuy: '新潟県上越市本町2丁目1-9（百々福堂）',
+    salesLocations: ['百々福堂（上越市本町2丁目1-9）'],
+    externalUrl: 'https://momofukudou.jp/',
+    relatedEventIds: [],
+    sourceInfo: [
+      {
+        sourceName: '百々福堂 公式サイト',
+        sourceUrl: 'https://momofukudou.jp/',
+        sourceType: 'manual_created',
+        retrievedAt: '2026-05-15',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイトの公開情報をもとに手動作成。',
+      },
+    ],
+  },
+  {
     id: 'iwa-kaki',
     name: '岩牡蠣（笹川流れ）',
     area: '村上市・笹川流れ',
