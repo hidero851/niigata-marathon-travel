@@ -147,6 +147,44 @@ function ImageUploadButton({
   );
 }
 
+// --- Shared ImagePositionPicker ---
+
+const POSITION_PRESETS = [
+  { label: '左上', value: 'top left' },
+  { label: '上', value: 'top center' },
+  { label: '右上', value: 'top right' },
+  { label: '左', value: 'center left' },
+  { label: '中央', value: 'center' },
+  { label: '右', value: 'center right' },
+  { label: '左下', value: 'bottom left' },
+  { label: '下', value: 'bottom center' },
+  { label: '右下', value: 'bottom right' },
+];
+
+function ImagePositionPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="mt-2">
+      <p className="text-xs text-gray-500 mb-1">表示位置</p>
+      <div className="grid grid-cols-3 gap-1 w-36">
+        {POSITION_PRESETS.map((p) => (
+          <button
+            key={p.value}
+            type="button"
+            onClick={() => onChange(p.value)}
+            className={`text-xs py-1 rounded border transition-colors ${
+              value === p.value
+                ? 'bg-orange-500 text-white border-orange-500 font-bold'
+                : 'bg-white text-gray-600 border-gray-300 hover:border-orange-400'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // --- Tab: Featured Events ---
 
 function FeaturedTab({ onSave }: { onSave: (msg: string) => void }) {
@@ -273,9 +311,11 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
         imageUrl: h.imageUrl ?? '',
         imageAlt: '',
         gradient: h.gradient,
+        imagePosition: 'center',
       })),
       hiddenSections: saved?.hiddenSections ?? [],
       hideHeroImageNote: saved?.hideHeroImageNote ?? false,
+      heroImagePosition: saved?.heroImagePosition ?? 'center',
     };
   }
 
@@ -351,10 +391,18 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
           />
         </div>
         {form.heroImageUrl && (
-          <div className="mt-2 h-28 rounded-xl bg-cover bg-center border border-gray-200"
-            style={{ backgroundImage: `url("${form.heroImageUrl}")` }}
+          <div className="mt-2 h-28 rounded-xl bg-no-repeat border border-gray-200"
+            style={{
+              backgroundImage: `url("${form.heroImageUrl}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: form.heroImagePosition || 'center',
+            }}
           />
         )}
+        <ImagePositionPicker
+          value={form.heroImagePosition ?? 'center'}
+          onChange={(v) => setField('heroImagePosition', v)}
+        />
       </div>
       <label className="flex items-center gap-2 cursor-pointer">
         <input
@@ -479,10 +527,18 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
               </div>
               {h.imageUrl && (
                 <div
-                  className="mt-2 h-16 rounded-lg bg-cover bg-center"
-                  style={{ backgroundImage: `url("${h.imageUrl}")` }}
+                  className="mt-2 h-16 rounded-lg bg-no-repeat"
+                  style={{
+                    backgroundImage: `url("${h.imageUrl}")`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: h.imagePosition || 'center',
+                  }}
                 />
               )}
+              <ImagePositionPicker
+                value={h.imagePosition ?? 'center'}
+                onChange={(v) => setHighlightField(idx, 'imagePosition', v)}
+              />
               <label className="flex items-center gap-2 cursor-pointer mt-2">
                 <input
                   type="checkbox"

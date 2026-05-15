@@ -135,6 +135,7 @@ export type EventHighlightSetting = {
   imageAlt: string;
   gradient?: string;
   hideImageNote?: boolean;
+  imagePosition?: string;
 };
 
 export type EventVisualSetting = {
@@ -153,6 +154,7 @@ export type EventVisualSetting = {
   highlights: EventHighlightSetting[];
   hiddenSections?: string[];
   hideHeroImageNote?: boolean;
+  heroImagePosition?: string;
 };
 
 export type ProductShop = {

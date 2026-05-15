@@ -190,7 +190,7 @@ export default function EventDetailPage() {
   const hiddenSections = visualSetting?.hiddenSections ?? [];
   const displayCatchCopy = visualSetting?.catchCopy || event.catchCopy;
   const displayHeroImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
-  type DisplayHighlight = { title: string; description: string; imageUrl: string; gradient?: string; hideImageNote?: boolean };
+  type DisplayHighlight = { title: string; description: string; imageUrl: string; gradient?: string; hideImageNote?: boolean; imagePosition?: string };
   const displayHighlights: DisplayHighlight[] | undefined =
     visualSetting?.highlights && visualSetting.highlights.length > 0
       ? visualSetting.highlights.map((h) => ({
@@ -199,6 +199,7 @@ export default function EventDetailPage() {
           imageUrl: h.imageUrl,
           gradient: h.gradient,
           hideImageNote: h.hideImageNote,
+          imagePosition: h.imagePosition,
         }))
       : event.highlights?.map((h) => ({
           title: h.title,
@@ -337,11 +338,12 @@ export default function EventDetailPage() {
       {/* ① ヒーロー */}
       <div className="relative min-h-[85vh] flex items-end">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-no-repeat"
           style={{
             backgroundImage: displayHeroImageUrl
               ? buildBgImage(displayHeroImageUrl, heroBg)
               : heroBg,
+            backgroundPosition: visualSetting?.heroImagePosition || 'center',
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/85 md:hidden" />
@@ -498,11 +500,12 @@ export default function EventDetailPage() {
               {displayHighlights.map((h) => (
                 <div key={h.title} className="relative rounded-2xl overflow-hidden h-48 shadow-md">
                   <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    className="absolute inset-0 bg-cover bg-no-repeat"
                     style={{
                       backgroundImage: h.imageUrl
                         ? buildBgImage(h.imageUrl, h.gradient || DEFAULT_GRADIENT)
                         : h.gradient || DEFAULT_GRADIENT,
+                      backgroundPosition: h.imagePosition || 'center',
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
