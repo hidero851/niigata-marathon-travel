@@ -255,7 +255,7 @@ function FeaturedTab({ onSave }: { onSave: (msg: string) => void }) {
   const [settings, setSettings] = useState<FeaturedEventSetting[]>(() => {
     const saved = getFeaturedSettings();
     if (saved.length > 0) return saved;
-    return events.map((e, i) => ({ eventId: e.id, isFeatured: i < 3, displayOrder: i }));
+    return events.map((e, i) => ({ eventId: e.id, isFeatured: false, displayOrder: i }));
   });
 
   const toggle = (eventId: string) => {
