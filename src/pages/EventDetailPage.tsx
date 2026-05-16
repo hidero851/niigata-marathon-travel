@@ -233,7 +233,7 @@ export default function EventDetailPage() {
   const allExperiences = [...new Set([...highlightTitles, ...tagExperiences])];
 
   // 宿泊カード
-  const stayCards: StayCardProps[] = [
+  const allStayCards: StayCardProps[] = [
     {
       rank: '🥇',
       priority: displayableAccommodations[0]?.label || '当日ラク重視',
@@ -280,6 +280,10 @@ export default function EventDetailPage() {
       rakutenUrl: displayableAccommodations[2]?.rakutenTravelUrl || venueRakutenUrl,
     },
   ];
+  // 宿泊設定が1件以上ある場合はその件数分だけ表示、未設定の場合はデフォルト3枚
+  const stayCards = displayableAccommodations.length > 0
+    ? allStayCards.slice(0, Math.min(displayableAccommodations.length, 3))
+    : allStayCards;
 
 
   // 大会基本情報
@@ -587,7 +591,7 @@ export default function EventDetailPage() {
               宿泊先が決まると参加への迷いがなくなります。目的に合わせて選んでください。
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+            <div className={`grid grid-cols-1 ${stayCards.length <= 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-5 mb-6`}>
               {stayCards.map((card) => (
                 <StayCard key={card.rank} {...card} />
               ))}
