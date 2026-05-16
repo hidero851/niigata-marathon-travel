@@ -532,14 +532,14 @@ export default function EventDetailPage() {
         )}
 
         {/* ④ 参加プラン */}
-        {!hiddenSections.includes('modelPlans') && event.modelPlans.length > 0 && (
+        {!hiddenSections.includes('modelPlans') && event.modelPlans.filter(p => p.title?.trim()).length > 0 && (
           <section id="plan" className="mb-14 scroll-mt-20">
             <h2 className="section-title">おすすめ参加プラン</h2>
             <p className="text-gray-500 text-sm mb-6 -mt-3">
               エントリー前に当日の動きをイメージしておきましょう。
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {event.modelPlans.map((plan) => (
+            <div className={`grid grid-cols-1 ${event.modelPlans.filter(p => p.title?.trim()).length >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6`}>
+              {event.modelPlans.filter(p => p.title?.trim()).map((plan) => (
                 <div key={plan.title} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                   <h3 className="font-bold text-navy-800 text-lg mb-4 flex items-center gap-2">
                     <span className="w-7 h-7 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-sm">
