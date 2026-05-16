@@ -1,3 +1,44 @@
 import type { MarathonEvent } from '../types';
 
-export const niigataMarathonEventsDraft: MarathonEvent[] = [];
+export const niigataMarathonEventsDraft: MarathonEvent[] = [
+  {
+    id: 'minami-uonuma-gourmet',
+    name: '南魚沼グルメマラソン',
+    location: '南魚沼市 八色の森公園',
+    prefecture: '新潟県',
+    date: '2026年6月14日（日）',
+    eventDate: '2026-06-14',
+    month: '6',
+    distances: ['ハーフ（21.0975km）', '1/8マラソン（5.274km）', '親子ラン（約1.2km）'],
+    catchCopy: '走って食べて、南魚沼を楽しもう！',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #2e7d32, #1b5e20)',
+    tags: ['グルメ', 'コシヒカリ', '米どころ', '家族向け', '初心者向け'],
+    entryUrl: 'https://runnet.jp/entry/runtes/user/pc/competitionDetailAction.do?raceId=385834&div=1',
+    officialUrl: 'https://gurumara.com/',
+    fee: 'ハーフ 6,500円 / 1/8マラソン 5,000円 / 親子ラン 3,000円〜',
+    capacity: 'ハーフ 2,700名 / 1/8マラソン 1,300名',
+    timeLimit: 'ハーフ 3時間 / 1/8マラソン 50分',
+    startPoint: '八色の森公園（新潟県南魚沼市浦佐5483-1）',
+    goalPoint: '八色の森公園',
+    venue: '八色の森公園',
+    organizer: '一般社団法人南魚沼まちづくり推進機構',
+    access: 'JR上越新幹線・上越線 浦佐駅よりシャトルバスあり（臨時新幹線運行あり）',
+    notes: '雨天決行。参加資格は高校生以上の健康な男女。',
+    highlights: [],
+    sourceInfo: [
+      {
+        sourceName: '南魚沼グルメマラソン 公式サイト',
+        sourceUrl: 'https://gurumara.com/',
+        sourceType: 'manual_created',
+        retrievedAt: '2026-05-16',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイトの公開情報をもとに手動作成。',
+      },
+    ],
+    accommodations: [],
+    localProducts: [],
+    modelPlans: [],
+  },
+];
