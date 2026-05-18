@@ -1847,15 +1847,13 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
                         ? <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full">下書き</span>
                         : <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">公開中</span>
                     )}
-                    {adminIds.has(event.id) && (
-                      <button
-                        onClick={() => window.open(`/events/${event.id}`, '_blank')}
-                        className="text-gray-400 hover:text-blue-500 p-1 rounded transition-colors"
-                        title="プレビュー"
-                      >
-                        <Eye size={14} />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => window.open(`/events/${event.id}`, '_blank')}
+                      className="text-gray-400 hover:text-blue-500 p-1 rounded transition-colors"
+                      title="プレビュー"
+                    >
+                      <Eye size={14} />
+                    </button>
                     {adminIds.has(event.id) && (
                       <button
                         onClick={() => handleTogglePublish(event)}
