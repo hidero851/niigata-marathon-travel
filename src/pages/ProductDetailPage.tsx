@@ -151,7 +151,7 @@ export default function ProductDetailPage() {
               <h2 className="font-bold text-navy-800 text-lg mb-4 flex items-center gap-2">
                 <span className="text-orange-500">📖</span> この特産について
               </h2>
-              <p className="text-gray-700 leading-relaxed">{product.description}</p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{product.description}</p>
             </section>
           )}
 
