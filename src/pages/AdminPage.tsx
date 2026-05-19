@@ -655,6 +655,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       whereToBuy: saved?.whereToBuy ?? product?.whereToBuy ?? '',
       images: normalizedImages,
       shops: saved?.shops ?? [],
+      shopMessage: saved?.shopMessage ?? '',
       hiddenSections: saved?.hiddenSections ?? [],
       hideImageNote: saved?.hideImageNote ?? false,
     };
@@ -808,6 +809,12 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           label="詳細説明文"
           value={form.description}
           onChange={(v) => setField('description', v)}
+          multiline
+        />
+        <FormField
+          label="お店からの一言"
+          value={form.shopMessage ?? ''}
+          onChange={(v) => setField('shopMessage', v)}
           multiline
         />
         <FormField
@@ -968,6 +975,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
               { id: 'gallery', label: '商品画像ギャラリー' },
               { id: 'description', label: 'この特産について（説明文）' },
               { id: 'salesLocations', label: '購入できる場所 / どこで買えるか' },
+              { id: 'shopMessage', label: 'お店からの一言' },
               { id: 'shops', label: 'お店で買う（店舗情報・地図）' },
               { id: 'externalLink', label: '公式サイトリンク' },
               { id: 'relatedEvents', label: '関連する大会' },

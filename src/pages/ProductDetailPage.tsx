@@ -64,6 +64,7 @@ export default function ProductDetailPage() {
     ? rawImages.map((item) => typeof item === 'string' ? { url: item as string } : item as import('../types').GalleryImage)
     : [];
   const shops = visualSetting?.shops ?? [];
+  const shopMessage = visualSetting?.shopMessage ?? '';
   const hiddenSections = visualSetting?.hiddenSections ?? [];
 
   const relatedEvents = product.relatedEventIds
@@ -179,6 +180,16 @@ export default function ProductDetailPage() {
                 <p className="text-gray-700 leading-relaxed">{product.whereToBuy}</p>
               </section>
             )
+          )}
+
+          {/* お店からの一言 */}
+          {!hiddenSections.includes('shopMessage') && shopMessage && (
+            <section className="bg-orange-50 rounded-2xl border border-orange-100 p-6">
+              <h2 className="font-bold text-navy-800 text-lg mb-3 flex items-center gap-2">
+                <span className="text-orange-500">💬</span> お店からの一言
+              </h2>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{shopMessage}</p>
+            </section>
           )}
 
           {/* お店情報・地図 */}

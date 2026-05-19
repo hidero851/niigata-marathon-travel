@@ -190,6 +190,7 @@ export type ProductVisualSetting = {
   whereToBuy?: string;
   images?: GalleryImage[];
   shops?: ProductShop[];
+  shopMessage?: string;
   hiddenSections?: string[];
   hideImageNote?: boolean;
 };
