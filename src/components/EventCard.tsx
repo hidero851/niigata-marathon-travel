@@ -4,6 +4,7 @@ import type { MarathonEvent } from '../types';
 import TagBadge from './TagBadge';
 import { trackEvent } from '../utils/analytics';
 import { trackGA4 } from '../utils/ga4';
+import { getEventVisualSetting } from '../utils/adminSettings';
 
 const DEFAULT_GRADIENT = 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
 
@@ -21,6 +22,8 @@ interface EventCardProps {
 
 export default function EventCard({ event, source }: EventCardProps) {
   const navigate = useNavigate();
+  const visualSetting = getEventVisualSetting(event.id);
+  const cardImageUrl = visualSetting?.cardImageUrl || visualSetting?.heroImageUrl || event.heroImageUrl;
 
   const handleClick = () => {
     trackEvent({ eventType: 'click_event_detail', marathonEventId: event.id });
@@ -39,8 +42,8 @@ export default function EventCard({ event, source }: EventCardProps) {
       <div
         className="h-48 bg-cover bg-center bg-no-repeat relative"
         style={{
-          backgroundImage: event.heroImageUrl
-            ? buildBgImage(event.heroImageUrl, event.imageGradient ?? DEFAULT_GRADIENT)
+          backgroundImage: cardImageUrl
+            ? buildBgImage(cardImageUrl, event.imageGradient ?? DEFAULT_GRADIENT)
             : event.imageGradient ?? DEFAULT_GRADIENT,
         }}
       >
