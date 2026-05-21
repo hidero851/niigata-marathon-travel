@@ -23,7 +23,7 @@ interface EventCardProps {
 export default function EventCard({ event, source }: EventCardProps) {
   const navigate = useNavigate();
   const visualSetting = getEventVisualSetting(event.id);
-  const cardImageUrl = visualSetting?.cardImageUrl || visualSetting?.heroImageUrl || event.heroImageUrl;
+  const cardImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
 
   const handleClick = () => {
     trackEvent({ eventType: 'click_event_detail', marathonEventId: event.id });
