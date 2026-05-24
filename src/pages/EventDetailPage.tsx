@@ -287,7 +287,7 @@ export default function EventDetailPage() {
 
 
   // 大会基本情報
-  type InfoItem = { icon: React.ReactNode; label: string; value: string };
+  type InfoItem = { icon: React.ReactNode; label: string; value: string; note?: string };
   const allInfoItems: InfoItem[] = [
     { icon: <Flag size={16} />, label: '距離', value: event.distances.join(' / ') || '確認中' },
     { icon: <Calendar size={16} />, label: '開催日', value: event.date || '確認中' },
@@ -301,7 +301,7 @@ export default function EventDetailPage() {
   const entryDateEntry = getEventEntryDates().find((e) => e.eventId === event.id);
   const fmtDate = (iso: string) => { const d = new Date(iso); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
   if (entryDateEntry?.entryStartDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー開始', value: fmtDate(entryDateEntry.entryStartDate) });
-  if (entryDateEntry?.entryEndDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー締切', value: `${fmtDate(entryDateEntry.entryEndDate)}${entryDateEntry.entryStatusNote ? `　[${entryDateEntry.entryStatusNote}]` : ''}` });
+  if (entryDateEntry?.entryEndDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー締切', value: fmtDate(entryDateEntry.entryEndDate), note: entryDateEntry.entryStatusNote });
   else if (entryDateEntry?.entryStatusNote) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー状況', value: entryDateEntry.entryStatusNote });
   allInfoItems.push({ icon: <Users size={16} />, label: '定員', value: event.capacity || '確認中' });
   if (event.organizer) allInfoItems.push({ icon: <Users size={16} />, label: '主催者', value: event.organizer });
@@ -422,7 +422,7 @@ export default function EventDetailPage() {
           <h2 className="section-title">大会基本情報</h2>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2">
-              {allInfoItems.map(({ icon, label, value }) => (
+              {allInfoItems.map(({ icon, label, value, note }) => (
                 <div
                   key={label}
                   className="flex items-start gap-3 p-5 border-b border-gray-100 last:border-b-0 md:odd:border-r"
@@ -431,6 +431,7 @@ export default function EventDetailPage() {
                   <div>
                     <div className="text-xs text-gray-500 mb-0.5">{label}</div>
                     <div className="text-sm font-medium text-gray-800">{value}</div>
+                    {note && <div className="text-xs text-orange-600 font-medium mt-0.5">{note}</div>}
                   </div>
                 </div>
               ))}
