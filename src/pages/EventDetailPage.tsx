@@ -301,7 +301,8 @@ export default function EventDetailPage() {
   const entryDateEntry = getEventEntryDates().find((e) => e.eventId === event.id);
   const fmtDate = (iso: string) => { const d = new Date(iso); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
   if (entryDateEntry?.entryStartDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー開始', value: fmtDate(entryDateEntry.entryStartDate) });
-  if (entryDateEntry?.entryEndDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー締切', value: fmtDate(entryDateEntry.entryEndDate) });
+  if (entryDateEntry?.entryEndDate) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー締切', value: `${fmtDate(entryDateEntry.entryEndDate)}${entryDateEntry.entryStatusNote ? `　[${entryDateEntry.entryStatusNote}]` : ''}` });
+  else if (entryDateEntry?.entryStatusNote) allInfoItems.push({ icon: <Calendar size={16} />, label: 'エントリー状況', value: entryDateEntry.entryStatusNote });
   allInfoItems.push({ icon: <Users size={16} />, label: '定員', value: event.capacity || '確認中' });
   if (event.organizer) allInfoItems.push({ icon: <Users size={16} />, label: '主催者', value: event.organizer });
   if (event.access) allInfoItems.push({ icon: <MapPin size={16} />, label: 'アクセス', value: event.access });

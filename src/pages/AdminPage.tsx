@@ -1544,23 +1544,23 @@ const EVENT_SUBTABS: { id: EventSubTab; label: string; icon: React.ReactNode }[]
 function EntryDatesPanel({ onSave }: { onSave: (msg: string) => void }) {
   const allEvts = getAllEventsForAdmin();
   const [alertDays, setAlertDays] = useState(() => getEntryAlertDays());
-  const [entries, setEntries] = useState<Record<string, { start: string; end: string }>>(() => {
+  const [entries, setEntries] = useState<Record<string, { start: string; end: string; note: string }>>(() => {
     const stored = getEventEntryDates();
-    const map: Record<string, { start: string; end: string }> = {};
+    const map: Record<string, { start: string; end: string; note: string }> = {};
     for (const e of stored) {
-      map[e.eventId] = { start: e.entryStartDate ?? '', end: e.entryEndDate ?? '' };
+      map[e.eventId] = { start: e.entryStartDate ?? '', end: e.entryEndDate ?? '', note: e.entryStatusNote ?? '' };
     }
     return map;
   });
 
-  const getEntry = (id: string) => entries[id] ?? { start: '', end: '' };
-  const setField = (id: string, field: 'start' | 'end', val: string) => {
+  const getEntry = (id: string) => entries[id] ?? { start: '', end: '', note: '' };
+  const setField = (id: string, field: 'start' | 'end' | 'note', val: string) => {
     setEntries((prev) => ({ ...prev, [id]: { ...getEntry(id), [field]: val } }));
   };
 
   const handleSaveEvent = (eventId: string) => {
     const e = getEntry(eventId);
-    saveEventEntryDate({ eventId, entryStartDate: e.start || undefined, entryEndDate: e.end || undefined });
+    saveEventEntryDate({ eventId, entryStartDate: e.start || undefined, entryEndDate: e.end || undefined, entryStatusNote: e.note || undefined });
     onSave('エントリー日程を保存しました');
   };
 
@@ -1624,6 +1624,16 @@ function EntryDatesPanel({ onSave }: { onSave: (msg: string) => void }) {
                       value={entry.end}
                       onChange={(e) => setField(event.id, 'end', e.target.value)}
                       className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-orange-400"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-48">
+                    <label className="block text-xs text-gray-500 mb-1">状況メモ（大会ページに表示）</label>
+                    <input
+                      type="text"
+                      value={entry.note}
+                      onChange={(e) => setField(event.id, 'note', e.target.value)}
+                      placeholder="例：締め切り済み、受付開始前 など"
+                      className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-orange-400"
                     />
                   </div>
                   <button

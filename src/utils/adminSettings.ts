@@ -234,7 +234,7 @@ export function saveEventAdminLocalProducts(eventId: string, localProducts: Loca
 
 // --- Entry Date Settings ---
 
-export type EntryDateEntry = { eventId: string; entryStartDate?: string; entryEndDate?: string };
+export type EntryDateEntry = { eventId: string; entryStartDate?: string; entryEndDate?: string; entryStatusNote?: string };
 
 export function getEventEntryDates(): EntryDateEntry[] {
   return load<EntryDateEntry>('eventEntryDates');
