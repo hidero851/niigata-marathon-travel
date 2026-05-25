@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { MarathonEvent } from '../types';
-import { getEventEntryDates, getEntryAlertDays } from '../utils/adminSettings';
+import { getEventEntryDates, getEntryAlertDays, getEventVisualSetting } from '../utils/adminSettings';
 
 const DEFAULT_GRADIENT = 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
 
@@ -28,8 +28,10 @@ function DaysLabel({ days }: { days: number }) {
 }
 
 function EntryCard({ event, days }: { event: MarathonEvent; days: number }) {
-  const bgImage = event.heroImageUrl
-    ? buildBgImage(event.heroImageUrl, event.imageGradient ?? DEFAULT_GRADIENT)
+  const visualSetting = getEventVisualSetting(event.id);
+  const heroImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
+  const bgImage = heroImageUrl
+    ? buildBgImage(heroImageUrl, event.imageGradient ?? DEFAULT_GRADIENT)
     : event.imageGradient ?? DEFAULT_GRADIENT;
 
   return (
