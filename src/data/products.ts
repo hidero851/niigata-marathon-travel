@@ -243,6 +243,36 @@ export const allProducts: LocalProduct[] = [
     ],
   },
   {
+    id: 'kanzuri',
+    name: 'かんずり（寒造里）',
+    area: '妙高市',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #b71c1c, #e65100)',
+    shortDescription: '雪さらし・3年熟成の発酵辛味調味料。妙高が育てた唐辛子と糀と柚子の逸品',
+    description:
+      '有限会社かんずりが守り続ける「かんずり（寒造里）」は、新潟県妙高市に400年以上伝わる発酵辛味調味料。地元産唐辛子を大寒（1月20日前後）に雪の上にさらす「寒ざらし」で塩分・アクを抜き、甘みを引き出したのち、米糀・柚子・海の塩と合わせて最低3年間じっくり熟成・発酵させます。辛さの中に発酵ならではの酸味と甘み、柚子の爽やかな香りが重なる複雑な味わいが特徴です。6年熟成の「六年熟成かんずり」はさらに穏やかで深みのある風味に仕上がります。鍋の薬味はもちろん、豚汁・焼き鳥・ラーメン・パスタなど和洋中幅広い料理に活躍します。',
+    recommendedPoint:
+      '上越・妙高エリアのレース後、地元の郷土料理や鍋に添えたかんずりは格別。辛味調味料とは思えない発酵の奥深さで、一度使うと手放せなくなります。お土産としても知名度が高く、お酒好きにも料理好きにも喜ばれます。',
+    whereToBuy: '有限会社かんずり直売所（妙高市大字猿橋）・妙高市内の道の駅・オンラインショップ',
+    salesLocations: [
+      '有限会社かんずり（新潟県妙高市大字猿橋758-1）',
+      'オンラインショップ（kanzuri.shop-pro.jp）',
+    ],
+    externalUrl: 'https://kanzuri.com/',
+    relatedEventIds: ['sea-to-summit-itoigawa-2026', 'joetsu-myoko-express-trail'],
+    sourceInfo: [
+      {
+        sourceName: '有限会社かんずり 公式サイト',
+        sourceUrl: 'https://kanzuri.com/',
+        sourceType: 'official_event',
+        retrievedAt: '2026-05-25',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイト・農林水産省郷土料理ページをもとに手動作成。',
+      },
+    ],
+  },
+  {
     id: 'iwa-kaki',
     name: '岩牡蠣（笹川流れ）',
     area: '村上市・笹川流れ',
