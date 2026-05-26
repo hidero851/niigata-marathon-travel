@@ -1076,13 +1076,21 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
         </div>
       </div>
 
-      <div className="flex gap-3 mt-6">
+      <div className="flex gap-3 mt-6 flex-wrap">
         <button onClick={handleSave} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
           <Save size={15} /> 保存
         </button>
         <button onClick={handleReset} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
           <RotateCcw size={15} /> この特産品をリセット
         </button>
+        <a
+          href={`/products/${selectedId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+        >
+          <Eye size={15} /> プレビュー
+        </a>
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Store, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProductById, getEventByIdAll } from '../data';
-import { getProductVisualSetting, getEventProductAssignment } from '../utils/adminSettings';
+import { getProductVisualSetting, getEventProductAssignment, getEventVisualSetting } from '../utils/adminSettings';
+import { SyncedContext } from '../App';
 import GradientImage from '../components/GradientImage';
 import { trackEvent } from '../utils/analytics';
 import { trackGA4 } from '../utils/ga4';
@@ -11,9 +12,10 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { version } = useContext(SyncedContext);
   const fromEventId = (location.state as { fromEventId?: string } | null)?.fromEventId;
   const baseProduct = id ? getProductById(id) : undefined;
-  const visualSetting = id ? getProductVisualSetting(id) : undefined;
+  const visualSetting = useMemo(() => id ? getProductVisualSetting(id) : undefined, [id, version]);
   const eventOverrideWhereToBuy =
     fromEventId && id
       ? getEventProductAssignment(fromEventId)?.productOverrides?.[id]?.whereToBuy
@@ -279,23 +281,34 @@ export default function ProductDetailPage() {
           {!hiddenSections.includes('relatedEvents') && relatedEvents.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
               <h3 className="font-bold text-navy-800 mb-4">関連する大会</h3>
-              <div className="space-y-3">
-                {relatedEvents.map((event) => event && (
-                  <Link
-                    key={event.id}
-                    to={`/events/${event.id}`}
-                    className="block rounded-xl overflow-hidden hover:shadow-md transition-shadow group"
-                  >
-                    <div className="h-16 relative" style={{ background: event.imageGradient }}>
-                      <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold px-3 text-center group-hover:opacity-90">
-                        {event.name}
+              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+                {relatedEvents.map((event) => {
+                  if (!event) return null;
+                  const vs = getEventVisualSetting(event.id);
+                  const heroUrl = vs?.heroImageUrl || event.heroImageUrl;
+                  const fallback = event.imageGradient ?? 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
+                  const bgImage = heroUrl
+                    ? `url("${heroUrl}"), ${fallback}`
+                    : fallback;
+                  return (
+                    <Link
+                      key={event.id}
+                      to={`/events/${event.id}`}
+                      className="flex-shrink-0 w-44 bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                    >
+                      <div
+                        className="h-24 bg-cover bg-center bg-no-repeat relative"
+                        style={{ backgroundImage: bgImage }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                       </div>
-                    </div>
-                    <div className="p-3 bg-gray-50 border border-t-0 border-gray-200 rounded-b-xl">
-                      <div className="text-xs text-gray-500">{event.location} · {event.date}</div>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="p-3">
+                        <div className="text-xs text-gray-500 mb-0.5">{event.location}</div>
+                        <div className="text-sm font-bold text-navy-800 leading-snug line-clamp-2">{event.name}</div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}
