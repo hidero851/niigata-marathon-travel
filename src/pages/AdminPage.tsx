@@ -256,8 +256,12 @@ function FeaturedTab({ onSave }: { onSave: (msg: string) => void }) {
   const events = getAllDisplayableEvents();
   const [settings, setSettings] = useState<FeaturedEventSetting[]>(() => {
     const saved = getFeaturedSettings();
-    if (saved.length > 0) return saved;
-    return events.map((e, i) => ({ eventId: e.id, isFeatured: false, displayOrder: i }));
+    const savedIds = new Set(saved.map((s) => s.eventId));
+    const maxOrder = saved.length > 0 ? Math.max(...saved.map((s) => s.displayOrder)) : -1;
+    const missing = events
+      .filter((e) => !savedIds.has(e.id))
+      .map((e, i) => ({ eventId: e.id, isFeatured: false, displayOrder: maxOrder + 1 + i }));
+    return [...saved, ...missing];
   });
 
   const toggle = (eventId: string) => {
