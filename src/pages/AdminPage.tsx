@@ -19,6 +19,7 @@ import {
   saveFeaturedSettings,
   resetFeaturedSettings,
   getEventVisualSetting,
+  getEventVisualSettings,
   saveEventVisualSetting,
   resetEventVisualSetting,
   getProductVisualSetting,
@@ -43,6 +44,7 @@ import {
   getEntryAlertDays,
   saveEntryAlertDays,
 } from '../utils/adminSettings';
+import { supabaseAdmin } from '../utils/supabaseAdmin';
 import { getLogs, clearLogs } from '../utils/analytics';
 import { logoutAdmin } from '../utils/auth';
 
@@ -385,6 +387,7 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
   }
 
   const [form, setForm] = useState<EventVisualSetting>(() => buildForm(eventId));
+  const [saving, setSaving] = useState(false);
 
   const setField = <K extends keyof EventVisualSetting>(key: K, value: EventVisualSetting[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -411,9 +414,21 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
     saveEventVisualSetting(form);
-    onSave('大会ビジュアル設定を保存しました');
+    try {
+      await supabaseAdmin.from('admin_settings').upsert({
+        id: 'eventVisualSettings',
+        value: getEventVisualSettings(),
+        updated_at: new Date().toISOString(),
+      });
+      onSave('大会ビジュアル設定を保存しました');
+    } catch {
+      onSave('⚠️ Supabase保存に失敗しました。再度お試しください。');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleReset = () => {
@@ -595,6 +610,28 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
                 onPositionChange={(v) => setHighlightField(idx, 'imagePosition', v)}
                 onSizeChange={(v) => setHighlightField(idx, 'imageSize', v)}
               />
+              {h.imageUrl && (
+                <div className="mt-3">
+                  <p className="text-xs text-gray-500 mb-1.5">カードプレビュー（実際の表示）</p>
+                  <div className="relative rounded-2xl overflow-hidden h-48 max-w-[220px] shadow-md pointer-events-none select-none">
+                    <div
+                      className="absolute inset-0 bg-no-repeat"
+                      style={{
+                        backgroundImage: `url("${h.imageUrl}")`,
+                        backgroundSize: h.imageSize || 'cover',
+                        backgroundPosition: h.imagePosition || 'center',
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-white font-bold text-sm leading-tight">{h.title || 'タイトル'}</p>
+                      {h.description && (
+                        <p className="text-white/80 text-xs mt-1 leading-snug line-clamp-2">{h.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               <label className="flex items-center gap-2 cursor-pointer mt-2">
                 <input
                   type="checkbox"
@@ -613,10 +650,10 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
       </div>
 
       <div className="flex gap-3 pt-2">
-        <button onClick={handleSave} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
-          <Save size={15} /> 保存
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+          <Save size={15} /> {saving ? '保存中...' : '保存'}
         </button>
-        <button onClick={handleReset} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+        <button onClick={handleReset} disabled={saving} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
           <RotateCcw size={15} /> リセット
         </button>
       </div>
