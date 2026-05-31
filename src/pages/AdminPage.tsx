@@ -1575,7 +1575,6 @@ const INIT_FORM = {
   distances: '', catchCopy: '', fee: '', capacity: '', timeLimit: '',
   startPoint: '', goalPoint: '', access: '', entryPeriod: '', organizer: '',
   officialUrl: '', entryUrl: '', rakutenTravelUrl: '', heroImageUrl: '', tags: '', notes: '',
-  entryStartDate: '', entryEndDate: '',
 };
 
 const EVENT_SUBTABS: { id: EventSubTab; label: string; icon: React.ReactNode }[] = [
@@ -1768,7 +1767,6 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
 
   const handleAdminEditStart = (event: MarathonEvent) => {
     setAdminEditId(event.id);
-    const entryDateEntry = getEventEntryDates().find((e) => e.eventId === event.id);
     setAdminEditForm({
       name: event.name, eventDate: event.eventDate ?? '', location: event.location,
       venue: event.venue ?? '', distances: event.distances.join(', '), catchCopy: event.catchCopy,
@@ -1777,8 +1775,6 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       entryPeriod: event.entryPeriod ?? '', organizer: event.organizer ?? '',
       officialUrl: event.officialUrl, entryUrl: event.entryUrl ?? '', rakutenTravelUrl: event.accommodations[0]?.rakutenTravelUrl ?? '',
       heroImageUrl: event.heroImageUrl ?? '', tags: event.tags.join(', '), notes: event.notes ?? '',
-      entryStartDate: entryDateEntry?.entryStartDate ?? '',
-      entryEndDate: entryDateEntry?.entryEndDate ?? '',
     });
   };
 
@@ -1802,9 +1798,6 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       notes: f.notes || undefined,
     };
     saveAdminCreatedEvent(updated);
-    if (f.entryStartDate || f.entryEndDate) {
-      saveEventEntryDate({ eventId, entryStartDate: f.entryStartDate || undefined, entryEndDate: f.entryEndDate || undefined });
-    }
     refresh(); setAdminEditId(null); onSave('大会情報を更新しました');
   };
 
@@ -1890,9 +1883,6 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
       draft: true,
     };
     saveAdminCreatedEvent(newEvent);
-    if (form.entryStartDate || form.entryEndDate) {
-      saveEventEntryDate({ eventId: id, entryStartDate: form.entryStartDate || undefined, entryEndDate: form.entryEndDate || undefined });
-    }
     refresh();
     setForm({ ...INIT_FORM });
     setShowForm(false);
@@ -2005,16 +1995,6 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
                       <FormField label="定員" value={adminEditForm.capacity} onChange={(v) => setAdminEditForm((p) => ({ ...p, capacity: v }))} />
                       <FormField label="主催者" value={adminEditForm.organizer} onChange={(v) => setAdminEditForm((p) => ({ ...p, organizer: v }))} />
                       <FormField label="申込期間" value={adminEditForm.entryPeriod} onChange={(v) => setAdminEditForm((p) => ({ ...p, entryPeriod: v }))} />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">エントリー開始日</label>
-                        <input type="date" value={adminEditForm.entryStartDate} onChange={(e) => setAdminEditForm((p) => ({ ...p, entryStartDate: e.target.value }))}
-                          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">エントリー締切日</label>
-                        <input type="date" value={adminEditForm.entryEndDate} onChange={(e) => setAdminEditForm((p) => ({ ...p, entryEndDate: e.target.value }))}
-                          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
-                      </div>
                       <FormField label="スタート地点" value={adminEditForm.startPoint} onChange={(v) => setAdminEditForm((p) => ({ ...p, startPoint: v }))} />
                       <FormField label="ゴール地点" value={adminEditForm.goalPoint} onChange={(v) => setAdminEditForm((p) => ({ ...p, goalPoint: v }))} />
                       <div className="md:col-span-2"><FormField label="アクセス" value={adminEditForm.access} onChange={(v) => setAdminEditForm((p) => ({ ...p, access: v }))} /></div>
@@ -2076,16 +2056,6 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
               <FormField label="申込期間" value={form.entryPeriod} onChange={(v) => setField('entryPeriod', v)} />
               <FormField label="主催者" value={form.organizer} onChange={(v) => setField('organizer', v)} />
               <FormField label="定員" value={form.capacity} onChange={(v) => setField('capacity', v)} />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">エントリー開始日</label>
-                <input type="date" value={form.entryStartDate} onChange={(e) => setField('entryStartDate', e.target.value)}
-                  className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">エントリー締切日</label>
-                <input type="date" value={form.entryEndDate} onChange={(e) => setField('entryEndDate', e.target.value)}
-                  className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
-              </div>
               <FormField label="スタート地点" value={form.startPoint} onChange={(v) => setField('startPoint', v)} />
               <FormField label="ゴール地点" value={form.goalPoint} onChange={(v) => setField('goalPoint', v)} />
               <FormField label="公式サイトURL" value={form.officialUrl} onChange={(v) => setField('officialUrl', v)} />
