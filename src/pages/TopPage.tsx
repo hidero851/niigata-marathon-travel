@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
 import { getAllDisplayableEvents, ALL_TAGS } from '../data';
 import EntryAlertSection from '../components/EntryAlertSection';
-import { getFeaturedSettings } from '../utils/adminSettings';
+import { getFeaturedSettings, getEventEntryDates } from '../utils/adminSettings';
 import EventCard from '../components/EventCard';
 import { trackEvent } from '../utils/analytics';
 
@@ -63,14 +63,29 @@ export default function TopPage() {
 
   const featuredSettings = getFeaturedSettings();
   const adminFeatured = featuredSettings.filter((s) => s.isFeatured);
-  const featured = adminFeatured.length > 0
-    ? adminFeatured
-        .sort((a, b) => a.displayOrder - b.displayOrder)
-        .map((s) => events.find((e) => e.id === s.eventId))
-        .filter((e): e is typeof events[0] => e !== undefined)
-    : DEFAULT_FEATURED_IDS
-        .map((id) => events.find((e) => e.id === id))
-        .filter((e): e is typeof events[0] => e !== undefined);
+
+  // エントリー受付中のイベントを自動で注目に追加
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const entryOpenIds = getEventEntryDates()
+    .filter((entry) => {
+      if (!entry.entryStartDate) return false;
+      const start = new Date(entry.entryStartDate);
+      const end = entry.entryEndDate ? new Date(entry.entryEndDate) : null;
+      return start <= today && (end === null || end >= today);
+    })
+    .map((entry) => entry.eventId);
+
+  const featuredIds = adminFeatured.length > 0
+    ? [...new Set([
+        ...adminFeatured.sort((a, b) => a.displayOrder - b.displayOrder).map((s) => s.eventId),
+        ...entryOpenIds,
+      ])]
+    : [...new Set([...DEFAULT_FEATURED_IDS, ...entryOpenIds])];
+
+  const featured = featuredIds
+    .map((id) => events.find((e) => e.id === id))
+    .filter((e): e is typeof events[0] => e !== undefined);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
