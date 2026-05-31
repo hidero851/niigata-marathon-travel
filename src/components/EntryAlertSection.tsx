@@ -89,7 +89,7 @@ export default function EntryAlertSection({ events }: { events: MarathonEvent[] 
 
     if (entry.entryStartDate) {
       const days = daysUntil(entry.entryStartDate);
-      if (days >= 0 && days <= alertDays) {
+      if (days > 0 && days <= alertDays) {
         startingSoon.push({ event, days });
       }
     }
