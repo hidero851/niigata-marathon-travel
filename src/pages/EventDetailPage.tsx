@@ -7,7 +7,7 @@ import {
   Banknote, Flag, Building2, FileText, Hotel,
 } from 'lucide-react';
 import { getEventByIdAll, allProducts } from '../data';
-import { getEventVisualSetting, getEventProductAssignment, getEventEntryDates } from '../utils/adminSettings';
+import { getEventVisualSetting, getEventProductAssignment, getEventEntryDates, isEntryFinished } from '../utils/adminSettings';
 import TagBadge from '../components/TagBadge';
 import ProductCard from '../components/ProductCard';
 import { trackEvent } from '../utils/analytics';
@@ -310,6 +310,7 @@ export default function EventDetailPage() {
   const entryLink = event.entryUrl && event.entryUrl !== '#'
     ? event.entryUrl
     : (displayOfficialUrl && displayOfficialUrl !== '#' ? displayOfficialUrl : null);
+  const entryFinished = isEntryFinished(event.id);
 
   return (
     <div className="pb-16">
@@ -393,10 +394,16 @@ export default function EventDetailPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 mb-7">
-              {event.modelPlans.length > 0 && (
-                <button onClick={() => scrollToId('plan')} className="btn-primary">
-                  参加プランを見る
-                </button>
+              {entryFinished ? (
+                <span className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gray-600/80 text-white/80 font-bold text-sm">
+                  エントリー終了
+                </span>
+              ) : (
+                event.modelPlans.length > 0 && (
+                  <button onClick={() => scrollToId('plan')} className="btn-primary">
+                    参加プランを見る
+                  </button>
+                )
               )}
               <button
                 onClick={() => scrollToId('stay')}
@@ -632,7 +639,7 @@ export default function EventDetailPage() {
         )}
 
         {/* ⑤ エントリー誘導（宿泊後） */}
-        {!hiddenSections.includes('entryCta') && entryLink && (
+        {!hiddenSections.includes('entryCta') && entryLink && !entryFinished && (
           <div
             className="mb-12 rounded-xl border-l-4 border-green-400 p-5"
             style={{ background: '#f0fdf4' }}
@@ -696,7 +703,11 @@ export default function EventDetailPage() {
               href={visualSetting?.prevNightRakutenUrl || venueRakutenUrl}
               onClick={() => trackGA4('click_rakuten_final_cta', { event_id: event.id })}
             />
-            {entryLink ? (
+            {entryFinished ? (
+              <span className="flex-1 flex items-center justify-center gap-2 bg-gray-600/50 text-white/60 font-bold text-sm py-4 px-5 rounded-xl border border-white/20 cursor-not-allowed">
+                エントリー終了
+              </span>
+            ) : entryLink ? (
               <a
                 href={entryLink}
                 target="_blank"

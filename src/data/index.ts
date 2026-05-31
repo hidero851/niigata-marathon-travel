@@ -73,13 +73,25 @@ function applyAdminOverrides(event: MarathonEvent, visualSettings: ReturnType<ty
   return e;
 }
 
+function isPastEvent(event: MarathonEvent): boolean {
+  const dateStr = event.eventDate;
+  if (!dateStr) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const raceDay = new Date(dateStr);
+  raceDay.setHours(0, 0, 0, 0);
+  return raceDay < today;
+}
+
 export function getAllDisplayableEvents(): MarathonEvent[] {
   try {
     const hidden = getHiddenEventIds();
     const adminCreated = getAdminCreatedEvents().filter((e) => !e.draft);
     const visualSettings = getEventVisualSettings();
     const staticEvents = getDisplayableEvents().filter((e) => !hidden.includes(e.id));
-    return [...staticEvents, ...adminCreated].map((e) => applyAdminOverrides(e, visualSettings));
+    return [...staticEvents, ...adminCreated]
+      .map((e) => applyAdminOverrides(e, visualSettings))
+      .filter((e) => !isPastEvent(e));
   } catch {
     return getDisplayableEvents();
   }
@@ -91,7 +103,9 @@ export function getEventByIdAll(id: string): MarathonEvent | undefined {
     const event = adminCreated.find((e) => e.id === id) ?? getEventById(id);
     if (!event) return undefined;
     const visualSettings = getEventVisualSettings();
-    return applyAdminOverrides(event, visualSettings);
+    const resolved = applyAdminOverrides(event, visualSettings);
+    if (isPastEvent(resolved)) return undefined;
+    return resolved;
   } catch {
     return getEventById(id);
   }

@@ -4,7 +4,7 @@ import type { MarathonEvent } from '../types';
 import TagBadge from './TagBadge';
 import { trackEvent } from '../utils/analytics';
 import { trackGA4 } from '../utils/ga4';
-import { getEventVisualSetting } from '../utils/adminSettings';
+import { getEventVisualSetting, isEntryFinished } from '../utils/adminSettings';
 
 const DEFAULT_GRADIENT = 'linear-gradient(135deg, #1e3a5f, #0d2d6b)';
 
@@ -24,6 +24,7 @@ export default function EventCard({ event, source }: EventCardProps) {
   const navigate = useNavigate();
   const visualSetting = getEventVisualSetting(event.id);
   const cardImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
+  const entryFinished = isEntryFinished(event.id);
 
   const handleClick = () => {
     trackEvent({ eventType: 'click_event_detail', marathonEventId: event.id });
@@ -48,6 +49,11 @@ export default function EventCard({ event, source }: EventCardProps) {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        {entryFinished && (
+          <div className="absolute top-2 left-2 bg-gray-700/90 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            エントリー終了
+          </div>
+        )}
       </div>
 
       <div className="p-5">

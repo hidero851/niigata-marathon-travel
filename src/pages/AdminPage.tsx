@@ -1593,23 +1593,26 @@ const EVENT_SUBTABS: { id: EventSubTab; label: string; icon: React.ReactNode }[]
 function EntryDatesPanel({ onSave }: { onSave: (msg: string) => void }) {
   const allEvts = getAllEventsForAdmin();
   const [alertDays, setAlertDays] = useState(() => getEntryAlertDays());
-  const [entries, setEntries] = useState<Record<string, { start: string; end: string; note: string }>>(() => {
+  const [entries, setEntries] = useState<Record<string, { start: string; end: string; note: string; finished: boolean }>>(() => {
     const stored = getEventEntryDates();
-    const map: Record<string, { start: string; end: string; note: string }> = {};
+    const map: Record<string, { start: string; end: string; note: string; finished: boolean }> = {};
     for (const e of stored) {
-      map[e.eventId] = { start: e.entryStartDate ?? '', end: e.entryEndDate ?? '', note: e.entryStatusNote ?? '' };
+      map[e.eventId] = { start: e.entryStartDate ?? '', end: e.entryEndDate ?? '', note: e.entryStatusNote ?? '', finished: e.entryFinished ?? false };
     }
     return map;
   });
 
-  const getEntry = (id: string) => entries[id] ?? { start: '', end: '', note: '' };
+  const getEntry = (id: string) => entries[id] ?? { start: '', end: '', note: '', finished: false };
   const setField = (id: string, field: 'start' | 'end' | 'note', val: string) => {
     setEntries((prev) => ({ ...prev, [id]: { ...getEntry(id), [field]: val } }));
+  };
+  const setFinished = (id: string, val: boolean) => {
+    setEntries((prev) => ({ ...prev, [id]: { ...getEntry(id), finished: val } }));
   };
 
   const handleSaveEvent = (eventId: string) => {
     const e = getEntry(eventId);
-    saveEventEntryDate({ eventId, entryStartDate: e.start || undefined, entryEndDate: e.end || undefined, entryStatusNote: e.note || undefined });
+    saveEventEntryDate({ eventId, entryStartDate: e.start || undefined, entryEndDate: e.end || undefined, entryStatusNote: e.note || undefined, entryFinished: e.finished || undefined });
     onSave('エントリー日程を保存しました');
   };
 
@@ -1685,6 +1688,15 @@ function EntryDatesPanel({ onSave }: { onSave: (msg: string) => void }) {
                       className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-orange-400"
                     />
                   </div>
+                  <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={entry.finished}
+                      onChange={(e) => setFinished(event.id, e.target.checked)}
+                      className="rounded"
+                    />
+                    エントリー終了
+                  </label>
                   <button
                     onClick={() => handleSaveEvent(event.id)}
                     className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"

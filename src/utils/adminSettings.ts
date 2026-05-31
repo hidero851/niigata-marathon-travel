@@ -234,7 +234,20 @@ export function saveEventAdminLocalProducts(eventId: string, localProducts: Loca
 
 // --- Entry Date Settings ---
 
-export type EntryDateEntry = { eventId: string; entryStartDate?: string; entryEndDate?: string; entryStatusNote?: string };
+export type EntryDateEntry = { eventId: string; entryStartDate?: string; entryEndDate?: string; entryStatusNote?: string; entryFinished?: boolean };
+
+export function isEntryFinished(eventId: string): boolean {
+  const entry = getEventEntryDates().find((e) => e.eventId === eventId);
+  if (entry?.entryFinished) return true;
+  if (entry?.entryEndDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(entry.entryEndDate);
+    end.setHours(0, 0, 0, 0);
+    return end < today;
+  }
+  return false;
+}
 
 export function getEventEntryDates(): EntryDateEntry[] {
   return load<EntryDateEntry>('eventEntryDates');
