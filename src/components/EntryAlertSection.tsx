@@ -20,11 +20,11 @@ function daysUntil(dateStr: string): number {
 }
 
 function DaysLabel({ days }: { days: number }) {
-  if (days === 0) return <span className="text-xs font-bold text-red-500">本日まで</span>;
-  if (days === 1) return <span className="text-xs font-bold text-red-500">残1日</span>;
-  if (days <= 3) return <span className="text-xs font-bold text-red-500">残{days}日</span>;
-  if (days <= 7) return <span className="text-xs font-bold text-orange-500">残{days}日</span>;
-  return <span className="text-xs font-bold text-gray-500">残{days}日</span>;
+  if (days === 0) return <span className="text-xs font-bold text-red-500">あと0日</span>;
+  if (days === 1) return <span className="text-xs font-bold text-red-500">あと1日</span>;
+  if (days <= 3) return <span className="text-xs font-bold text-red-500">あと{days}日</span>;
+  if (days <= 7) return <span className="text-xs font-bold text-orange-500">あと{days}日</span>;
+  return <span className="text-xs font-bold text-gray-500">あと{days}日</span>;
 }
 
 function EntryCard({ event, days }: { event: MarathonEvent; days: number }) {
