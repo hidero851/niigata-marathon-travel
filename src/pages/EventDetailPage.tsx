@@ -560,7 +560,7 @@ export default function EventDetailPage() {
                           <span className="w-5 h-5 rounded-full bg-navy-100 text-navy-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                             {i + 1}
                           </span>
-                          {step}
+                          {typeof step === 'string' ? step : ''}
                         </div>
                         {i < plan.steps.length - 1 && (
                           <div className="flex items-center gap-3 py-1">
@@ -570,15 +570,17 @@ export default function EventDetailPage() {
                       </li>
                     ))}
                   </ol>
-                  <div className="pt-4 border-t border-gray-100">
-                    <p className="text-xs text-gray-500 mb-2">このプランで宿泊を探す</p>
-                    <RakutenButton
-                      label="楽天トラベルで宿泊エリアを探す"
-                      className="w-full"
-                      href={plan.rakutenUrl || venueRakutenUrl}
-                      onClick={() => trackGA4('click_rakuten_plan', { event_id: event.id, plan_title: plan.title })}
-                    />
-                  </div>
+                  {!plan.title?.includes('日帰り') && (
+                    <div className="pt-4 border-t border-gray-100">
+                      <p className="text-xs text-gray-500 mb-2">このプランで宿泊を探す</p>
+                      <RakutenButton
+                        label="楽天トラベルで宿泊エリアを探す"
+                        className="w-full"
+                        href={plan.rakutenUrl || venueRakutenUrl}
+                        onClick={() => trackGA4('click_rakuten_plan', { event_id: event.id, plan_title: plan.title })}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
