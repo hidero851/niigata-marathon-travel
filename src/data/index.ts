@@ -6,7 +6,7 @@ import { niigataMarathonEventsDraft } from './niigata-events-draft';
 import type { MarathonEvent, LocalProduct } from '../types';
 import {
   getAdminCreatedEvents, getHiddenEventIds, getEventVisualSettings,
-  getEventAccommodationOverride, getEventModelPlanOverride, getEventAdminLocalProducts,
+  getEventAccommodationOverride, getEventModelPlanOverride, getEventAdminLocalProducts, getAllAdminLocalProducts,
 } from '../utils/adminSettings';
 
 /** YYYY-MM-DD → "YYYY年M月D日（曜）" */
@@ -45,6 +45,9 @@ export function getProductById(id: string): LocalProduct | undefined {
     const local = event.localProducts.find((p) => p.id === id);
     if (local) return local;
   }
+  // eventAdminLocalProducts（スクリプト/管理画面で登録した商品）も検索
+  const adminLocal = getAllAdminLocalProducts().find((p) => p.id === id);
+  if (adminLocal) return adminLocal;
   return undefined;
 }
 

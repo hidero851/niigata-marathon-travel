@@ -225,6 +225,10 @@ export function getEventAdminLocalProducts(eventId: string): LocalProduct[] {
   return load<AdminLocalProductEntry>(KEYS.eventAdminProducts).find((a) => a.eventId === eventId)?.localProducts ?? [];
 }
 
+export function getAllAdminLocalProducts(): LocalProduct[] {
+  return load<AdminLocalProductEntry>(KEYS.eventAdminProducts).flatMap((e) => e.localProducts ?? []);
+}
+
 export function saveEventAdminLocalProducts(eventId: string, localProducts: LocalProduct[]): void {
   const all = load<AdminLocalProductEntry>(KEYS.eventAdminProducts);
   const idx = all.findIndex((a) => a.eventId === eventId);
