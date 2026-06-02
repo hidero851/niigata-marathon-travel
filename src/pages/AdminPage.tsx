@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
-  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Package, Eye, Globe, FileSpreadsheet, Upload, ChevronUp, ChevronDown,
+  Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Eye, Globe, FileSpreadsheet, Upload, ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { uploadEventImage, uploadProductImage } from '../utils/imageUpload';
 import ImportPanel from '../components/admin/ImportPanel';
 import { getAllDisplayableEvents, getEventByIdAll, allProducts, formatEventDate } from '../data';
-import type { MarathonEvent, Accommodation, ModelPlan, LocalProduct } from '../types';
+import type { MarathonEvent, Accommodation, ModelPlan } from '../types';
 import type {
   FeaturedEventSetting,
   EventVisualSetting,
@@ -37,8 +37,6 @@ import {
   saveEventAccommodationOverride,
   getEventModelPlanOverride,
   saveEventModelPlanOverride,
-  getEventAdminLocalProducts,
-  saveEventAdminLocalProducts,
   getEventEntryDates,
   saveEventEntryDate,
   getEntryAlertDays,
@@ -49,7 +47,7 @@ import { getLogs, clearLogs } from '../utils/analytics';
 import { logoutAdmin } from '../utils/auth';
 
 type Tab = 'featured' | 'eventManage' | 'import' | 'data';
-type EventSubTab = 'visual' | 'accommodations' | 'modelPlans' | 'products' | 'productAssign' | 'localProductsAdmin' | 'entryDates';
+type EventSubTab = 'visual' | 'accommodations' | 'modelPlans' | 'products' | 'productAssign' | 'entryDates';
 
 // --- Toast ---
 
@@ -1461,103 +1459,6 @@ function ModelPlanPanel({ eventId, onSave }: { eventId: string; onSave: (msg: st
   );
 }
 
-// --- LocalProductAdminPanel ---
-
-const EMPTY_LP = { name: '', area: '', shortDescription: '', description: '', recommendedPoint: '', whereToBuy: '', externalUrl: '', imageUrl: '' };
-
-function LocalProductAdminPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
-  const [products, setProducts] = useState<LocalProduct[]>(() => getEventAdminLocalProducts(eventId));
-  const [editIdx, setEditIdx] = useState<number | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [form, setForm] = useState({ ...EMPTY_LP });
-  const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
-
-  const persistProducts = (updated: LocalProduct[]) => {
-    setProducts(updated); saveEventAdminLocalProducts(eventId, updated);
-  };
-
-  const handleAdd = () => {
-    if (!form.name.trim()) { alert('名称は必須です'); return; }
-    persistProducts([...products, { id: `lp-admin-${Date.now()}`, ...form, relatedEventIds: [eventId], sourceInfo: [ADMIN_SOURCE] }]);
-    setForm({ ...EMPTY_LP }); setShowAddForm(false); onSave('特産品を追加しました');
-  };
-
-  const handleEditSave = () => {
-    if (editIdx === null) return;
-    if (!form.name.trim()) { alert('名称は必須です'); return; }
-    persistProducts(products.map((p, i) => i === editIdx ? { ...p, ...form } : p));
-    setEditIdx(null); setForm({ ...EMPTY_LP }); onSave('特産品を更新しました');
-  };
-
-  const handleEditStart = (idx: number) => {
-    const p = products[idx];
-    setForm({ name: p.name, area: p.area, shortDescription: p.shortDescription, description: p.description, recommendedPoint: p.recommendedPoint, whereToBuy: p.whereToBuy, externalUrl: p.externalUrl, imageUrl: p.imageUrl });
-    setEditIdx(idx); setShowAddForm(false);
-  };
-
-  const handleDelete = (idx: number) => {
-    if (!window.confirm('この特産品を削除しますか？')) return;
-    persistProducts(products.filter((_, i) => i !== idx)); onSave('特産品を削除しました');
-  };
-
-  const LpForm = () => (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 mt-2">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <FormField label="名称 *" value={form.name} onChange={(v) => setF('name', v)} />
-        <FormField label="エリア" value={form.area} onChange={(v) => setF('area', v)} />
-        <FormField label="短い説明" value={form.shortDescription} onChange={(v) => setF('shortDescription', v)} />
-        <FormField label="おすすめポイント" value={form.recommendedPoint} onChange={(v) => setF('recommendedPoint', v)} />
-        <FormField label="購入場所" value={form.whereToBuy} onChange={(v) => setF('whereToBuy', v)} />
-        <FormField label="外部リンクURL" value={form.externalUrl} onChange={(v) => setF('externalUrl', v)} />
-        <FormField label="画像URL" value={form.imageUrl} onChange={(v) => setF('imageUrl', v)} preview={!!form.imageUrl} previewUrl={form.imageUrl} />
-        <div className="md:col-span-2"><FormField label="詳細説明" value={form.description} onChange={(v) => setF('description', v)} multiline /></div>
-      </div>
-      <div className="flex gap-2 mt-3">
-        <button onClick={editIdx !== null ? handleEditSave : handleAdd} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
-          <Save size={13} /> {editIdx !== null ? '更新' : '追加'}
-        </button>
-        <button onClick={() => { setShowAddForm(false); setEditIdx(null); setForm({ ...EMPTY_LP }); }} className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-          <X size={13} /> キャンセル
-        </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <div>
-      <p className="text-sm text-gray-500 mb-4">この大会専用の特産品・グルメ情報を追加できます。グローバル特産品の紐づけは「特産品紐づけ」タブをご利用ください。</p>
-      {products.length > 0 ? (
-        <div className="space-y-2 mb-4">
-          {products.map((product, idx) => (
-            <div key={product.id}>
-              <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-navy-800 text-sm">{product.name}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{product.area}</div>
-                  <div className="text-xs text-gray-600 mt-1 line-clamp-2">{product.shortDescription}</div>
-                </div>
-                <div className="flex gap-1 flex-shrink-0">
-                  <button onClick={() => handleEditStart(idx)} className="p-1.5 text-gray-400 hover:text-orange-500 rounded transition-colors"><Pencil size={14} /></button>
-                  <button onClick={() => handleDelete(idx)} className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"><Trash2 size={14} /></button>
-                </div>
-              </div>
-              {editIdx === idx && LpForm()}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-gray-400 text-center py-4 mb-4">追加された特産品がありません</p>
-      )}
-      {showAddForm && editIdx === null && LpForm()}
-      {!showAddForm && editIdx === null && (
-        <button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
-          <Plus size={14} /> 特産品を追加
-        </button>
-      )}
-    </div>
-  );
-}
-
 // --- EventManageContainer (event list + sub-tabs) ---
 
 const ADMIN_SOURCE = {
@@ -1583,7 +1484,6 @@ const EVENT_SUBTABS: { id: EventSubTab; label: string; icon: React.ReactNode }[]
   { id: 'modelPlans', label: '参加プラン', icon: <Route size={14} /> },
   { id: 'products', label: '特産品設定', icon: <ShoppingBag size={14} /> },
   { id: 'productAssign', label: '特産品紐づけ', icon: <Link2 size={14} /> },
-  { id: 'localProductsAdmin', label: '独自特産品', icon: <Package size={14} /> },
   { id: 'entryDates', label: 'エントリー日程', icon: <CalendarDays size={14} /> },
 ];
 
@@ -2138,9 +2038,6 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
             )}
             {subTab === 'productAssign' && (
               <ProductAssignPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
-            )}
-            {subTab === 'localProductsAdmin' && (
-              <LocalProductAdminPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
             )}
             {subTab === 'entryDates' && (
               <EntryDatesPanel onSave={onSave} />
