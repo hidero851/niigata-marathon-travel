@@ -273,6 +273,33 @@ export const allProducts: LocalProduct[] = [
     ],
   },
   {
+    id: 'kotake-sandopan',
+    name: '小竹製菓のサンドパン',
+    area: '上越市',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #c8860a, #e8a820)',
+    shortDescription: '大正13年創業、上越のソウルフード',
+    description:
+      '100年以上変わらない製法と味。クリームは一つひとつ手作業で塗り、作り置き一切なしの作りたて主義。半世紀変わらないパッケージも上越市民に愛され続けている老舗の証。',
+    recommendedPoint:
+      '上越妙高駅や新潟駅などの駅でも購入可能。旅のお供や大会前後のエネルギー補給にもぴったりの上越土産。',
+    whereToBuy: '上越妙高駅・新潟駅・湯沢駅・東京駅・上野駅ほか',
+    salesLocations: ['上越妙高駅', '新潟駅', '湯沢駅', '東京駅', '上野駅'],
+    externalUrl: 'https://kotakeseika.com/',
+    relatedEventIds: [],
+    sourceInfo: [
+      {
+        sourceName: '小竹製菓公式サイト',
+        sourceUrl: 'https://kotakeseika.com/',
+        sourceType: 'manual_created' as const,
+        retrievedAt: '2026-06-03',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイトの公開情報をもとに手動作成。',
+      },
+    ],
+  },
+  {
     id: 'iwa-kaki',
     name: '岩牡蠣（笹川流れ）',
     area: '村上市・笹川流れ',
