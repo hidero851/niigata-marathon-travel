@@ -300,6 +300,37 @@ export const allProducts: LocalProduct[] = [
     ],
   },
   {
+    id: 'machida-amazake',
+    name: '無加糖あまざけ「晴れたらイイな！」',
+    area: '上越市',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #e8c84a, #d4a020)',
+    shortDescription: '明治8年創業の蔵元が作る、米こうじ100%の無加糖甘酒',
+    description:
+      '新潟県産米こうじだけを原料にした無加糖の甘酒。砂糖・保存料・化学調味料を一切使用せず、こうじ由来の自然な甘みとコクが特徴。「飲む点滴」とも言われるビタミンB群・アミノ酸・ブドウ糖が豊富で、レース後のリカバリーにも最適。豆乳・牛乳割りやスムージーのベースにもなる万能甘酒。同社は醤油・味噌・しょうゆの実（あじもろみ）・かぐらなんばん辛味噌など上越の伝統的な発酵食品も製造している。',
+    recommendedPoint:
+      '無加糖でお子様から大人まで飲める米こうじ由来の甘酒。上越のきき酒文化を支える醸造蔵の技術が詰まった一品。',
+    whereToBuy: '公式サイト通販・上越市内直売所',
+    salesLocations: ['公式サイト通販', '上越市内直売所'],
+    externalUrl: 'https://www.machida-shouyumiso.co.jp/',
+    relatedEventIds: [
+      'echigo-kenshin-kikizake-marathon',
+      'takada-castle-road-race',
+      'joetsu-myoko-express-trail',
+    ],
+    sourceInfo: [
+      {
+        sourceName: '町田醤油味噌醸造場公式サイト',
+        sourceUrl: 'https://www.machida-shouyumiso.co.jp/',
+        sourceType: 'manual_created' as const,
+        retrievedAt: '2026-06-03',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイトの公開情報をもとに手動作成。',
+      },
+    ],
+  },
+  {
     id: 'iwa-kaki',
     name: '岩牡蠣（笹川流れ）',
     area: '村上市・笹川流れ',
