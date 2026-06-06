@@ -242,9 +242,11 @@ export default function EventDetailPage() {
         displayableAccommodations[0]?.description ||
         '会場まで徒歩圏内のエリア。スタート前の移動ストレスをゼロにして、朝の準備に余裕を持てます。',
       experiences:
-        allExperiences.slice(0, 3).length > 0
-          ? allExperiences.slice(0, 3)
-          : ['会場へ徒歩でアクセス', '朝の準備に余裕ができる', 'レース後もすぐ休憩できる'],
+        displayableAccommodations[0]?.experiences?.length
+          ? displayableAccommodations[0].experiences
+          : allExperiences.slice(0, 3).length > 0
+            ? allExperiences.slice(0, 3)
+            : ['会場へ徒歩でアクセス', '朝の準備に余裕ができる', 'レース後もすぐ休憩できる'],
       priceRange: displayableAccommodations[0]?.priceRange,
       onRakutenClick: () => trackGA4('click_rakuten_stay_area', { event_id: event.id, rank: '1_gold' }),
       rakutenUrl: displayableAccommodations[0]?.rakutenTravelUrl || venueRakutenUrl,
@@ -257,9 +259,11 @@ export default function EventDetailPage() {
         displayableAccommodations[1]?.description ||
         '飲食店・コンビニが充実した前泊向きエリア。前夜に地元グルメを楽しんで翌朝会場へ移動するプランに最適です。',
       experiences:
-        allExperiences.slice(1, 4).length > 0
-          ? allExperiences.slice(1, 4)
-          : ['地元グルメの食べ歩き', '飲食店・居酒屋が豊富', '翌朝の移動も便利'],
+        displayableAccommodations[1]?.experiences?.length
+          ? displayableAccommodations[1].experiences
+          : allExperiences.slice(1, 4).length > 0
+            ? allExperiences.slice(1, 4)
+            : ['地元グルメの食べ歩き', '飲食店・居酒屋が豊富', '翌朝の移動も便利'],
       priceRange: displayableAccommodations[1]?.priceRange,
       onRakutenClick: () => trackGA4('click_rakuten_stay_area', { event_id: event.id, rank: '2_silver' }),
       rakutenUrl: displayableAccommodations[1]?.rakutenTravelUrl || venueRakutenUrl,
@@ -272,9 +276,11 @@ export default function EventDetailPage() {
         displayableAccommodations[2]?.description ||
         '大会＋観光・温泉をセットで楽しみたい人向け。車移動や家族旅行との相性が良いエリアです。',
       experiences:
-        allExperiences.slice(2, 5).length > 0
-          ? allExperiences.slice(2, 5)
-          : ['温泉でリカバリー', '観光スポットへのアクセス', '家族旅行にも最適'],
+        displayableAccommodations[2]?.experiences?.length
+          ? displayableAccommodations[2].experiences
+          : allExperiences.slice(2, 5).length > 0
+            ? allExperiences.slice(2, 5)
+            : ['温泉でリカバリー', '観光スポットへのアクセス', '家族旅行にも最適'],
       priceRange: displayableAccommodations[2]?.priceRange,
       onRakutenClick: () => trackGA4('click_rakuten_stay_area', { event_id: event.id, rank: '3_bronze' }),
       rakutenUrl: displayableAccommodations[2]?.rakutenTravelUrl || venueRakutenUrl,
@@ -380,7 +386,7 @@ export default function EventDetailPage() {
             {visualSetting?.subtitle && (
               <p className="text-blue-200 text-base mb-2 leading-snug">{visualSetting.subtitle}</p>
             )}
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+            <h1 className="text-4xl md:text-4xl font-black text-white mb-6 leading-tight">
               {event.name}
             </h1>
 

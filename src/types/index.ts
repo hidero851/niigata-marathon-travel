@@ -23,6 +23,7 @@ export type Accommodation = {
   priceRange: string;
   externalUrl: string;
   rakutenTravelUrl?: string;
+  experiences?: string[];
   sourceInfo: SourceInfo[];
 };
 
@@ -163,6 +164,7 @@ export type ProductShop = {
   name: string;
   address?: string;
   hours?: string;
+  closedDays?: string;
   description?: string;
   mapUrl?: string;
   mapEmbedUrl?: string;
