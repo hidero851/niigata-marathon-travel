@@ -44,6 +44,15 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function renderStepText(text: string) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+  return parts.map((part, i) => {
+    const m = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (m) return <a key={i} href={m[2]} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">{m[1]}</a>;
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function getPrevDay(isoDate: string): string {
   const d = new Date(isoDate);
   d.setUTCDate(d.getUTCDate() - 1);
@@ -583,7 +592,7 @@ export default function EventDetailPage() {
                           <span className="w-5 h-5 rounded-full bg-navy-100 text-navy-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                             {i + 1}
                           </span>
-                          {typeof step === 'string' ? step : ''}
+                          {typeof step === 'string' ? renderStepText(step) : ''}
                         </div>
                         {i < plan.steps.length - 1 && (
                           <div className="flex items-center gap-3 py-1">
