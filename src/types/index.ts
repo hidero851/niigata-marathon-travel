@@ -158,6 +158,8 @@ export type EventVisualSetting = {
   hideHeroImageNote?: boolean;
   heroImagePosition?: string;
   heroImageSize?: string;
+  photoGalleryUrl?: string;
+  photoGalleryLabel?: string;
 };
 
 export type ProductShop = {

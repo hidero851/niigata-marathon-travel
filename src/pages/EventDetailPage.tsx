@@ -514,9 +514,19 @@ export default function EventDetailPage() {
         {!hiddenSections.includes('highlights') && displayHighlights && displayHighlights.length > 0 && (
           <section className="mb-14">
             <h2 className="section-title">このレースで楽しめること</h2>
-            <p className="text-gray-500 text-sm mb-6 -mt-3">
+            <p className="text-gray-500 text-sm -mt-3 mb-1">
               走るだけじゃない、{event.location}ならではの体験。
             </p>
+            {visualSetting?.photoGalleryUrl && (
+              <p className="text-xs text-gray-400 mb-6">
+                ※写真は
+                <a href={visualSetting.photoGalleryUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600">
+                  {visualSetting.photoGalleryLabel || '公式写真ギャラリー'}
+                </a>
+                から引用
+              </p>
+            )}
+            {!visualSetting?.photoGalleryUrl && <div className="mb-6" />}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {displayHighlights.map((h) => (
                 <div key={h.title} className="relative rounded-2xl overflow-hidden h-48 shadow-md">
