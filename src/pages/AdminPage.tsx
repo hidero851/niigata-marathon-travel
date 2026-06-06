@@ -710,7 +710,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
   };
 
   const addShop = () => {
-    setField('shops', [...(form.shops ?? []), { name: '', address: '', hours: '', description: '', mapUrl: '', mapEmbedUrl: '' }]);
+    setField('shops', [...(form.shops ?? []), { name: '', address: '', hours: '', closedDays: '', description: '', mapUrl: '', mapEmbedUrl: '' }]);
   };
 
   const removeShop = (idx: number) => {
@@ -1083,6 +1083,13 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
                     onChange={(e) => setShopField(idx, 'hours', e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
                   />
+                  <input
+                    type="text"
+                    placeholder="定休日（例: 木曜日、第2・4火曜日）"
+                    value={shop.closedDays ?? ''}
+                    onChange={(e) => setShopField(idx, 'closedDays', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400"
+                  />
                   <textarea
                     placeholder="店舗の説明（任意）"
                     value={shop.description ?? ''}
@@ -1245,7 +1252,7 @@ function ProductAssignPanel({ eventId, onSave }: { eventId: string; onSave: (msg
 
 // --- AccommodationPanel ---
 
-const EMPTY_ACC = { label: '', areaName: '', distanceToVenue: '', description: '', priceRange: '', externalUrl: '', rakutenTravelUrl: '' };
+const EMPTY_ACC = { label: '', areaName: '', distanceToVenue: '', description: '', priceRange: '', externalUrl: '', rakutenTravelUrl: '', experiences: '' };
 
 function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg: string) => void }) {
   const event = getEventByIdAll(eventId);
@@ -1260,11 +1267,15 @@ function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg
     saveEventAccommodationOverride(eventId, updated);
   };
 
+  const parseExperiences = (v: string) => v.split('\n').map(s => s.trim()).filter(Boolean);
+
   const handleAdd = () => {
     if (!form.areaName.trim()) { alert('エリア名は必須です'); return; }
+    const experiences = parseExperiences(form.experiences);
     persistItems([...items, {
       id: `acc-admin-${Date.now()}`, ...form,
       label: form.label || undefined,
+      experiences: experiences.length ? experiences : undefined,
       rakutenTravelUrl: form.rakutenTravelUrl || undefined, sourceInfo: [ADMIN_SOURCE],
     }]);
     setForm({ ...EMPTY_ACC }); setShowAddForm(false); onSave('宿泊エリアを追加しました');
@@ -1273,13 +1284,23 @@ function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg
   const handleEditSave = () => {
     if (editIdx === null) return;
     if (!form.areaName.trim()) { alert('エリア名は必須です'); return; }
-    persistItems(items.map((item, i) => i === editIdx ? { ...item, ...form, rakutenTravelUrl: form.rakutenTravelUrl || undefined } : item));
+    const experiences = parseExperiences(form.experiences);
+    persistItems(items.map((item, i) => i === editIdx ? {
+      ...item, ...form,
+      experiences: experiences.length ? experiences : undefined,
+      rakutenTravelUrl: form.rakutenTravelUrl || undefined,
+    } : item));
     setEditIdx(null); setForm({ ...EMPTY_ACC }); onSave('宿泊エリアを更新しました');
   };
 
   const handleEditStart = (idx: number) => {
     const item = items[idx];
-    setForm({ label: item.label ?? '', areaName: item.areaName, distanceToVenue: item.distanceToVenue, description: item.description, priceRange: item.priceRange, externalUrl: item.externalUrl, rakutenTravelUrl: item.rakutenTravelUrl ?? '' });
+    setForm({
+      label: item.label ?? '', areaName: item.areaName, distanceToVenue: item.distanceToVenue,
+      description: item.description, priceRange: item.priceRange, externalUrl: item.externalUrl,
+      rakutenTravelUrl: item.rakutenTravelUrl ?? '',
+      experiences: item.experiences?.join('\n') ?? '',
+    });
     setEditIdx(idx); setShowAddForm(false);
   };
 
@@ -1297,6 +1318,18 @@ function AccommodationPanel({ eventId, onSave }: { eventId: string; onSave: (msg
         <FormField label="価格帯" value={form.priceRange} onChange={(v) => setF('priceRange', v)} />
         <FormField label="楽天トラベルURL" value={form.rakutenTravelUrl} onChange={(v) => setF('rakutenTravelUrl', v)} />
         <div className="md:col-span-2"><FormField label="説明文" value={form.description} onChange={(v) => setF('description', v)} multiline /></div>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            このエリアで楽しめること <span className="text-xs text-gray-400 font-normal">（1行1項目）</span>
+          </label>
+          <textarea
+            value={form.experiences}
+            onChange={(e) => setF('experiences', e.target.value)}
+            placeholder={'うみがたり（水族館）\n五智公園\n岩殿山明静院'}
+            rows={3}
+            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none"
+          />
+        </div>
       </div>
       <div className="flex gap-2">
         <button onClick={editIdx !== null ? handleEditSave : handleAdd} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
