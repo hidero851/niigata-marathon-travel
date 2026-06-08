@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
-import { getAllDisplayableEvents, ALL_TAGS } from '../data';
+import { getAllDisplayableEvents, ALL_TAGS, getPublishedDisplayableProducts } from '../data';
 import EntryAlertSection from '../components/EntryAlertSection';
-import { getFeaturedSettings, getEventEntryDates } from '../utils/adminSettings';
+import { getFeaturedSettings, getEventEntryDates, isEntryFinished } from '../utils/adminSettings';
 import EventCard from '../components/EventCard';
+import ProductCard from '../components/ProductCard';
+import AutoScrollCarousel from '../components/AutoScrollCarousel';
 import { trackEvent } from '../utils/analytics';
 
 const TAG_ICONS: Record<string, React.ReactNode> = {
@@ -85,7 +87,19 @@ export default function TopPage() {
 
   const featured = featuredIds
     .map((id) => events.find((e) => e.id === id))
-    .filter((e): e is typeof events[0] => e !== undefined);
+    .filter((e): e is typeof events[0] => e !== undefined)
+    .filter((e) => !isEntryFinished(e.id))
+    .slice(0, 10);
+
+  // 公開済み特産品をシャッフル（ページロード時に1回固定）
+  const publishedProducts = useMemo(() => {
+    const products = getPublishedDisplayableProducts();
+    for (let i = products.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [products[i], products[j]] = [products[j], products[i]];
+    }
+    return products;
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -258,11 +272,13 @@ export default function TopPage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featured.map((event) => (
+          <AutoScrollCarousel
+            items={featured.map((event) => (
               <EventCard key={event.id} event={event} source="featured" />
             ))}
-          </div>
+            pcVisible={3}
+            interval={4500}
+          />
 
           <div className="text-center mt-10">
             <button onClick={() => navigate('/events')} className="btn-primary">
@@ -272,6 +288,28 @@ export default function TopPage() {
           </div>
         </div>
       </section>
+
+      {/* 地元の特産品 */}
+      {publishedProducts.length > 0 && (
+        <section className="bg-white py-16 overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 mb-8">
+            <h2 className="text-2xl font-black text-navy-800 mb-1">地元の特産品</h2>
+            <p className="text-gray-500 text-sm">走った後に出会いたい、新潟の美味しいもの</p>
+          </div>
+          <div className="overflow-hidden">
+            <div
+              className="marquee-track flex gap-4"
+              style={{ width: `${publishedProducts.length * 2 * 220}px` }}
+            >
+              {[...publishedProducts, ...publishedProducts].map((product, i) => (
+                <div key={i} className="w-52 flex-shrink-0">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ⑤ タグで探す */}
       <section className="bg-white py-16">

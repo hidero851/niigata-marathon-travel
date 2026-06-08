@@ -3,10 +3,11 @@ export { allProducts } from './products';
 import { allEvents as baseEvents } from './events';
 import { allProducts } from './products';
 import { niigataMarathonEventsDraft } from './niigata-events-draft';
-import type { MarathonEvent, LocalProduct } from '../types';
+import type { MarathonEvent, LocalProduct, ProductVisualSetting } from '../types';
 import {
   getAdminCreatedEvents, getHiddenEventIds, getEventVisualSettings,
   getEventAccommodationOverride, getEventModelPlanOverride, getEventAdminLocalProducts, getAllAdminLocalProducts,
+  getProductVisualSettings,
 } from '../utils/adminSettings';
 
 /** YYYY-MM-DD → "YYYY年M月D日（曜）" */
@@ -116,6 +117,14 @@ export function getEventByIdAll(id: string): MarathonEvent | undefined {
 
 export function getDisplayableProducts(): LocalProduct[] {
   return allProducts.filter((p) => p.sourceInfo.every((s) => s.usageAllowed));
+}
+
+export function getPublishedDisplayableProducts(): LocalProduct[] {
+  const settings: ProductVisualSetting[] = getProductVisualSettings();
+  return getDisplayableProducts().filter((p) => {
+    const vs = settings.find((s) => s.productId === p.id);
+    return vs ? vs.isPublished !== false : false;
+  });
 }
 
 export const ALL_TAGS = [

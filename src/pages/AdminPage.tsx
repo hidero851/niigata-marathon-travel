@@ -995,6 +995,22 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           </div>
         </div>
 
+        {/* トップページ公開設定 */}
+        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.isPublished ?? false}
+              onChange={(e) => setField('isPublished', e.target.checked)}
+              className="w-4 h-4 rounded accent-green-500"
+            />
+            <div>
+              <span className="text-sm font-medium text-green-800">トップページに公開する</span>
+              <p className="text-xs text-green-600 mt-0.5">チェックするとトップの特産品カルーセルに表示されます</p>
+            </div>
+          </label>
+        </div>
+
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"

@@ -197,4 +197,5 @@ export type ProductVisualSetting = {
   shopMessage?: string;
   hiddenSections?: string[];
   hideImageNote?: boolean;
+  isPublished?: boolean;
 };

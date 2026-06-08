@@ -212,6 +212,9 @@ export default function ProductDetailPage() {
                     {shop.hours && (
                       <p className="text-sm text-gray-500 mb-1">🕐 {shop.hours}</p>
                     )}
+                    {shop.closedDays && (
+                      <p className="text-sm text-gray-500 mb-1">🗓️ 定休日：{shop.closedDays}</p>
+                    )}
                     {shop.description && (
                       <p className="text-sm text-gray-700 mt-2 mb-3 leading-relaxed">{shop.description}</p>
                     )}
