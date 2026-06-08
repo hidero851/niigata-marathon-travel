@@ -331,15 +331,6 @@ export default function TopPage() {
         </div>
       </section>
 
-      {/* 免責 */}
-      <section className="bg-amber-50 border-t border-amber-200 py-6">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <p className="text-amber-800 text-sm">
-            ⚠️ 本サイトの大会・宿泊・特産情報はすべて<strong>仮データ（MVP開発用）</strong>です。
-            実際の情報は各公式サイトでご確認ください。
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
