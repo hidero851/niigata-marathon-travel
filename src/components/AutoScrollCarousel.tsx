@@ -69,8 +69,6 @@ export default function AutoScrollCarousel({ items, interval = 4500, pcVisible =
       <div
         ref={containerRef}
         className="overflow-hidden"
-        onMouseEnter={stopTimer}
-        onMouseLeave={startTimer}
       >
         <div
           className="flex"
