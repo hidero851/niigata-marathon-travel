@@ -123,7 +123,7 @@ export function getPublishedDisplayableProducts(): LocalProduct[] {
   const settings: ProductVisualSetting[] = getProductVisualSettings();
   return getDisplayableProducts().filter((p) => {
     const vs = settings.find((s) => s.productId === p.id);
-    return vs ? vs.isPublished !== false : false;
+    return vs?.isPublished === true;
   });
 }
 
