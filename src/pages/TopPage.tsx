@@ -291,22 +291,21 @@ export default function TopPage() {
 
       {/* 地元の特産品 */}
       {publishedProducts.length > 0 && (
-        <section className="bg-white py-16 overflow-hidden">
-          <div className="max-w-6xl mx-auto px-4 mb-8">
-            <h2 className="text-2xl font-black text-navy-800 mb-1">地元の特産品</h2>
-            <p className="text-gray-500 text-sm">走った後に出会いたい、新潟の美味しいもの</p>
-          </div>
-          <div className="overflow-hidden">
-            <div
-              className="marquee-track flex gap-4"
-              style={{ width: `${publishedProducts.length * 2 * 220}px` }}
-            >
-              {[...publishedProducts, ...publishedProducts].map((product, i) => (
-                <div key={i} className="w-52 flex-shrink-0">
-                  <ProductCard product={product} />
-                </div>
-              ))}
+        <section className="bg-white py-16">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="mb-8">
+              <h2 className="text-2xl font-black text-navy-800 mb-1">地元の特産品</h2>
+              <p className="text-gray-500 text-sm">走った後に出会いたい、新潟の美味しいもの</p>
             </div>
+            <AutoScrollCarousel
+              items={publishedProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+              pcVisible={4}
+              spVisible={2.1}
+              interval={3500}
+              showDots={false}
+            />
           </div>
         </section>
       )}
