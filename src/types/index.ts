@@ -101,6 +101,7 @@ export type EventProductAssignment = {
 export type UserEventLog = {
   eventType:
     | "view_event"
+    | "view_product"
     | "click_event_detail"
     | "click_accommodation"
     | "click_product"

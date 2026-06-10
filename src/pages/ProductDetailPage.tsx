@@ -25,6 +25,10 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (id && baseProduct) {
+      trackEvent({ eventType: 'view_product', productId: id });
+      trackGA4('view_product_detail', { product_id: id, product_name: baseProduct.name });
+    }
   }, [id]);
 
   useEffect(() => {
