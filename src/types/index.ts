@@ -139,6 +139,7 @@ export type EventHighlightSetting = {
   hideImageNote?: boolean;
   imagePosition?: string;
   imageSize?: string;
+  imageCredit?: string;
 };
 
 export type EventVisualSetting = {
@@ -161,6 +162,7 @@ export type EventVisualSetting = {
   heroImageSize?: string;
   photoGalleryUrl?: string;
   photoGalleryLabel?: string;
+  heroImageCredit?: string;
 };
 
 export type ProductShop = {

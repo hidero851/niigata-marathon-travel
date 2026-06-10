@@ -199,7 +199,7 @@ export default function EventDetailPage() {
   const hiddenSections = visualSetting?.hiddenSections ?? [];
   const displayCatchCopy = visualSetting?.catchCopy || event.catchCopy;
   const displayHeroImageUrl = visualSetting?.heroImageUrl || event.heroImageUrl;
-  type DisplayHighlight = { title: string; description: string; imageUrl: string; gradient?: string; hideImageNote?: boolean; imagePosition?: string; imageSize?: string };
+  type DisplayHighlight = { title: string; description: string; imageUrl: string; gradient?: string; hideImageNote?: boolean; imagePosition?: string; imageSize?: string; imageCredit?: string };
   const displayHighlights: DisplayHighlight[] | undefined =
     visualSetting?.highlights && visualSetting.highlights.length > 0
       ? visualSetting.highlights.map((h) => ({
@@ -210,6 +210,7 @@ export default function EventDetailPage() {
           hideImageNote: h.hideImageNote,
           imagePosition: h.imagePosition,
           imageSize: h.imageSize,
+          imageCredit: h.imageCredit,
         }))
       : event.highlights?.map((h) => ({
           title: h.title,
@@ -371,7 +372,13 @@ export default function EventDetailPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/85 md:hidden" />
         <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
-        {!visualSetting?.hideHeroImageNote && (
+        {visualSetting?.heroImageCredit ? (
+          <div className="absolute top-4 right-4 z-20">
+            <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
+              {visualSetting.heroImageCredit}
+            </span>
+          </div>
+        ) : !visualSetting?.hideHeroImageNote && (
           <div className="absolute top-4 right-4 z-20">
             <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
               ※ 画像はイメージです
@@ -550,7 +557,13 @@ export default function EventDetailPage() {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                  {!h.hideImageNote && (
+                  {h.imageCredit ? (
+                    <div className="absolute top-2 right-2 z-10">
+                      <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded-full">
+                        {h.imageCredit}
+                      </span>
+                    </div>
+                  ) : !h.hideImageNote && (
                     <div className="absolute top-2 right-2 z-10">
                       <span className="text-xs text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded-full">
                         ※ イメージ
