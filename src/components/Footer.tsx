@@ -19,6 +19,7 @@ export default function Footer() {
               <li><Link to="/events" className="hover:text-white transition-colors">大会一覧</Link></li>
               <li><Link to="/datasource" className="hover:text-white transition-colors">データソース確認</Link></li>
               <li><Link to="/privacy" className="hover:text-white transition-colors">プライバシーポリシー</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">お問い合わせ</Link></li>
             </ul>
           </div>
 

@@ -10,6 +10,7 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import DataSourcePage from './pages/DataSourcePage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import ContactPage from './pages/ContactPage'
 import { supabase } from './utils/supabase'
 import { loadFromSupabase } from './utils/syncDB'
 
@@ -83,6 +84,7 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </Layout>
       </HelmetProvider>
