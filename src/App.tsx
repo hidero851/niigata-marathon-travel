@@ -1,4 +1,4 @@
-import { createContext, lazy, Suspense, useEffect, useState } from 'react'
+import { createContext, lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import type { Session } from '@supabase/supabase-js'
@@ -23,6 +23,27 @@ function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
+declare function gtag(...args: unknown[]): void
+
+function PageViewTracker() {
+  const { pathname } = useLocation()
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return // 初回は gtag('config') が自動送信するためスキップ
+    }
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'page_view', {
+        page_path: pathname,
+        page_location: window.location.href,
+        page_title: document.title,
+      })
+    }
   }, [pathname])
   return null
 }
@@ -69,6 +90,7 @@ function App() {
       <HelmetProvider>
         <Layout>
           <ScrollToTop />
+          <PageViewTracker />
           <Routes>
             <Route path="/" element={<TopPage />} />
             <Route path="/events" element={<EventListPage />} />
