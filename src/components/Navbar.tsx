@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { MapPin, Menu, X } from 'lucide-react';
+import { MapPin, Menu, X, Instagram } from 'lucide-react';
 import { useState } from 'react';
 
 const LOGO_SRC = '/images/logo.png?v=2';
@@ -51,6 +51,15 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          <a
+            href="https://www.instagram.com/marathon_navi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 text-gray-500 hover:text-pink-500 transition-colors"
+            aria-label="Instagram"
+          >
+            <Instagram size={22} />
+          </a>
           <Link
             to="/events"
             className="ml-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-xl transition-colors shadow-sm"
@@ -88,6 +97,15 @@ export default function Navbar() {
           >
             新潟の大会を探す
           </Link>
+          <a
+            href="https://www.instagram.com/marathon_navi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-pink-500 transition-colors"
+          >
+            <Instagram size={18} />
+            Instagram
+          </a>
         </div>
       )}
     </header>
