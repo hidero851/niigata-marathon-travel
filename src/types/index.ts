@@ -198,6 +198,7 @@ export type ProductVisualSetting = {
   images?: GalleryImage[];
   shops?: ProductShop[];
   shopMessage?: string;
+  furusatoUrl?: string;
   hiddenSections?: string[];
   hideImageNote?: boolean;
   isPublished?: boolean;

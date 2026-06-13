@@ -277,6 +277,17 @@ export default function ProductDetailPage() {
                     公式サイト（設定中）
                   </span>
                 )}
+                {visualSetting?.furusatoUrl && (
+                  <a
+                    href={visualSetting.furusatoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors"
+                  >
+                    <ExternalLink size={15} />
+                    ふるさと納税で手に入れる
+                  </a>
+                )}
               </div>
               <p className="text-xs text-gray-400 mt-3">
                 ※ 外部リンクは参考です。購入は公式サイトや現地でご確認ください。

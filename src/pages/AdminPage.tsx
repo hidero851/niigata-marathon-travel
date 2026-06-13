@@ -695,6 +695,7 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       images: normalizedImages,
       shops: saved?.shops ?? [],
       shopMessage: saved?.shopMessage ?? '',
+      furusatoUrl: saved?.furusatoUrl ?? '',
       hiddenSections: saved?.hiddenSections ?? [],
       hideImageNote: saved?.hideImageNote ?? false,
     };
@@ -860,6 +861,11 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
           label="公式サイトURL"
           value={form.externalUrl}
           onChange={(v) => setField('externalUrl', v)}
+        />
+        <FormField
+          label="ふるさと納税URL（未設定の場合はボタン非表示）"
+          value={form.furusatoUrl ?? ''}
+          onChange={(v) => setField('furusatoUrl', v)}
         />
         <div>
           <div className="flex items-center justify-between mb-2">
