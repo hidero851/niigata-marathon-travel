@@ -82,6 +82,10 @@ export default function ProductDetailPage() {
     trackGA4('click_product_external', { product_id: product.id, product_name: product.name, event_id: fromEventId });
   };
 
+  const handleFurusatoClick = () => {
+    trackGA4('click_product_furusato', { product_id: product.id, product_name: product.name, event_id: fromEventId });
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <button
@@ -282,6 +286,7 @@ export default function ProductDetailPage() {
                     href={visualSetting.furusatoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={handleFurusatoClick}
                     className="flex items-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors"
                   >
                     <ExternalLink size={15} />
