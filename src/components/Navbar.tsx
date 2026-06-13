@@ -68,13 +68,24 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-          onClick={() => setOpen(!open)}
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {/* Mobile: Instagram + hamburger */}
+        <div className="md:hidden flex items-center gap-1">
+          <a
+            href="https://www.instagram.com/marathon_navi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 text-gray-500 hover:text-pink-500 transition-colors"
+            aria-label="Instagram"
+          >
+            <Instagram size={22} />
+          </a>
+          <button
+            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
