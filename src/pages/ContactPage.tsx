@@ -34,13 +34,13 @@ export default function ContactPage() {
     <div className="max-w-2xl mx-auto px-4 py-12">
       <Helmet>
         <title>お問い合わせ | 新潟マラソンナビ</title>
-        <meta name="description" content="宿泊施設・特産品の掲載に関するお問い合わせはこちら。" />
+        <meta name="description" content="新潟マラソンナビへのお問い合わせはこちら。" />
       </Helmet>
 
       <h1 className="text-2xl font-black text-navy-800 mb-2">お問い合わせ</h1>
       <p className="text-sm text-gray-500 mb-8">
-        宿泊施設・特産品の掲載をご希望の事業者様はこちらからご連絡ください。<br />
-        掲載費は無料です。2〜3営業日以内にご返信いたします。
+        ご質問・掲載のご希望など、お気軽にご連絡ください。<br />
+        2〜3営業日以内にご返信いたします。
       </p>
 
       {status === 'success' ? (
@@ -54,28 +54,46 @@ export default function ContactPage() {
         </div>
       ) : (
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">
+              お問い合わせ種別 <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="category"
+              required
+              defaultValue=""
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+            >
+              <option value="" disabled>選択してください</option>
+              <option value="宿泊施設の掲載希望">宿泊施設の掲載希望</option>
+              <option value="特産品・グルメの掲載希望">特産品・グルメの掲載希望</option>
+              <option value="大会情報について">大会情報について</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">
-                事業者名 <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="company_name"
-                required
-                placeholder="○○旅館"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
-                担当者名 <span className="text-red-500">*</span>
+                お名前 <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 name="name"
                 required
                 placeholder="山田 太郎"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                事業者名
+                <span className="text-gray-400 font-normal text-xs ml-1">（掲載希望の方）</span>
+              </label>
+              <input
+                type="text"
+                name="company_name"
+                placeholder="○○旅館"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
@@ -109,30 +127,13 @@ export default function ContactPage() {
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
-              掲載希望カテゴリ <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="category"
-              required
-              defaultValue=""
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
-            >
-              <option value="" disabled>選択してください</option>
-              <option value="宿泊施設">宿泊施設</option>
-              <option value="特産品・グルメ">特産品・グルメ</option>
-              <option value="その他">その他</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">
               お問い合わせ内容 <span className="text-red-500">*</span>
             </label>
             <textarea
               name="message"
               required
               rows={5}
-              placeholder="掲載をご希望の施設・商品の概要や、ご質問などをお書きください。"
+              placeholder="お問い合わせ内容をご記入ください。"
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
             />
           </div>
