@@ -368,6 +368,8 @@ export default function EventDetailPage() {
               : heroBg,
             backgroundSize: visualSetting?.heroImageSize || 'cover',
             backgroundPosition: visualSetting?.heroImagePosition || 'center',
+            printColorAdjust: 'exact',
+            WebkitPrintColorAdjust: 'exact',
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/85 md:hidden" />
@@ -554,6 +556,8 @@ export default function EventDetailPage() {
                         : h.gradient || DEFAULT_GRADIENT,
                       backgroundSize: h.imageSize || 'cover',
                       backgroundPosition: h.imagePosition || 'center',
+                      printColorAdjust: 'exact',
+                      WebkitPrintColorAdjust: 'exact',
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
