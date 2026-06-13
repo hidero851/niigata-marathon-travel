@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useContext } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
+import { SyncedContext } from '../App';
 import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
 import { getAllDisplayableEvents, ALL_TAGS, getPublishedDisplayableProducts } from '../data';
 import EntryAlertSection from '../components/EntryAlertSection';
@@ -23,6 +24,14 @@ const TAG_ICONS: Record<string, React.ReactNode> = {
 };
 
 const FEATURED_TAGS = ['日本海グルメ', '温泉', '地酒', '米どころ', '城下町', '紅葉', '雪景色', '佐渡'];
+
+const HERO_IMAGES = [
+  '/images/hero/hero1.jpg',
+  '/images/hero/hero2.jpg',
+  '/images/hero/hero3.jpg',
+  '/images/hero/hero4.jpg',
+  '/images/hero/hero5.jpg',
+];
 
 const CONCEPT_STEPS = [
   {
@@ -50,6 +59,7 @@ const CONCEPT_STEPS = [
 
 export default function TopPage() {
   const navigate = useNavigate();
+  const { version } = useContext(SyncedContext);
   const [searchRegion, setSearchRegion] = useState('');
   const [searchMonth, setSearchMonth] = useState('');
   const [searchDistance, setSearchDistance] = useState('');
@@ -91,7 +101,7 @@ export default function TopPage() {
     .filter((e) => !isEntryFinished(e.id))
     .slice(0, 10);
 
-  // 公開済み特産品をシャッフル（ページロード時に1回固定）
+  // 公開済み特産品をシャッフル（Supabase同期後に再計算）
   const publishedProducts = useMemo(() => {
     const products = getPublishedDisplayableProducts();
     for (let i = products.length - 1; i > 0; i--) {
@@ -99,6 +109,14 @@ export default function TopPage() {
       [products[i], products[j]] = [products[j], products[i]];
     }
     return products;
+  }, [version]);
+
+  const [heroIndex, setHeroIndex] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroIndex(i => (i + 1) % HERO_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(timer);
   }, []);
 
   const handleSearch = () => {
@@ -130,16 +148,21 @@ export default function TopPage() {
       </Helmet>
       {/* ヒーロー */}
       <section
-        className="relative min-h-[540px] flex items-center"
+        className="relative min-h-[540px] flex items-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0b1d51 0%, #1e5fa8 55%, #f97316 100%)' }}
       >
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 80% 100%, rgba(249,115,22,0.5) 0%, transparent 45%), radial-gradient(circle at 10% 20%, rgba(14,165,233,0.4) 0%, transparent 40%)',
-          }}
-        />
+        {/* スライドショー背景 */}
+        {HERO_IMAGES.map((src, i) => (
+          <div
+            key={src}
+            className="absolute inset-0 transition-opacity duration-1000"
+            style={{ opacity: i === heroIndex ? 1 : 0 }}
+          >
+            <img src={src} alt="" className="w-full h-full object-cover object-center" />
+          </div>
+        ))}
+        {/* 暗いオーバーレイ（テキスト可読性） */}
+        <div className="absolute inset-0 bg-black/55" />
 
         <div className="relative max-w-6xl mx-auto px-4 py-20 text-white">
           <div className="max-w-2xl">
