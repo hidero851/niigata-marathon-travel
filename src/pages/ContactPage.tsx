@@ -65,9 +65,9 @@ export default function ContactPage() {
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
             >
               <option value="" disabled>選択してください</option>
-              <option value="宿泊施設の掲載希望">宿泊施設の掲載希望</option>
-              <option value="特産品・グルメの掲載希望">特産品・グルメの掲載希望</option>
-              <option value="大会情報について">大会情報について</option>
+              <option value="大会情報掲載希望">大会情報掲載希望</option>
+              <option value="特産品情報掲載希望">特産品情報掲載希望</option>
+              <option value="宿泊掲載希望">宿泊掲載希望</option>
               <option value="その他">その他</option>
             </select>
           </div>
