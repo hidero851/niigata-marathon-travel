@@ -2,7 +2,7 @@ import { useEffect, useState, useContext, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Store, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProductById, getEventByIdAll } from '../data';
-import { getProductVisualSetting, getEventProductAssignment, getEventVisualSetting } from '../utils/adminSettings';
+import { getProductVisualSetting, getEventProductAssignment, getEventVisualSetting, getEventProductAssignments } from '../utils/adminSettings';
 import { SyncedContext } from '../App';
 import GradientImage from '../components/GradientImage';
 import { trackEvent } from '../utils/analytics';
@@ -73,7 +73,11 @@ export default function ProductDetailPage() {
   const shopMessage = visualSetting?.shopMessage ?? '';
   const hiddenSections = visualSetting?.hiddenSections ?? [];
 
-  const relatedEvents = product.relatedEventIds
+  const assignedEventIds = getEventProductAssignments()
+    .filter((a) => a.productIds.includes(product.id))
+    .map((a) => a.eventId);
+  const relatedEventIds = assignedEventIds.length > 0 ? assignedEventIds : product.relatedEventIds;
+  const relatedEvents = relatedEventIds
     .map((eid) => getEventByIdAll(eid))
     .filter(Boolean);
 
