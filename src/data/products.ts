@@ -336,6 +336,52 @@ export const allProducts: LocalProduct[] = [
     ],
   },
   {
+    id: 'takahashi-magozaemon-okina-ame',
+    name: '翁飴（髙橋孫左衛門商店）',
+    area: '上越市',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #b8860b, #daa520)',
+    shortDescription: '江戸時代から続く越後高田の銘菓。藩主・榊原公より名を賜った寒天飴',
+    description:
+      '翁飴は江戸時代から越後高田に伝わる銘菓。3代目孫左衛門が大阪で寒天の製法を学び、水飴を寒天で固めて乾燥させるという独自の製法を確立。当初は「翁羹」として販売されていたが、高田藩主・榊原公よりその名を賜り「翁飴」となった。モチモチとした独特の食感とあっさりとした上品な甘み、そして常温60日間保存できる実用性を兼ね備えた越後高田を代表する銘菓。新宿髙島屋の銘菓百選にも選ばれるなど、全国的な評価も高い。',
+    recommendedPoint:
+      '上越の大会帰りに立ち寄れる老舗の味。長期保存可能なので遠方へのお土産にも最適。江戸時代から続くストーリーを話しながら渡すと喜ばれます。',
+    whereToBuy:
+      '本店（上越市南本町3-7-2）・新宿髙島屋 銘菓百選・新潟ふるさと村・長岡駅ビルCoCoLo長岡 横山商店',
+    salesLocations: [
+      '本店：新潟県上越市南本町3-7-2（TEL 025-524-1188）',
+      '新宿髙島屋 銘菓百選（東京都新宿区）',
+      '新潟ふるさと村（新潟市西区）',
+      '長岡駅ビルCoCoLo長岡 横山商店',
+    ],
+    externalUrl: 'http://www.etigo-ameya.co.jp/',
+    relatedEventIds: [
+      'echigo-kubikino-100km',
+      'echigo-kenshin-kikizake-marathon',
+      'takada-castle-road-race',
+    ],
+    sourceInfo: [
+      {
+        sourceName: '髙橋孫左衛門商店 公式サイト',
+        sourceUrl: 'http://www.etigo-ameya.co.jp/',
+        sourceType: 'manual_created' as const,
+        retrievedAt: '2026-06-15',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイトおよびmadeinjoetsu.jpの公開情報をもとに手動作成。',
+      },
+      {
+        sourceName: 'Made in 上越（翁飴の紹介記事）',
+        sourceUrl: 'https://madeinjoetsu.jp/harvest/2017/02/554/',
+        sourceType: 'manual_created' as const,
+        retrievedAt: '2026-06-15',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '商品の詳細情報・製造工程の参照に使用。',
+      },
+    ],
+  },
+  {
     id: 'iwa-kaki',
     name: '岩牡蠣（笹川流れ）',
     area: '村上市・笹川流れ',
