@@ -355,11 +355,7 @@ export const allProducts: LocalProduct[] = [
       '長岡駅ビルCoCoLo長岡 横山商店',
     ],
     externalUrl: 'http://www.etigo-ameya.co.jp/',
-    relatedEventIds: [
-      'echigo-kubikino-100km',
-      'echigo-kenshin-kikizake-marathon',
-      'takada-castle-road-race',
-    ],
+    relatedEventIds: [],
     sourceInfo: [
       {
         sourceName: '髙橋孫左衛門商店 公式サイト',
