@@ -378,6 +378,45 @@ export const allProducts: LocalProduct[] = [
     ],
   },
   {
+    id: 'shimokoshi-kirin',
+    name: '麒麟・蒲原・ほまれ麒麟（下越酒造）',
+    area: '阿賀町',
+    imageUrl: '',
+    imageGradient: 'linear-gradient(135deg, #1b2a4a, #2e6fa3)',
+    shortDescription: '阿賀野川と常浪川が交わる霧の里・津川が育む日本酒。明治13年から続く「麒麟」の清冽な旨み',
+    description:
+      '尾瀬と猪苗代湖から流れ出る阿賀野川と、御神楽岳を源とする常浪川が合流する津川の里。一年を通じて霧が立ち込めるこの地は、微生物の働きを助け、酒造りに最適な環境を自然が整えている。明治13年創業の下越酒造は、その恵まれた風土と、極寒期に低温発酵で仕込む伝統の「寒仕込み」を守り続けてきた。代表銘柄「麒麟」は、香味のバランスがよく、きめ細やかな旨みが舌に広がりながら、後味はすっきりと飲み飽きしない。飲む者を選ばないその品のよさが、地元・阿賀町で長く愛されてきた理由だ。「麒麟」のほか、創業時の屋号「酒座 蒲原屋」に由来する「蒲原」、季節や食事を問わず楽しめる「ほまれ麒麟」など多彩なラインナップを展開している。',
+    recommendedPoint:
+      '阿賀ウルトラマラソンの舞台・阿賀町にある蔵元。レース後の疲れた身体に、すっきりした旨みの麒麟をひと杯。蔵見学も予約すれば可能なので、大会前日の観光コースに組み込むのもおすすめ。',
+    whereToBuy: '蔵元（阿賀町津川）・アガマチマーケット（通販）',
+    salesLocations: [
+      '蔵元：新潟県東蒲原郡阿賀町津川3644（TEL 0254-92-3211）',
+      'アガマチマーケット（通販）',
+    ],
+    externalUrl: 'https://www.sake-kirin.com/',
+    relatedEventIds: [],
+    sourceInfo: [
+      {
+        sourceName: '下越酒造株式会社 公式サイト',
+        sourceUrl: 'https://www.sake-kirin.com/',
+        sourceType: 'manual_created' as const,
+        retrievedAt: '2026-06-16',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '公式サイトの公開情報をもとに手動作成。',
+      },
+      {
+        sourceName: '酒の国にいがた（新潟清酒達人検定協会）',
+        sourceUrl: 'https://www.niigata-sake.or.jp/interview/k11.html',
+        sourceType: 'manual_created' as const,
+        retrievedAt: '2026-06-16',
+        termsChecked: true,
+        usageAllowed: true,
+        usageNote: '味わい・製法の詳細情報の参照に使用。',
+      },
+    ],
+  },
+  {
     id: 'iwa-kaki',
     name: '岩牡蠣（笹川流れ）',
     area: '村上市・笹川流れ',
