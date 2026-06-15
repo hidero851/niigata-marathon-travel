@@ -378,7 +378,7 @@ export const allProducts: LocalProduct[] = [
     ],
   },
   {
-    id: 'shimokoshi-kirin',
+    id: 'kaetsu-kirin',
     name: '麒麟・蒲原・ほまれ麒麟（下越酒造）',
     area: '阿賀町',
     imageUrl: '',
