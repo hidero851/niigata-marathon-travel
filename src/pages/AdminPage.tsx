@@ -46,7 +46,7 @@ import { supabaseAdmin } from '../utils/supabaseAdmin';
 import { getLogs, clearLogs } from '../utils/analytics';
 import { logoutAdmin } from '../utils/auth';
 
-type Tab = 'featured' | 'eventManage' | 'import' | 'data';
+type Tab = 'featured' | 'eventManage' | 'listManage' | 'data';
 type EventSubTab = 'visual' | 'accommodations' | 'modelPlans' | 'products' | 'productAssign' | 'entryDates';
 
 // --- Toast ---
@@ -1674,20 +1674,20 @@ function getAllEventsForAdmin(): MarathonEvent[] {
   return [...staticEvents, ...adminCreated];
 }
 
-function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
+function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
   const [events, setEvents] = useState<MarathonEvent[]>(() => getAllEventsForAdmin());
   const [adminIds, setAdminIds] = useState<Set<string>>(
     () => new Set(getAdminCreatedEvents().map((e) => e.id))
   );
-  const [form, setForm] = useState({ ...INIT_FORM });
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDate, setEditDate] = useState('');
-  const [adminEditId, setAdminEditId] = useState<string | null>(null);
-  const [adminEditForm, setAdminEditForm] = useState({ ...INIT_FORM });
-
   const [selectedEventId, setSelectedEventId] = useState(() => getAllEventsForAdmin()[0]?.id ?? '');
   const [subTab, setSubTab] = useState<EventSubTab>('visual');
+  const [editForm, setEditForm] = useState({ ...INIT_FORM });
+  const [editDate, setEditDate] = useState('');
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newForm, setNewForm] = useState({ ...INIT_FORM });
+
+  const selectedEvent = events.find((e) => e.id === selectedEventId);
+  const isAdminEvent = adminIds.has(selectedEventId);
 
   const refresh = () => {
     const updated = getAllEventsForAdmin();
@@ -1696,6 +1696,294 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
     if (updated.length > 0 && !updated.find((e) => e.id === selectedEventId)) {
       setSelectedEventId(updated[0].id);
     }
+  };
+
+  useEffect(() => {
+    const event = getAllEventsForAdmin().find((e) => e.id === selectedEventId);
+    if (!event) return;
+    if (getAdminCreatedEvents().some((e) => e.id === selectedEventId)) {
+      setEditForm({
+        name: event.name, eventDate: event.eventDate ?? '', location: event.location,
+        venue: event.venue ?? '', distances: event.distances.join(', '), catchCopy: event.catchCopy,
+        fee: event.fee, capacity: event.capacity, timeLimit: event.timeLimit,
+        startPoint: event.startPoint, goalPoint: event.goalPoint, access: event.access ?? '',
+        entryPeriod: event.entryPeriod ?? '', organizer: event.organizer ?? '',
+        officialUrl: event.officialUrl, entryUrl: event.entryUrl ?? '',
+        rakutenTravelUrl: event.accommodations[0]?.rakutenTravelUrl ?? '',
+        heroImageUrl: event.heroImageUrl ?? '', tags: event.tags.join(', '), notes: event.notes ?? '',
+      });
+    } else {
+      setEditDate(event.eventDate ?? '');
+    }
+  }, [selectedEventId]);
+
+  const handleSaveAdminEdit = () => {
+    const f = editForm;
+    const stored = getAdminCreatedEvents().find((e) => e.id === selectedEventId);
+    if (!stored) return;
+    const date = f.eventDate ? formatEventDate(f.eventDate) : stored.date;
+    const month = f.eventDate ? String(parseInt(f.eventDate.split('-')[1] ?? '1')) : stored.month;
+    const updated: MarathonEvent = {
+      ...stored, name: f.name, eventDate: f.eventDate || undefined, date, month,
+      location: f.location || stored.location, venue: f.venue || undefined,
+      distances: f.distances ? f.distances.split(',').map((s) => s.trim()).filter(Boolean) : stored.distances,
+      catchCopy: f.catchCopy, fee: f.fee || stored.fee, capacity: f.capacity || stored.capacity,
+      timeLimit: f.timeLimit || stored.timeLimit, startPoint: f.startPoint || stored.startPoint,
+      goalPoint: f.goalPoint || stored.goalPoint, access: f.access || undefined,
+      entryPeriod: f.entryPeriod || undefined, organizer: f.organizer || undefined,
+      officialUrl: f.officialUrl, entryUrl: f.entryUrl || f.officialUrl,
+      heroImageUrl: f.heroImageUrl || undefined,
+      tags: f.tags ? f.tags.split(',').map((s) => s.trim()).filter(Boolean) : stored.tags,
+      notes: f.notes || undefined,
+    };
+    saveAdminCreatedEvent(updated);
+    refresh();
+    onSave('大会情報を更新しました');
+  };
+
+  const handleSaveStaticDate = () => {
+    const existing = getEventVisualSetting(selectedEventId);
+    const base = events.find((e) => e.id === selectedEventId);
+    saveEventVisualSetting({
+      eventId: selectedEventId,
+      heroImageUrl: existing?.heroImageUrl ?? base?.heroImageUrl ?? '',
+      heroImageAlt: existing?.heroImageAlt ?? '',
+      catchCopy: existing?.catchCopy ?? base?.catchCopy ?? '',
+      subtitle: existing?.subtitle ?? '',
+      officialUrl: existing?.officialUrl ?? base?.officialUrl ?? '',
+      eventDate: editDate || undefined,
+      highlights: existing?.highlights ?? [],
+    });
+    refresh();
+    onSave('開催日を更新しました');
+  };
+
+  const setNewField = (key: string, value: string) =>
+    setNewForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleCreate = () => {
+    if (!newForm.name.trim()) { alert('大会名は必須です'); return; }
+    const id = `admin-${Date.now()}`;
+    const date = newForm.eventDate ? formatEventDate(newForm.eventDate) : '未定';
+    const month = newForm.eventDate ? String(parseInt(newForm.eventDate.split('-')[1] ?? '1')) : '1';
+    const newEvent: MarathonEvent = {
+      id,
+      name: newForm.name,
+      location: newForm.location || '未設定',
+      prefecture: '新潟県',
+      date,
+      month,
+      eventDate: newForm.eventDate || undefined,
+      distances: newForm.distances ? newForm.distances.split(',').map((s) => s.trim()).filter(Boolean) : [],
+      catchCopy: newForm.catchCopy,
+      imageUrl: '',
+      imageGradient: 'linear-gradient(135deg, #1e3a5f, #0d2d6b)',
+      heroImageUrl: newForm.heroImageUrl || undefined,
+      tags: newForm.tags ? newForm.tags.split(',').map((s) => s.trim()).filter(Boolean) : [],
+      entryUrl: newForm.entryUrl || newForm.officialUrl,
+      officialUrl: newForm.officialUrl,
+      fee: newForm.fee || '要確認',
+      capacity: newForm.capacity || '要確認',
+      timeLimit: newForm.timeLimit || '要確認',
+      startPoint: newForm.startPoint || '要確認',
+      goalPoint: newForm.goalPoint || '要確認',
+      venue: newForm.venue || undefined,
+      entryPeriod: newForm.entryPeriod || undefined,
+      organizer: newForm.organizer || undefined,
+      notes: newForm.notes || undefined,
+      sourceInfo: [ADMIN_SOURCE],
+      accommodations: newForm.rakutenTravelUrl
+        ? [{
+            id: `${id}-acc`,
+            areaName: `${newForm.location || ''}周辺`,
+            distanceToVenue: '要確認',
+            description: `${newForm.location || ''}周辺の宿泊施設`,
+            priceRange: '要確認',
+            externalUrl: newForm.rakutenTravelUrl,
+            rakutenTravelUrl: newForm.rakutenTravelUrl,
+            sourceInfo: [ADMIN_SOURCE],
+          }]
+        : [],
+      localProducts: [],
+      modelPlans: [],
+      draft: true,
+    };
+    saveAdminCreatedEvent(newEvent);
+    refresh();
+    setNewForm({ ...INIT_FORM });
+    setShowNewForm(false);
+    setSelectedEventId(id);
+    onSave('下書きとして保存しました');
+  };
+
+  return (
+    <div>
+      {/* Event dropdown */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-1">設定する大会</label>
+        <select
+          value={selectedEventId}
+          onChange={(e) => { setSelectedEventId(e.target.value); setSubTab('visual'); }}
+          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 w-full"
+        >
+          {events.map((e) => (
+            <option key={e.id} value={e.id}>{e.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {selectedEvent && (
+        <>
+          {/* Basic info */}
+          <div className="bg-orange-50 rounded-2xl border border-orange-100 p-5 mb-6">
+            <h3 className="text-sm font-bold text-orange-800 mb-4">基本情報</h3>
+            {isAdminEvent ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="md:col-span-2"><FormField label="大会名 *" value={editForm.name} onChange={(v) => setEditForm((p) => ({ ...p, name: v }))} /></div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
+                    <input type="date" value={editForm.eventDate}
+                      onChange={(e) => setEditForm((p) => ({ ...p, eventDate: e.target.value }))}
+                      className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                  </div>
+                  <FormField label="開催エリア" value={editForm.location} onChange={(v) => setEditForm((p) => ({ ...p, location: v }))} />
+                  <FormField label="会場" value={editForm.venue} onChange={(v) => setEditForm((p) => ({ ...p, venue: v }))} />
+                  <FormField label="種目（カンマ区切り）" value={editForm.distances} onChange={(v) => setEditForm((p) => ({ ...p, distances: v }))} />
+                  <FormField label="タグ（カンマ区切り）" value={editForm.tags} onChange={(v) => setEditForm((p) => ({ ...p, tags: v }))} />
+                  <FormField label="参加費" value={editForm.fee} onChange={(v) => setEditForm((p) => ({ ...p, fee: v }))} />
+                  <FormField label="制限時間" value={editForm.timeLimit} onChange={(v) => setEditForm((p) => ({ ...p, timeLimit: v }))} />
+                  <FormField label="定員" value={editForm.capacity} onChange={(v) => setEditForm((p) => ({ ...p, capacity: v }))} />
+                  <FormField label="主催者" value={editForm.organizer} onChange={(v) => setEditForm((p) => ({ ...p, organizer: v }))} />
+                  <FormField label="申込期間" value={editForm.entryPeriod} onChange={(v) => setEditForm((p) => ({ ...p, entryPeriod: v }))} />
+                  <FormField label="スタート地点" value={editForm.startPoint} onChange={(v) => setEditForm((p) => ({ ...p, startPoint: v }))} />
+                  <FormField label="ゴール地点" value={editForm.goalPoint} onChange={(v) => setEditForm((p) => ({ ...p, goalPoint: v }))} />
+                  <div className="md:col-span-2"><FormField label="アクセス" value={editForm.access} onChange={(v) => setEditForm((p) => ({ ...p, access: v }))} /></div>
+                  <FormField label="公式サイトURL" value={editForm.officialUrl} onChange={(v) => setEditForm((p) => ({ ...p, officialUrl: v }))} />
+                  <FormField label="エントリーURL（公式と異なる場合）" value={editForm.entryUrl} onChange={(v) => setEditForm((p) => ({ ...p, entryUrl: v }))} />
+                  <FormField label="楽天トラベルURL" value={editForm.rakutenTravelUrl} onChange={(v) => setEditForm((p) => ({ ...p, rakutenTravelUrl: v }))} />
+                  <div className="md:col-span-2"><FormField label="ヒーロー画像URL" value={editForm.heroImageUrl} onChange={(v) => setEditForm((p) => ({ ...p, heroImageUrl: v }))} /></div>
+                  <div className="md:col-span-2"><FormField label="キャッチコピー" value={editForm.catchCopy} onChange={(v) => setEditForm((p) => ({ ...p, catchCopy: v }))} multiline /></div>
+                  <div className="md:col-span-2"><FormField label="備考" value={editForm.notes} onChange={(v) => setEditForm((p) => ({ ...p, notes: v }))} multiline /></div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <button onClick={handleSaveAdminEdit}
+                    className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors">
+                    <Save size={13} /> 保存
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-gray-500 mb-3">静的データの大会は開催日のみ変更できます。</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400" />
+                  {editDate && (
+                    <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded border border-gray-200">
+                      表示: {formatEventDate(editDate)}
+                    </span>
+                  )}
+                  <button onClick={handleSaveStaticDate}
+                    className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors">
+                    <Save size={13} /> 保存
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Detail subtabs */}
+          <div className="mb-8">
+            <h3 className="text-sm font-bold text-gray-700 mb-3">詳細設定</h3>
+            <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
+              {EVENT_SUBTABS.map(({ id, label, icon }) => (
+                <button key={id} onClick={() => setSubTab(id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex-1 justify-center ${
+                    subTab === id ? 'bg-white text-navy-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {icon}
+                  <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
+            </div>
+            <div>
+              {subTab === 'visual' && <EventVisualPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />}
+              {subTab === 'accommodations' && <AccommodationPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />}
+              {subTab === 'modelPlans' && <ModelPlanPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />}
+              {subTab === 'products' && <ProductVisualPanel onSave={onSave} />}
+              {subTab === 'productAssign' && <ProductAssignPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />}
+              {subTab === 'entryDates' && <EntryDatesPanel onSave={onSave} />}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* New event */}
+      <div className="border-t border-gray-200 pt-6">
+        {!showNewForm ? (
+          <button onClick={() => setShowNewForm(true)}
+            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+            <Plus size={15} /> 新しい大会を登録
+          </button>
+        ) : (
+          <div className="bg-gray-50 rounded-2xl border border-gray-200 p-5">
+            <h3 className="text-sm font-bold text-gray-800 mb-4">新しい大会を登録</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2"><FormField label="大会名 *" value={newForm.name} onChange={(v) => setNewField('name', v)} /></div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
+                <input type="date" value={newForm.eventDate} onChange={(e) => setNewField('eventDate', e.target.value)}
+                  className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                {newForm.eventDate && (
+                  <span className="ml-3 text-xs text-gray-500">表示: {formatEventDate(newForm.eventDate)}</span>
+                )}
+              </div>
+              <FormField label="開催エリア" value={newForm.location} onChange={(v) => setNewField('location', v)} />
+              <FormField label="会場" value={newForm.venue} onChange={(v) => setNewField('venue', v)} />
+              <FormField label="制限時間" value={newForm.timeLimit} onChange={(v) => setNewField('timeLimit', v)} />
+              <FormField label="参加費 / 会費" value={newForm.fee} onChange={(v) => setNewField('fee', v)} />
+              <FormField label="種目（カンマ区切り）" value={newForm.distances} onChange={(v) => setNewField('distances', v)} />
+              <FormField label="申込期間" value={newForm.entryPeriod} onChange={(v) => setNewField('entryPeriod', v)} />
+              <FormField label="主催者" value={newForm.organizer} onChange={(v) => setNewField('organizer', v)} />
+              <FormField label="定員" value={newForm.capacity} onChange={(v) => setNewField('capacity', v)} />
+              <FormField label="スタート地点" value={newForm.startPoint} onChange={(v) => setNewField('startPoint', v)} />
+              <FormField label="ゴール地点" value={newForm.goalPoint} onChange={(v) => setNewField('goalPoint', v)} />
+              <FormField label="公式サイトURL" value={newForm.officialUrl} onChange={(v) => setNewField('officialUrl', v)} />
+              <FormField label="エントリーURL（公式と異なる場合）" value={newForm.entryUrl} onChange={(v) => setNewField('entryUrl', v)} />
+              <FormField label="楽天トラベルURL" value={newForm.rakutenTravelUrl} onChange={(v) => setNewField('rakutenTravelUrl', v)} />
+              <FormField label="ヒーロー画像URL" value={newForm.heroImageUrl} onChange={(v) => setNewField('heroImageUrl', v)} />
+              <FormField label="タグ（カンマ区切り）" value={newForm.tags} onChange={(v) => setNewField('tags', v)} />
+              <div className="md:col-span-2"><FormField label="キャッチコピー" value={newForm.catchCopy} onChange={(v) => setNewField('catchCopy', v)} multiline /></div>
+              <div className="md:col-span-2"><FormField label="備考" value={newForm.notes} onChange={(v) => setNewField('notes', v)} multiline /></div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleCreate}
+                className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+                <Save size={15} /> 登録する
+              </button>
+              <button onClick={() => { setShowNewForm(false); setNewForm({ ...INIT_FORM }); }}
+                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+                キャンセル
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EventListTab({ onSave }: { onSave: (msg: string) => void }) {
+  const [events, setEvents] = useState<MarathonEvent[]>(() => getAllEventsForAdmin());
+  const [adminIds, setAdminIds] = useState<Set<string>>(
+    () => new Set(getAdminCreatedEvents().map((e) => e.id))
+  );
+
+  const refresh = () => {
+    setEvents(getAllEventsForAdmin());
+    setAdminIds(new Set(getAdminCreatedEvents().map((e) => e.id)));
   };
 
   const handleTogglePublish = (event: MarathonEvent) => {
@@ -1715,391 +2003,63 @@ function EventManageContainer({ onSave }: { onSave: (msg: string) => void }) {
     onSave('大会を削除しました');
   };
 
-  const handleEditStart = (event: MarathonEvent) => {
-    setEditingId(event.id);
-    setEditDate(event.eventDate ?? '');
-  };
-
-  const handleAdminEditStart = (event: MarathonEvent) => {
-    setAdminEditId(event.id);
-    setAdminEditForm({
-      name: event.name, eventDate: event.eventDate ?? '', location: event.location,
-      venue: event.venue ?? '', distances: event.distances.join(', '), catchCopy: event.catchCopy,
-      fee: event.fee, capacity: event.capacity, timeLimit: event.timeLimit,
-      startPoint: event.startPoint, goalPoint: event.goalPoint, access: event.access ?? '',
-      entryPeriod: event.entryPeriod ?? '', organizer: event.organizer ?? '',
-      officialUrl: event.officialUrl, entryUrl: event.entryUrl ?? '', rakutenTravelUrl: event.accommodations[0]?.rakutenTravelUrl ?? '',
-      heroImageUrl: event.heroImageUrl ?? '', tags: event.tags.join(', '), notes: event.notes ?? '',
-    });
-  };
-
-  const handleAdminEditSave = (eventId: string) => {
-    const f = adminEditForm;
-    const stored = getAdminCreatedEvents().find((e) => e.id === eventId);
-    if (!stored) return;
-    const date = f.eventDate ? formatEventDate(f.eventDate) : stored.date;
-    const month = f.eventDate ? String(parseInt(f.eventDate.split('-')[1] ?? '1')) : stored.month;
-    const updated: MarathonEvent = {
-      ...stored, name: f.name, eventDate: f.eventDate || undefined, date, month,
-      location: f.location || stored.location, venue: f.venue || undefined,
-      distances: f.distances ? f.distances.split(',').map((s) => s.trim()).filter(Boolean) : stored.distances,
-      catchCopy: f.catchCopy, fee: f.fee || stored.fee, capacity: f.capacity || stored.capacity,
-      timeLimit: f.timeLimit || stored.timeLimit, startPoint: f.startPoint || stored.startPoint,
-      goalPoint: f.goalPoint || stored.goalPoint, access: f.access || undefined,
-      entryPeriod: f.entryPeriod || undefined,
-      organizer: f.organizer || undefined, officialUrl: f.officialUrl, entryUrl: f.entryUrl || f.officialUrl,
-      heroImageUrl: f.heroImageUrl || undefined,
-      tags: f.tags ? f.tags.split(',').map((s) => s.trim()).filter(Boolean) : stored.tags,
-      notes: f.notes || undefined,
-    };
-    saveAdminCreatedEvent(updated);
-    refresh(); setAdminEditId(null); onSave('大会情報を更新しました');
-  };
-
-  const handleEditSave = (eventId: string) => {
-    if (adminIds.has(eventId)) {
-      const stored = getAdminCreatedEvents().find((e) => e.id === eventId);
-      if (stored) {
-        const updated: MarathonEvent = {
-          ...stored,
-          eventDate: editDate || undefined,
-          date: editDate ? formatEventDate(editDate) : stored.date,
-          month: editDate ? String(parseInt(editDate.split('-')[1] ?? '1')) : stored.month,
-        };
-        saveAdminCreatedEvent(updated);
-      }
-    } else {
-      const existing = getEventVisualSetting(eventId);
-      const base = events.find((e) => e.id === eventId);
-      saveEventVisualSetting({
-        eventId,
-        heroImageUrl: existing?.heroImageUrl ?? base?.heroImageUrl ?? '',
-        heroImageAlt: existing?.heroImageAlt ?? '',
-        catchCopy: existing?.catchCopy ?? base?.catchCopy ?? '',
-        subtitle: existing?.subtitle ?? '',
-        officialUrl: existing?.officialUrl ?? base?.officialUrl ?? '',
-        eventDate: editDate || undefined,
-        highlights: existing?.highlights ?? [],
-      });
-    }
-    refresh();
-    setEditingId(null);
-    onSave('開催日を更新しました');
-  };
-
-  const setField = (key: string, value: string) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
-
-  const handleCreate = () => {
-    if (!form.name.trim()) { alert('大会名は必須です'); return; }
-    const id = `admin-${Date.now()}`;
-    const date = form.eventDate ? formatEventDate(form.eventDate) : '未定';
-    const month = form.eventDate ? String(parseInt(form.eventDate.split('-')[1] ?? '1')) : '1';
-    const newEvent: MarathonEvent = {
-      id,
-      name: form.name,
-      location: form.location || '未設定',
-      prefecture: '新潟県',
-      date,
-      month,
-      eventDate: form.eventDate || undefined,
-      distances: form.distances ? form.distances.split(',').map((s) => s.trim()).filter(Boolean) : [],
-      catchCopy: form.catchCopy,
-      imageUrl: '',
-      imageGradient: 'linear-gradient(135deg, #1e3a5f, #0d2d6b)',
-      heroImageUrl: form.heroImageUrl || undefined,
-      tags: form.tags ? form.tags.split(',').map((s) => s.trim()).filter(Boolean) : [],
-      entryUrl: form.entryUrl || form.officialUrl,
-      officialUrl: form.officialUrl,
-      fee: form.fee || '要確認',
-      capacity: form.capacity || '要確認',
-      timeLimit: form.timeLimit || '要確認',
-      startPoint: form.startPoint || '要確認',
-      goalPoint: form.goalPoint || '要確認',
-      venue: form.venue || undefined,
-      entryPeriod: form.entryPeriod || undefined,
-      organizer: form.organizer || undefined,
-      notes: form.notes || undefined,
-      sourceInfo: [ADMIN_SOURCE],
-      accommodations: form.rakutenTravelUrl
-        ? [{
-            id: `${id}-acc`,
-            areaName: `${form.location || ''}周辺`,
-            distanceToVenue: '要確認',
-            description: `${form.location || ''}周辺の宿泊施設`,
-            priceRange: '要確認',
-            externalUrl: form.rakutenTravelUrl,
-            rakutenTravelUrl: form.rakutenTravelUrl,
-            sourceInfo: [ADMIN_SOURCE],
-          }]
-        : [],
-      localProducts: [],
-      modelPlans: [],
-      draft: true,
-    };
-    saveAdminCreatedEvent(newEvent);
-    refresh();
-    setForm({ ...INIT_FORM });
-    setShowForm(false);
-    onSave('下書きとして保存しました');
-  };
-
   return (
     <div>
-      {/* Section 1: Event list */}
-      <div className="mb-8">
-        <p className="text-sm text-gray-500 mb-4">
-          大会の新規登録・削除・開催日変更ができます。静的データの削除は非表示扱いになります。
-        </p>
+      <p className="text-sm text-gray-500 mb-4">
+        大会の公開・非公開の切り替え、削除、Excelからのインポートができます。
+      </p>
 
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-5">
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">登録済み大会一覧</span>
-            <span className="text-xs text-gray-400">{events.length}件</span>
-          </div>
-          <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto">
-            {events.map((event) => (
-              <div key={event.id}>
-                <div className="flex items-center justify-between px-4 py-3">
-                  <div>
-                    <div className="text-sm font-medium text-navy-800">{event.name}</div>
-                    <div className="text-xs text-gray-500">{event.location} / {event.date}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {adminIds.has(event.id) && (
-                      event.draft
-                        ? <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full">下書き</span>
-                        : <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">公開中</span>
-                    )}
-                    <button
-                      onClick={() => window.open(`/events/${event.id}`, '_blank')}
-                      className="text-gray-400 hover:text-blue-500 p-1 rounded transition-colors"
-                      title="プレビュー"
-                    >
-                      <Eye size={14} />
-                    </button>
-                    {adminIds.has(event.id) && (
-                      <button
-                        onClick={() => handleTogglePublish(event)}
-                        className={`p-1 rounded transition-colors ${event.draft ? 'text-gray-400 hover:text-green-500' : 'text-green-500 hover:text-gray-400'}`}
-                        title={event.draft ? '公開する' : '下書きに戻す'}
-                      >
-                        <Globe size={14} />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        if (adminIds.has(event.id)) {
-                          adminEditId === event.id ? setAdminEditId(null) : handleAdminEditStart(event);
-                        } else {
-                          editingId === event.id ? setEditingId(null) : handleEditStart(event);
-                        }
-                      }}
-                      className={`p-1 rounded transition-colors ${(editingId === event.id || adminEditId === event.id) ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'}`}
-                      title={adminIds.has(event.id) ? '大会情報を編集' : '開催日を編集'}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(event.id, event.name)}
-                      className="text-red-400 hover:text-red-600 p-1 rounded transition-colors"
-                      title="削除"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </div>
-                {editingId === event.id && (
-                  <div className="px-4 pb-4 bg-orange-50 border-t border-orange-100">
-                    <p className="text-xs text-orange-700 font-medium pt-3 mb-2">開催日を変更</p>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400" />
-                      {editDate && (
-                        <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded border border-gray-200">
-                          表示: {formatEventDate(editDate)}
-                        </span>
-                      )}
-                      <button onClick={() => handleEditSave(event.id)}
-                        className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors">
-                        <Save size={13} /> 保存
-                      </button>
-                      <button onClick={() => setEditingId(null)}
-                        className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-xs px-2 py-1.5 rounded-lg transition-colors">
-                        <X size={13} /> キャンセル
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {adminEditId === event.id && (
-                  <div className="px-4 pb-5 bg-orange-50 border-t border-orange-100">
-                    <p className="text-xs text-orange-700 font-medium pt-3 mb-3">大会情報を編集</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="md:col-span-2"><FormField label="大会名 *" value={adminEditForm.name} onChange={(v) => setAdminEditForm((p) => ({ ...p, name: v }))} /></div>
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
-                        <input type="date" value={adminEditForm.eventDate} onChange={(e) => setAdminEditForm((p) => ({ ...p, eventDate: e.target.value }))}
-                          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
-                      </div>
-                      <FormField label="開催エリア" value={adminEditForm.location} onChange={(v) => setAdminEditForm((p) => ({ ...p, location: v }))} />
-                      <FormField label="会場" value={adminEditForm.venue} onChange={(v) => setAdminEditForm((p) => ({ ...p, venue: v }))} />
-                      <FormField label="種目（カンマ区切り）" value={adminEditForm.distances} onChange={(v) => setAdminEditForm((p) => ({ ...p, distances: v }))} />
-                      <FormField label="タグ（カンマ区切り）" value={adminEditForm.tags} onChange={(v) => setAdminEditForm((p) => ({ ...p, tags: v }))} />
-                      <FormField label="参加費" value={adminEditForm.fee} onChange={(v) => setAdminEditForm((p) => ({ ...p, fee: v }))} />
-                      <FormField label="制限時間" value={adminEditForm.timeLimit} onChange={(v) => setAdminEditForm((p) => ({ ...p, timeLimit: v }))} />
-                      <FormField label="定員" value={adminEditForm.capacity} onChange={(v) => setAdminEditForm((p) => ({ ...p, capacity: v }))} />
-                      <FormField label="主催者" value={adminEditForm.organizer} onChange={(v) => setAdminEditForm((p) => ({ ...p, organizer: v }))} />
-                      <FormField label="申込期間" value={adminEditForm.entryPeriod} onChange={(v) => setAdminEditForm((p) => ({ ...p, entryPeriod: v }))} />
-                      <FormField label="スタート地点" value={adminEditForm.startPoint} onChange={(v) => setAdminEditForm((p) => ({ ...p, startPoint: v }))} />
-                      <FormField label="ゴール地点" value={adminEditForm.goalPoint} onChange={(v) => setAdminEditForm((p) => ({ ...p, goalPoint: v }))} />
-                      <div className="md:col-span-2"><FormField label="アクセス" value={adminEditForm.access} onChange={(v) => setAdminEditForm((p) => ({ ...p, access: v }))} /></div>
-                      <FormField label="公式サイトURL" value={adminEditForm.officialUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, officialUrl: v }))} />
-                      <FormField label="エントリーURL（公式と異なる場合）" value={adminEditForm.entryUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, entryUrl: v }))} />
-                      <FormField label="楽天トラベルURL" value={adminEditForm.rakutenTravelUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, rakutenTravelUrl: v }))} />
-                      <div className="md:col-span-2"><FormField label="ヒーロー画像URL" value={adminEditForm.heroImageUrl} onChange={(v) => setAdminEditForm((p) => ({ ...p, heroImageUrl: v }))} /></div>
-                      <div className="md:col-span-2"><FormField label="キャッチコピー" value={adminEditForm.catchCopy} onChange={(v) => setAdminEditForm((p) => ({ ...p, catchCopy: v }))} multiline /></div>
-                      <div className="md:col-span-2"><FormField label="備考" value={adminEditForm.notes} onChange={(v) => setAdminEditForm((p) => ({ ...p, notes: v }))} multiline /></div>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <button onClick={() => handleAdminEditSave(event.id)}
-                        className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors">
-                        <Save size={13} /> 保存
-                      </button>
-                      <button onClick={() => setAdminEditId(null)}
-                        className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-xs px-2 py-1.5 rounded-lg transition-colors">
-                        <X size={13} /> キャンセル
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-8">
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">登録済み大会一覧</span>
+          <span className="text-xs text-gray-400">{events.length}件</span>
         </div>
-
-        {!showForm ? (
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
-          >
-            <Plus size={15} /> 新しい大会を登録
-          </button>
-        ) : (
-          <div className="bg-gray-50 rounded-2xl border border-gray-200 p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-4">新しい大会を登録</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <FormField label="大会名 *" value={form.name} onChange={(v) => setField('name', v)} />
+        <div className="divide-y divide-gray-100 max-h-[480px] overflow-y-auto">
+          {events.map((event) => (
+            <div key={event.id} className="flex items-center justify-between px-4 py-3">
+              <div>
+                <div className="text-sm font-medium text-navy-800">{event.name}</div>
+                <div className="text-xs text-gray-500">{event.location} / {event.date}</div>
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
-                <input
-                  type="date"
-                  value={form.eventDate}
-                  onChange={(e) => setField('eventDate', e.target.value)}
-                  className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
-                />
-                {form.eventDate && (
-                  <span className="ml-3 text-xs text-gray-500">表示: {formatEventDate(form.eventDate)}</span>
+              <div className="flex items-center gap-2">
+                {adminIds.has(event.id) && (
+                  event.draft
+                    ? <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full">下書き</span>
+                    : <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">公開中</span>
                 )}
-              </div>
-              <FormField label="開催エリア" value={form.location} onChange={(v) => setField('location', v)} />
-              <FormField label="会場" value={form.venue} onChange={(v) => setField('venue', v)} />
-              <FormField label="制限時間" value={form.timeLimit} onChange={(v) => setField('timeLimit', v)} />
-              <FormField label="参加費 / 会費" value={form.fee} onChange={(v) => setField('fee', v)} />
-              <FormField label="種目（カンマ区切り）" value={form.distances} onChange={(v) => setField('distances', v)} />
-              <FormField label="申込期間" value={form.entryPeriod} onChange={(v) => setField('entryPeriod', v)} />
-              <FormField label="主催者" value={form.organizer} onChange={(v) => setField('organizer', v)} />
-              <FormField label="定員" value={form.capacity} onChange={(v) => setField('capacity', v)} />
-              <FormField label="スタート地点" value={form.startPoint} onChange={(v) => setField('startPoint', v)} />
-              <FormField label="ゴール地点" value={form.goalPoint} onChange={(v) => setField('goalPoint', v)} />
-              <FormField label="公式サイトURL" value={form.officialUrl} onChange={(v) => setField('officialUrl', v)} />
-              <FormField label="エントリーURL（公式と異なる場合）" value={form.entryUrl} onChange={(v) => setField('entryUrl', v)} />
-              <FormField label="楽天トラベルURL" value={form.rakutenTravelUrl} onChange={(v) => setField('rakutenTravelUrl', v)} />
-              <FormField label="ヒーロー画像URL" value={form.heroImageUrl} onChange={(v) => setField('heroImageUrl', v)} />
-              <FormField label="タグ（カンマ区切り）" value={form.tags} onChange={(v) => setField('tags', v)} />
-              <div className="md:col-span-2">
-                <FormField label="キャッチコピー" value={form.catchCopy} onChange={(v) => setField('catchCopy', v)} multiline />
-              </div>
-              <div className="md:col-span-2">
-                <FormField label="備考" value={form.notes} onChange={(v) => setField('notes', v)} multiline />
+                <button
+                  onClick={() => window.open(`/events/${event.id}`, '_blank')}
+                  className="text-gray-400 hover:text-blue-500 p-1 rounded transition-colors"
+                  title="プレビュー"
+                >
+                  <Eye size={14} />
+                </button>
+                {adminIds.has(event.id) && (
+                  <button
+                    onClick={() => handleTogglePublish(event)}
+                    className={`p-1 rounded transition-colors ${event.draft ? 'text-gray-400 hover:text-green-500' : 'text-green-500 hover:text-gray-400'}`}
+                    title={event.draft ? '公開する' : '下書きに戻す'}
+                  >
+                    <Globe size={14} />
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDelete(event.id, event.name)}
+                  className="text-red-400 hover:text-red-600 p-1 rounded transition-colors"
+                  title="削除"
+                >
+                  <Trash2 size={15} />
+                </button>
               </div>
             </div>
-            <div className="flex gap-3 mt-5">
-              <button
-                onClick={handleCreate}
-                className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
-              >
-                <Save size={15} /> 登録する
-              </button>
-              <button
-                onClick={() => { setShowForm(false); setForm({ ...INIT_FORM }); }}
-                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
-              >
-                キャンセル
-              </button>
-            </div>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
 
-      {/* Section 2: Per-event detail settings */}
-      {events.length > 0 && (
-        <div className="border-t border-gray-200 pt-8">
-          <h3 className="text-sm font-bold text-gray-700 mb-4">大会詳細設定</h3>
-
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-700 mb-1">設定する大会</label>
-            <select
-              value={selectedEventId}
-              onChange={(e) => setSelectedEventId(e.target.value)}
-              className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 w-full max-w-md"
-            >
-              {events.map((e) => (
-                <option key={e.id} value={e.id}>{e.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Sub-tab navigation */}
-          <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
-            {EVENT_SUBTABS.map(({ id, label, icon }) => (
-              <button
-                key={id}
-                onClick={() => setSubTab(id)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex-1 justify-center ${
-                  subTab === id ? 'bg-white text-navy-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {icon}
-                <span className="hidden sm:inline">{label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Sub-tab content — key forces re-mount on event change */}
-          <div>
-            {subTab === 'visual' && (
-              <EventVisualPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
-            )}
-            {subTab === 'accommodations' && (
-              <AccommodationPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
-            )}
-            {subTab === 'modelPlans' && (
-              <ModelPlanPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
-            )}
-            {subTab === 'products' && (
-              <ProductVisualPanel onSave={onSave} />
-            )}
-            {subTab === 'productAssign' && (
-              <ProductAssignPanel key={selectedEventId} eventId={selectedEventId} onSave={onSave} />
-            )}
-            {subTab === 'entryDates' && (
-              <EntryDatesPanel onSave={onSave} />
-            )}
-          </div>
-        </div>
-      )}
+      <div className="border-t border-gray-200 pt-6">
+        <h3 className="text-sm font-bold text-gray-700 mb-4">Excelインポート</h3>
+        <ImportPanel />
+      </div>
     </div>
   );
 }
@@ -2272,8 +2232,8 @@ function DataTab({ onSave }: { onSave: (msg: string) => void }) {
 const MAIN_TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'featured', label: 'トップ表示', icon: <Star size={15} /> },
   { id: 'eventManage', label: '大会管理', icon: <CalendarDays size={15} /> },
-  { id: 'import', label: 'インポート', icon: <FileSpreadsheet size={15} /> },
-  { id: 'data', label: 'データ確認', icon: <BarChart2 size={15} /> },
+  { id: 'listManage', label: '一覧管理', icon: <FileSpreadsheet size={15} /> },
+  { id: 'data', label: 'データ管理', icon: <BarChart2 size={15} /> },
 ];
 
 export default function AdminPage() {
@@ -2322,8 +2282,8 @@ export default function AdminPage() {
       {/* Tab content */}
       <div>
         {tab === 'featured' && <FeaturedTab onSave={showToast} />}
-        {tab === 'eventManage' && <EventManageContainer onSave={showToast} />}
-        {tab === 'import' && <ImportPanel />}
+        {tab === 'eventManage' && <EventManageTab onSave={showToast} />}
+        {tab === 'listManage' && <EventListTab onSave={showToast} />}
         {tab === 'data' && <DataTab onSave={showToast} />}
       </div>
 
