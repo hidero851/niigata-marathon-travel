@@ -23,6 +23,7 @@ import {
   saveEventVisualSetting,
   resetEventVisualSetting,
   getProductVisualSetting,
+  getProductVisualSettings,
   saveProductVisualSetting,
   resetProductVisualSetting,
   resetAllEventVisualSettings,
@@ -723,9 +724,23 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
     setField('shops', updated);
   };
 
-  const handleSave = () => {
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
     saveProductVisualSetting(form);
-    onSave('特産品設定を保存しました');
+    try {
+      await supabaseAdmin.from('admin_settings').upsert({
+        id: 'productVisualSettings',
+        value: getProductVisualSettings(),
+        updated_at: new Date().toISOString(),
+      });
+      onSave('特産品設定を保存しました');
+    } catch {
+      onSave('⚠️ Supabase保存に失敗しました。再度お試しください。');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleReset = () => {
@@ -1145,10 +1160,10 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
       </div>
 
       <div className="flex gap-3 mt-6 flex-wrap">
-        <button onClick={handleSave} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
-          <Save size={15} /> 保存
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+          <Save size={15} /> {saving ? '保存中...' : '保存'}
         </button>
-        <button onClick={handleReset} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+        <button onClick={handleReset} disabled={saving} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
           <RotateCcw size={15} /> この特産品をリセット
         </button>
         <a
