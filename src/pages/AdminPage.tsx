@@ -730,13 +730,15 @@ function ProductVisualPanel({ onSave }: { onSave: (msg: string) => void }) {
     setSaving(true);
     saveProductVisualSetting(form);
     try {
-      await supabaseAdmin.from('admin_settings').upsert({
+      const { error } = await supabaseAdmin.from('admin_settings').upsert({
         id: 'productVisualSettings',
         value: getProductVisualSettings(),
         updated_at: new Date().toISOString(),
       });
+      if (error) throw error;
       onSave('特産品設定を保存しました');
-    } catch {
+    } catch (e) {
+      console.error('productVisualSettings save error:', e);
       onSave('⚠️ Supabase保存に失敗しました。再度お試しください。');
     } finally {
       setSaving(false);
