@@ -331,10 +331,10 @@ export default function EventDetailPage() {
   return (
     <div className="pb-16">
       <Helmet>
-        <title>{event.name} | 新潟マラソンナビ</title>
-        <meta name="description" content={`${event.name}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
-        <meta property="og:title" content={`${event.name} | 新潟マラソンナビ`} />
-        <meta property="og:description" content={`${event.name}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
+        <title>{event.name.replace(/\n/g, ' ')} | 新潟マラソンナビ</title>
+        <meta name="description" content={`${event.name.replace(/\n/g, ' ')}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
+        <meta property="og:title" content={`${event.name.replace(/\n/g, ' ')} | 新潟マラソンナビ`} />
+        <meta property="og:description" content={`${event.name.replace(/\n/g, ' ')}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://marathon-navi.com/events/${event.id}`} />
         {event.imageUrl && <meta property="og:image" content={event.imageUrl} />}
@@ -404,7 +404,7 @@ export default function EventDetailPage() {
             {visualSetting?.subtitle && (
               <p className="text-blue-200 text-base mb-2 leading-snug">{visualSetting.subtitle}</p>
             )}
-            <h1 className="text-4xl md:text-4xl font-black text-white mb-6 leading-tight">
+            <h1 className="text-4xl md:text-4xl font-black text-white mb-6 leading-tight whitespace-pre-line">
               {event.name}
             </h1>
 
