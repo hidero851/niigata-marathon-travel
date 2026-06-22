@@ -7,6 +7,7 @@ import type {
   Accommodation,
   ModelPlan,
   LocalProduct,
+  HeroImageSetting,
 } from '../types';
 import { saveToSupabase } from './syncDB';
 
@@ -20,6 +21,7 @@ const KEYS = {
   eventAccommodations: 'eventAccommodationOverrides',
   eventModelPlans: 'eventModelPlanOverrides',
   eventAdminProducts: 'eventAdminLocalProducts',
+  heroImages: 'heroImages',
 } as const;
 
 function load<T>(key: string): T[] {
@@ -274,4 +276,14 @@ export function getEntryAlertDays(): number {
 export function saveEntryAlertDays(days: number): void {
   localStorage.setItem('entryAlertDays', JSON.stringify(days));
   saveToSupabase('entryAlertDays', days);
+}
+
+// --- Top Page Hero Background Images ---
+
+export function getHeroImages(): HeroImageSetting[] {
+  return load<HeroImageSetting>(KEYS.heroImages);
+}
+
+export function saveHeroImages(images: HeroImageSetting[]): void {
+  persist(KEYS.heroImages, images);
 }

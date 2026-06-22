@@ -3,7 +3,7 @@ import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
   Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Eye, Globe, FileSpreadsheet, Upload, ChevronUp, ChevronDown,
 } from 'lucide-react';
-import { uploadEventImage, uploadProductImage } from '../utils/imageUpload';
+import { uploadEventImage, uploadProductImage, uploadSiteImage } from '../utils/imageUpload';
 import ImportPanel from '../components/admin/ImportPanel';
 import { getAllDisplayableEvents, getEventByIdAll, allProducts, formatEventDate } from '../data';
 import type { MarathonEvent, Accommodation, ModelPlan } from '../types';
@@ -13,11 +13,14 @@ import type {
   EventHighlightSetting,
   ProductVisualSetting,
   ProductShop,
+  HeroImageSetting,
 } from '../types';
 import {
   getFeaturedSettings,
   saveFeaturedSettings,
   resetFeaturedSettings,
+  getHeroImages,
+  saveHeroImages,
   getEventVisualSetting,
   getEventVisualSettings,
   saveEventVisualSetting,
@@ -250,6 +253,90 @@ function ImageAdjustPanel({
 }
 
 // --- Tab: Featured Events ---
+
+function HeroImagesPanel({ onSave }: { onSave: (msg: string) => void }) {
+  const [images, setImages] = useState<HeroImageSetting[]>(() => getHeroImages());
+
+  const addImage = (url: string) => {
+    setImages((prev) => [...prev, { id: String(Date.now()), url }]);
+  };
+  const updateUrl = (id: string, url: string) => {
+    setImages((prev) => prev.map((img) => (img.id === id ? { ...img, url } : img)));
+  };
+  const removeImage = (id: string) => {
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  };
+  const moveUp = (i: number) => {
+    if (i === 0) return;
+    setImages((prev) => {
+      const next = [...prev];
+      [next[i - 1], next[i]] = [next[i], next[i - 1]];
+      return next;
+    });
+  };
+  const moveDown = (i: number) => {
+    setImages((prev) => {
+      if (i === prev.length - 1) return prev;
+      const next = [...prev];
+      [next[i], next[i + 1]] = [next[i + 1], next[i]];
+      return next;
+    });
+  };
+
+  const handleSave = () => {
+    saveHeroImages(images);
+    onSave('トップページ背景画像を保存しました');
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-bold text-navy-800">トップページ背景画像（フェード表示）</h3>
+        <ImageUploadButton
+          uploadFn={(file) => uploadSiteImage(`hero-${Date.now()}`, file)}
+          onUploaded={addImage}
+          label="画像を追加"
+        />
+      </div>
+      <p className="text-xs text-gray-500 mb-4">
+        ここで登録した画像が、トップページ検索エリアの背景で数秒ごとにフェード切り替わります。1枚も登録しない場合は既定の画像が使われます。
+      </p>
+      <div className="space-y-3">
+        {images.map((img, i) => (
+          <div key={img.id} className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500 w-5">{i + 1}</span>
+            <div
+              className="w-20 h-12 rounded-lg bg-cover bg-center border border-gray-200 flex-shrink-0"
+              style={{ backgroundImage: `url("${img.url}")` }}
+            />
+            <input
+              type="text"
+              value={img.url}
+              onChange={(e) => updateUrl(img.id, e.target.value)}
+              placeholder="画像URL"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400"
+            />
+            <ImageUploadButton
+              uploadFn={(file) => uploadSiteImage(`hero-${Date.now()}`, file)}
+              onUploaded={(url) => updateUrl(img.id, url)}
+            />
+            <div className="flex flex-col gap-0.5">
+              <button type="button" onClick={() => moveUp(i)} disabled={i === 0} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronUp size={14} /></button>
+              <button type="button" onClick={() => moveDown(i)} disabled={i === images.length - 1} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronDown size={14} /></button>
+            </div>
+            <button type="button" onClick={() => removeImage(img.id)} className="p-1 text-red-400 hover:text-red-600 rounded"><Trash2 size={14} /></button>
+          </div>
+        ))}
+        {images.length === 0 && (
+          <p className="text-xs text-gray-400">画像が登録されていません。既定の画像が表示されます。</p>
+        )}
+      </div>
+      <button onClick={handleSave} className="mt-4 flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+        <Save size={15} /> 保存
+      </button>
+    </div>
+  );
+}
 
 function FeaturedTab({ onSave }: { onSave: (msg: string) => void }) {
   const events = getAllDisplayableEvents();
@@ -2298,7 +2385,12 @@ export default function AdminPage() {
 
       {/* Tab content */}
       <div>
-        {tab === 'featured' && <FeaturedTab onSave={showToast} />}
+        {tab === 'featured' && (
+          <>
+            <HeroImagesPanel onSave={showToast} />
+            <FeaturedTab onSave={showToast} />
+          </>
+        )}
         {tab === 'eventManage' && <EventManageTab onSave={showToast} />}
         {tab === 'listManage' && <EventListTab onSave={showToast} />}
         {tab === 'data' && <DataTab onSave={showToast} />}

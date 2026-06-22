@@ -37,6 +37,19 @@ export async function uploadProductImage(
   return `${STORAGE_PUBLIC_BASE}/${path}?t=${Date.now()}`;
 }
 
+export async function uploadSiteImage(role: string, file: File): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+  const path = `site/${role}.${ext}`;
+
+  const { error } = await supabaseAdmin.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type });
+
+  if (error) throw new Error(`画像アップロード失敗: ${error.message}`);
+
+  return `${STORAGE_PUBLIC_BASE}/${path}?t=${Date.now()}`;
+}
+
 export async function deleteEventImage(eventId: string, role: ImageRole): Promise<void> {
   const files = await supabaseAdmin.storage
     .from(STORAGE_BUCKET)

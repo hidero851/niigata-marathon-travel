@@ -129,6 +129,11 @@ export type FeaturedEventSetting = {
   displayOrder: number;
 };
 
+export type HeroImageSetting = {
+  id: string;
+  url: string;
+};
+
 export type EventHighlightSetting = {
   id: string;
   title: string;

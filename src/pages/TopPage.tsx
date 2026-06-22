@@ -5,7 +5,7 @@ import { SyncedContext } from '../App';
 import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
 import { getAllDisplayableEvents, ALL_TAGS, getPublishedDisplayableProducts } from '../data';
 import EntryAlertSection from '../components/EntryAlertSection';
-import { getFeaturedSettings, getEventEntryDates, isEntryFinished } from '../utils/adminSettings';
+import { getFeaturedSettings, getEventEntryDates, isEntryFinished, getHeroImages } from '../utils/adminSettings';
 import EventCard from '../components/EventCard';
 import ProductCard from '../components/ProductCard';
 import AutoScrollCarousel from '../components/AutoScrollCarousel';
@@ -25,7 +25,7 @@ const TAG_ICONS: Record<string, React.ReactNode> = {
 
 const FEATURED_TAGS = ['日本海グルメ', '温泉', '地酒', '米どころ', '城下町', '紅葉', '雪景色', '佐渡'];
 
-const HERO_IMAGES = [
+const DEFAULT_HERO_IMAGES = [
   '/images/hero/hero1.jpg',
   '/images/hero/hero2.jpg',
   '/images/hero/hero3.jpg',
@@ -111,13 +111,18 @@ export default function TopPage() {
     return products;
   }, [version]);
 
+  const heroImages = useMemo(() => {
+    const saved = getHeroImages();
+    return saved.length > 0 ? saved.map((img) => img.url) : DEFAULT_HERO_IMAGES;
+  }, [version]);
+
   const [heroIndex, setHeroIndex] = useState(0);
   useEffect(() => {
     const timer = setInterval(() => {
-      setHeroIndex(i => (i + 1) % HERO_IMAGES.length);
+      setHeroIndex(i => (i + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroImages.length]);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -152,7 +157,7 @@ export default function TopPage() {
         style={{ background: 'linear-gradient(135deg, #0b1d51 0%, #1e5fa8 55%, #f97316 100%)' }}
       >
         {/* スライドショー背景 */}
-        {HERO_IMAGES.map((src, i) => (
+        {heroImages.map((src, i) => (
           <div
             key={src}
             className="absolute inset-0 transition-opacity duration-1000"
