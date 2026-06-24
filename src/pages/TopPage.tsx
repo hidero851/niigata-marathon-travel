@@ -6,6 +6,7 @@ import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake
 import { getAllDisplayableEvents, ALL_TAGS, getPublishedDisplayableProducts } from '../data';
 import EntryAlertSection from '../components/EntryAlertSection';
 import { getFeaturedSettings, getEventEntryDates, isEntryFinished, getHeroImages } from '../utils/adminSettings';
+import type { HeroImageSetting } from '../types';
 import EventCard from '../components/EventCard';
 import ProductCard from '../components/ProductCard';
 import AutoScrollCarousel from '../components/AutoScrollCarousel';
@@ -111,9 +112,9 @@ export default function TopPage() {
     return products;
   }, [version]);
 
-  const heroImages = useMemo(() => {
+  const heroImages: HeroImageSetting[] = useMemo(() => {
     const saved = getHeroImages();
-    return saved.length > 0 ? saved.map((img) => img.url) : DEFAULT_HERO_IMAGES;
+    return saved.length > 0 ? saved : DEFAULT_HERO_IMAGES.map((url) => ({ id: url, url }));
   }, [version]);
 
   const [heroIndex, setHeroIndex] = useState(0);
@@ -157,17 +158,32 @@ export default function TopPage() {
         style={{ background: 'linear-gradient(135deg, #0b1d51 0%, #1e5fa8 55%, #f97316 100%)' }}
       >
         {/* スライドショー背景 */}
-        {heroImages.map((src, i) => (
+        {heroImages.map((img, i) => (
           <div
-            key={src}
+            key={img.id}
             className="absolute inset-0 transition-opacity duration-1000"
             style={{ opacity: i === heroIndex ? 1 : 0 }}
           >
-            <img src={src} alt="" className="w-full h-full object-cover object-center" />
+            <img src={img.url} alt="" className="w-full h-full object-cover object-center" />
           </div>
         ))}
         {/* 暗いオーバーレイ（テキスト可読性） */}
         <div className="absolute inset-0 bg-black/55" />
+
+        {/* 画像キャプション（設定時のみ表示） */}
+        {heroImages.map((img, i) => (
+          img.caption ? (
+            <div
+              key={`caption-${img.id}`}
+              className="absolute bottom-4 right-4 transition-opacity duration-1000 z-10"
+              style={{ opacity: i === heroIndex ? 1 : 0 }}
+            >
+              <span className="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full">
+                {img.caption}
+              </span>
+            </div>
+          ) : null
+        ))}
 
         <div className="relative max-w-6xl mx-auto px-4 py-20 text-white">
           <div className="max-w-2xl">

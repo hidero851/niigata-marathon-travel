@@ -263,6 +263,9 @@ function HeroImagesPanel({ onSave }: { onSave: (msg: string) => void }) {
   const updateUrl = (id: string, url: string) => {
     setImages((prev) => prev.map((img) => (img.id === id ? { ...img, url } : img)));
   };
+  const updateCaption = (id: string, caption: string) => {
+    setImages((prev) => prev.map((img) => (img.id === id ? { ...img, caption } : img)));
+  };
   const removeImage = (id: string) => {
     setImages((prev) => prev.filter((img) => img.id !== id));
   };
@@ -303,28 +306,38 @@ function HeroImagesPanel({ onSave }: { onSave: (msg: string) => void }) {
       </p>
       <div className="space-y-3">
         {images.map((img, i) => (
-          <div key={img.id} className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500 w-5">{i + 1}</span>
-            <div
-              className="w-20 h-12 rounded-lg bg-cover bg-center border border-gray-200 flex-shrink-0"
-              style={{ backgroundImage: `url("${img.url}")` }}
-            />
+          <div key={img.id} className="bg-gray-50 rounded-xl border border-gray-200 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-500 w-5">{i + 1}</span>
+              <div
+                className="w-20 h-12 rounded-lg bg-cover bg-center border border-gray-200 flex-shrink-0"
+                style={{ backgroundImage: `url("${img.url}")` }}
+              />
+              <input
+                type="text"
+                value={img.url}
+                onChange={(e) => updateUrl(img.id, e.target.value)}
+                placeholder="画像URL"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400"
+              />
+              <ImageUploadButton
+                uploadFn={(file) => uploadSiteImage(`hero-${Date.now()}`, file)}
+                onUploaded={(url) => updateUrl(img.id, url)}
+              />
+              <div className="flex flex-col gap-0.5">
+                <button type="button" onClick={() => moveUp(i)} disabled={i === 0} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronUp size={14} /></button>
+                <button type="button" onClick={() => moveDown(i)} disabled={i === images.length - 1} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronDown size={14} /></button>
+              </div>
+              <button type="button" onClick={() => removeImage(img.id)} className="p-1 text-red-400 hover:text-red-600 rounded"><Trash2 size={14} /></button>
+            </div>
             <input
               type="text"
-              value={img.url}
-              onChange={(e) => updateUrl(img.id, e.target.value)}
-              placeholder="画像URL"
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400"
+              value={img.caption ?? ''}
+              onChange={(e) => updateCaption(img.id, e.target.value)}
+              placeholder="キャプション（任意・未入力なら非表示）"
+              className="w-full ml-7 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400"
+              style={{ width: 'calc(100% - 1.75rem)' }}
             />
-            <ImageUploadButton
-              uploadFn={(file) => uploadSiteImage(`hero-${Date.now()}`, file)}
-              onUploaded={(url) => updateUrl(img.id, url)}
-            />
-            <div className="flex flex-col gap-0.5">
-              <button type="button" onClick={() => moveUp(i)} disabled={i === 0} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronUp size={14} /></button>
-              <button type="button" onClick={() => moveDown(i)} disabled={i === images.length - 1} className="p-0.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"><ChevronDown size={14} /></button>
-            </div>
-            <button type="button" onClick={() => removeImage(img.id)} className="p-1 text-red-400 hover:text-red-600 rounded"><Trash2 size={14} /></button>
           </div>
         ))}
         {images.length === 0 && (

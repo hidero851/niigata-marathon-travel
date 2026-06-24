@@ -132,6 +132,7 @@ export type FeaturedEventSetting = {
 export type HeroImageSetting = {
   id: string;
   url: string;
+  caption?: string;
 };
 
 export type EventHighlightSetting = {
