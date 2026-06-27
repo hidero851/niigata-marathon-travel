@@ -2038,9 +2038,12 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
                 <div className="flex items-center gap-3 flex-wrap">
                   <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)}
                     className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400" />
+                  <span className="text-xs text-gray-400">〜（複数日開催の場合のみ終了日も入力）</span>
+                  <input type="date" value={editDateEnd} onChange={(e) => setEditDateEnd(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-400" />
                   {editDate && (
                     <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded border border-gray-200">
-                      表示: {formatEventDate(editDate)}
+                      表示: {editDateEnd ? formatEventDateRange(editDate, editDateEnd) : formatEventDate(editDate)}
                     </span>
                   )}
                   <button onClick={handleSaveStaticDate}
@@ -2093,10 +2096,17 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
               <div className="md:col-span-2"><FormField label="大会名 *" value={newForm.name} onChange={(v) => setNewField('name', v)} /></div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
-                <input type="date" value={newForm.eventDate} onChange={(e) => setNewField('eventDate', e.target.value)}
-                  className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                <div className="flex items-center gap-2 flex-wrap">
+                  <input type="date" value={newForm.eventDate} onChange={(e) => setNewField('eventDate', e.target.value)}
+                    className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                  <span className="text-xs text-gray-400">〜（複数日開催の場合のみ終了日も入力）</span>
+                  <input type="date" value={newForm.eventDateEnd} onChange={(e) => setNewField('eventDateEnd', e.target.value)}
+                    className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                </div>
                 {newForm.eventDate && (
-                  <span className="ml-3 text-xs text-gray-500">表示: {formatEventDate(newForm.eventDate)}</span>
+                  <span className="text-xs text-gray-500">
+                    表示: {newForm.eventDateEnd ? formatEventDateRange(newForm.eventDate, newForm.eventDateEnd) : formatEventDate(newForm.eventDate)}
+                  </span>
                 )}
               </div>
               <FormField label="開催エリア" value={newForm.location} onChange={(v) => setNewField('location', v)} />

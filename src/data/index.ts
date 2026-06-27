@@ -101,7 +101,7 @@ function applyAdminOverrides(event: MarathonEvent, visualSettings: ReturnType<ty
 }
 
 function isPastEvent(event: MarathonEvent): boolean {
-  const dateStr = event.eventDate;
+  const dateStr = event.eventDateEnd || event.eventDate;
   if (!dateStr) return false;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
