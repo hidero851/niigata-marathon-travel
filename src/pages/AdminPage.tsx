@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useContext } from 'react';
+import { SyncedContext } from '../App';
 import {
   Save, RotateCcw, Star, Image, ShoppingBag, Plus, Trash2,
   Link2, CalendarDays, Pencil, X, BarChart2, Hotel, Route, Eye, Globe, FileSpreadsheet, Upload, ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { uploadEventImage, uploadProductImage, uploadSiteImage } from '../utils/imageUpload';
 import ImportPanel from '../components/admin/ImportPanel';
-import { getAllDisplayableEvents, getEventByIdAll, allProducts, formatEventDate } from '../data';
+import { getAllDisplayableEvents, getEventByIdAll, allProducts, formatEventDate, formatEventDateRange } from '../data';
 import type { MarathonEvent, Accommodation, ModelPlan } from '../types';
 import type {
   FeaturedEventSetting,
@@ -467,6 +468,7 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
       subtitle: saved?.subtitle ?? '',
       officialUrl: saved?.officialUrl ?? event?.officialUrl ?? '',
       eventDate: saved?.eventDate ?? event?.eventDate ?? '',
+      eventDateEnd: saved?.eventDateEnd ?? event?.eventDateEnd ?? '',
       prevNightRakutenUrl: saved?.prevNightRakutenUrl ?? '',
       areaRakutenUrl: saved?.areaRakutenUrl ?? '',
       areaKankoUrl: saved?.areaKankoUrl ?? '',
@@ -549,14 +551,25 @@ function EventVisualPanel({ eventId, onSave }: { eventId: string; onSave: (msg: 
       />
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
-        <input
-          type="date"
-          value={form.eventDate ?? ''}
-          onChange={(e) => setField('eventDate', e.target.value)}
-          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400 w-full max-w-xs"
-        />
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            type="date"
+            value={form.eventDate ?? ''}
+            onChange={(e) => setField('eventDate', e.target.value)}
+            className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+          />
+          <span className="text-xs text-gray-400">〜（複数日開催の場合のみ終了日も入力）</span>
+          <input
+            type="date"
+            value={form.eventDateEnd ?? ''}
+            onChange={(e) => setField('eventDateEnd', e.target.value)}
+            className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+          />
+        </div>
         {form.eventDate && (
-          <p className="text-xs text-gray-500 mt-1">表示: {formatEventDate(form.eventDate)}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            表示: {form.eventDateEnd ? formatEventDateRange(form.eventDate, form.eventDateEnd) : formatEventDate(form.eventDate)}
+          </p>
         )}
       </div>
       <div>
@@ -1644,7 +1657,7 @@ const ADMIN_SOURCE = {
 };
 
 const INIT_FORM = {
-  name: '', eventDate: '', location: '', venue: '',
+  name: '', eventDate: '', eventDateEnd: '', location: '', venue: '',
   distances: '', catchCopy: '', fee: '', capacity: '', timeLimit: '',
   startPoint: '', goalPoint: '', access: '', entryPeriod: '', organizer: '',
   officialUrl: '', entryUrl: '', rakutenTravelUrl: '', heroImageUrl: '', tags: '', notes: '',
@@ -1792,6 +1805,7 @@ function getAllEventsForAdmin(): MarathonEvent[] {
 }
 
 function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
+  const { version } = useContext(SyncedContext);
   const [events, setEvents] = useState<MarathonEvent[]>(() => getAllEventsForAdmin());
   const [adminIds, setAdminIds] = useState<Set<string>>(
     () => new Set(getAdminCreatedEvents().map((e) => e.id))
@@ -1800,6 +1814,7 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
   const [subTab, setSubTab] = useState<EventSubTab>('visual');
   const [editForm, setEditForm] = useState({ ...INIT_FORM });
   const [editDate, setEditDate] = useState('');
+  const [editDateEnd, setEditDateEnd] = useState('');
   const [showNewForm, setShowNewForm] = useState(false);
   const [newForm, setNewForm] = useState({ ...INIT_FORM });
 
@@ -1815,12 +1830,21 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
     }
   };
 
+  // Supabaseからの初回ロードはApp側で非同期に行われるため、
+  // ロード完了（versionの更新）後に大会一覧を再取得する。
+  // これがないと、ロード完了前にマウントされた場合に
+  // 直近で作成・編集した大会が選択肢に出てこない。
+  useEffect(() => {
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version]);
+
   useEffect(() => {
     const event = getAllEventsForAdmin().find((e) => e.id === selectedEventId);
     if (!event) return;
     if (getAdminCreatedEvents().some((e) => e.id === selectedEventId)) {
       setEditForm({
-        name: event.name, eventDate: event.eventDate ?? '', location: event.location,
+        name: event.name, eventDate: event.eventDate ?? '', eventDateEnd: event.eventDateEnd ?? '', location: event.location,
         venue: event.venue ?? '', distances: event.distances.join(', '), catchCopy: event.catchCopy,
         fee: event.fee, capacity: event.capacity, timeLimit: event.timeLimit,
         startPoint: event.startPoint, goalPoint: event.goalPoint, access: event.access ?? '',
@@ -1831,6 +1855,7 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
       });
     } else {
       setEditDate(event.eventDate ?? '');
+      setEditDateEnd(event.eventDateEnd ?? '');
     }
   }, [selectedEventId]);
 
@@ -1838,10 +1863,12 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
     const f = editForm;
     const stored = getAdminCreatedEvents().find((e) => e.id === selectedEventId);
     if (!stored) return;
-    const date = f.eventDate ? formatEventDate(f.eventDate) : stored.date;
+    const date = f.eventDate
+      ? (f.eventDateEnd ? formatEventDateRange(f.eventDate, f.eventDateEnd) : formatEventDate(f.eventDate))
+      : stored.date;
     const month = f.eventDate ? String(parseInt(f.eventDate.split('-')[1] ?? '1')) : stored.month;
     const updated: MarathonEvent = {
-      ...stored, name: f.name, eventDate: f.eventDate || undefined, date, month,
+      ...stored, name: f.name, eventDate: f.eventDate || undefined, eventDateEnd: f.eventDateEnd || undefined, date, month,
       location: f.location || stored.location, venue: f.venue || undefined,
       distances: f.distances ? f.distances.split(',').map((s) => s.trim()).filter(Boolean) : stored.distances,
       catchCopy: f.catchCopy, fee: f.fee || stored.fee, capacity: f.capacity || stored.capacity,
@@ -1869,6 +1896,7 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
       subtitle: existing?.subtitle ?? '',
       officialUrl: existing?.officialUrl ?? base?.officialUrl ?? '',
       eventDate: editDate || undefined,
+      eventDateEnd: editDateEnd || undefined,
       highlights: existing?.highlights ?? [],
     });
     refresh();
@@ -1881,7 +1909,9 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
   const handleCreate = () => {
     if (!newForm.name.trim()) { alert('大会名は必須です'); return; }
     const id = `admin-${Date.now()}`;
-    const date = newForm.eventDate ? formatEventDate(newForm.eventDate) : '未定';
+    const date = newForm.eventDate
+      ? (newForm.eventDateEnd ? formatEventDateRange(newForm.eventDate, newForm.eventDateEnd) : formatEventDate(newForm.eventDate))
+      : '未定';
     const month = newForm.eventDate ? String(parseInt(newForm.eventDate.split('-')[1] ?? '1')) : '1';
     const newEvent: MarathonEvent = {
       id,
@@ -1891,6 +1921,7 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
       date,
       month,
       eventDate: newForm.eventDate || undefined,
+      eventDateEnd: newForm.eventDateEnd || undefined,
       distances: newForm.distances ? newForm.distances.split(',').map((s) => s.trim()).filter(Boolean) : [],
       catchCopy: newForm.catchCopy,
       imageUrl: '',
@@ -1960,9 +1991,20 @@ function EventManageTab({ onSave }: { onSave: (msg: string) => void }) {
                   <div className="md:col-span-2"><FormField label="大会名 *" value={editForm.name} onChange={(v) => setEditForm((p) => ({ ...p, name: v }))} /></div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">開催日</label>
-                    <input type="date" value={editForm.eventDate}
-                      onChange={(e) => setEditForm((p) => ({ ...p, eventDate: e.target.value }))}
-                      className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <input type="date" value={editForm.eventDate}
+                        onChange={(e) => setEditForm((p) => ({ ...p, eventDate: e.target.value }))}
+                        className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                      <span className="text-xs text-gray-400">〜（複数日開催の場合のみ終了日も入力）</span>
+                      <input type="date" value={editForm.eventDateEnd}
+                        onChange={(e) => setEditForm((p) => ({ ...p, eventDateEnd: e.target.value }))}
+                        className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-400" />
+                    </div>
+                    {editForm.eventDate && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        表示: {editForm.eventDateEnd ? formatEventDateRange(editForm.eventDate, editForm.eventDateEnd) : formatEventDate(editForm.eventDate)}
+                      </p>
+                    )}
                   </div>
                   <FormField label="開催エリア" value={editForm.location} onChange={(v) => setEditForm((p) => ({ ...p, location: v }))} />
                   <FormField label="会場" value={editForm.venue} onChange={(v) => setEditForm((p) => ({ ...p, venue: v }))} />

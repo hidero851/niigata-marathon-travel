@@ -63,6 +63,7 @@ export type MarathonEvent = {
   prefecture: string;
   date: string;
   eventDate?: string;
+  eventDateEnd?: string;
   month: string;
   distances: string[];
   catchCopy: string;
@@ -156,6 +157,7 @@ export type EventVisualSetting = {
   subtitle: string;
   officialUrl: string;
   eventDate?: string;
+  eventDateEnd?: string;
   prevNightRakutenUrl?: string;
   areaRakutenUrl?: string;
   areaKankoUrl?: string;

@@ -23,6 +23,27 @@ export function formatEventDate(dateStr: string): string {
   return `${y}年${m}月${day}日（${dow}）`;
 }
 
+/** 開始日・終了日（YYYY-MM-DD）→ "YYYY年M月D日（曜）・D日（曜）の2日間" 等 */
+export function formatEventDateRange(startStr: string, endStr: string): string {
+  if (!endStr) return formatEventDate(startStr);
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return formatEventDate(startStr);
+  const days = ['日', '月', '火', '水', '木', '金', '土'];
+  const sy = start.getUTCFullYear();
+  const sm = start.getUTCMonth() + 1;
+  const sd = start.getUTCDate();
+  const sdow = days[start.getUTCDay()];
+  const ey = end.getUTCFullYear();
+  const em = end.getUTCMonth() + 1;
+  const ed = end.getUTCDate();
+  const edow = days[end.getUTCDay()];
+  if (sy === ey && sm === em) {
+    return `${sy}年${sm}月${sd}日（${sdow}）・${ed}日（${edow}）の2日間`;
+  }
+  return `${sy}年${sm}月${sd}日（${sdow}）〜${ey}年${em}月${ed}日（${edow}）`;
+}
+
 /** 旧データ＋新データをマージ。同IDは新データが優先。 */
 function mergeEvents(base: MarathonEvent[], overrides: MarathonEvent[]): MarathonEvent[] {
   const map = new Map<string, MarathonEvent>();
@@ -59,9 +80,11 @@ export function getDisplayableEvents(): MarathonEvent[] {
 function applyDateOverride(event: MarathonEvent, visualSettings: ReturnType<typeof getEventVisualSettings>): MarathonEvent {
   const vs = visualSettings.find((s) => s.eventId === event.id);
   if (vs?.eventDate) {
-    const formatted = formatEventDate(vs.eventDate);
+    const formatted = vs.eventDateEnd
+      ? formatEventDateRange(vs.eventDate, vs.eventDateEnd)
+      : formatEventDate(vs.eventDate);
     const month = String(parseInt(vs.eventDate.split('-')[1] ?? '1'));
-    return { ...event, date: formatted, month, eventDate: vs.eventDate };
+    return { ...event, date: formatted, month, eventDate: vs.eventDate, eventDateEnd: vs.eventDateEnd };
   }
   return event;
 }
