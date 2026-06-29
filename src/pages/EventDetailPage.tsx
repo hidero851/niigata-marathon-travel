@@ -45,10 +45,12 @@ function scrollToId(id: string) {
 }
 
 function renderStepText(text: string) {
-  const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+  const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
   return parts.map((part, i) => {
-    const m = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-    if (m) return <a key={i} href={m[2]} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">{m[1]}</a>;
+    const bold = part.match(/^\*\*([^*]+)\*\*$/);
+    if (bold) return <strong key={i}>{bold[1]}</strong>;
+    const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (link) return <a key={i} href={link[2]} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">{link[1]}</a>;
     return <span key={i}>{part}</span>;
   });
 }
@@ -472,7 +474,7 @@ export default function EventDetailPage() {
                 <FileText size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <div className="text-xs text-amber-700 mb-0.5">備考</div>
-                  <div className="text-sm text-amber-900 whitespace-pre-wrap">{event.notes}</div>
+                  <div className="text-sm text-amber-900 whitespace-pre-wrap">{renderStepText(event.notes)}</div>
                 </div>
               </div>
             )}
