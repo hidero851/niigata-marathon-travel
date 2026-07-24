@@ -1,4 +1,4 @@
-import { createContext, lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { createContext, lazy, Suspense, useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import type { Session } from '@supabase/supabase-js'
@@ -31,19 +31,20 @@ declare function gtag(...args: unknown[]): void
 
 function PageViewTracker() {
   const { pathname } = useLocation()
-  const mounted = useRef(false)
   useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true
-      return // 初回は gtag('config') が自動送信するためスキップ
-    }
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'page_view', {
-        page_path: pathname,
-        page_location: window.location.href,
-        page_title: document.title,
-      })
-    }
+    // index.html の gtag('config') は send_page_view:false にしてあるため
+    // 全ページビューをここで送信する。setTimeout で react-helmet-async が
+    // document.title を更新するのを待ってから送信することで正しいタイトルを記録できる。
+    const timer = setTimeout(() => {
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'page_view', {
+          page_path: pathname,
+          page_location: window.location.href,
+          page_title: document.title,
+        })
+      }
+    }, 300)
+    return () => clearTimeout(timer)
   }, [pathname])
   return null
 }

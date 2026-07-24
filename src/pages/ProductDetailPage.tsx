@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, MapPin, ShoppingBag, Store, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProductById, getEventByIdAll } from '../data';
@@ -92,6 +93,10 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
+      <Helmet>
+        <title>{product.name} | 新潟マラソンナビ</title>
+        <meta name="description" content={product.shortDescription} />
+      </Helmet>
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-sm mb-6 transition-colors"
