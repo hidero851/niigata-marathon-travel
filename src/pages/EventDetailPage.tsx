@@ -6,7 +6,7 @@ import {
   ArrowLeft, ExternalLink, MapPin, Calendar, Clock, Users,
   Banknote, Flag, Building2, FileText, Hotel,
 } from 'lucide-react';
-import { getEventByIdAll, allProducts } from '../data';
+import { getEventByIdAll, allProducts, isPastEvent } from '../data';
 import { getEventVisualSetting, getEventProductAssignment, getEventEntryDates, isEntryFinished } from '../utils/adminSettings';
 import TagBadge from '../components/TagBadge';
 import ProductCard from '../components/ProductCard';
@@ -325,6 +325,7 @@ export default function EventDetailPage() {
   if (event.organizer) allInfoItems.push({ icon: <Users size={16} />, label: '主催者', value: event.organizer });
   if (event.access) allInfoItems.push({ icon: <MapPin size={16} />, label: 'アクセス', value: event.access });
 
+  const isPast = isPastEvent(event);
   const entryLink = event.entryUrl && event.entryUrl !== '#'
     ? event.entryUrl
     : (displayOfficialUrl && displayOfficialUrl !== '#' ? displayOfficialUrl : null);
@@ -420,7 +421,11 @@ export default function EventDetailPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 mb-7">
-              {entryFinished ? (
+              {isPast ? (
+                <span className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/60 text-white/80 font-bold text-sm">
+                  🏁 開催終了
+                </span>
+              ) : entryFinished ? (
                 <span className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gray-600/80 text-white/80 font-bold text-sm">
                   エントリー終了
                 </span>

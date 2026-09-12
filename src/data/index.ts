@@ -100,7 +100,7 @@ function applyAdminOverrides(event: MarathonEvent, visualSettings: ReturnType<ty
   return e;
 }
 
-function isPastEvent(event: MarathonEvent): boolean {
+export function isPastEvent(event: MarathonEvent): boolean {
   const dateStr = event.eventDateEnd || event.eventDate;
   if (!dateStr) return false;
   const today = new Date();
@@ -117,8 +117,7 @@ export function getAllDisplayableEvents(): MarathonEvent[] {
     const visualSettings = getEventVisualSettings();
     const staticEvents = getDisplayableEvents().filter((e) => !hidden.includes(e.id));
     return [...staticEvents, ...adminCreated]
-      .map((e) => applyAdminOverrides(e, visualSettings))
-      .filter((e) => !isPastEvent(e));
+      .map((e) => applyAdminOverrides(e, visualSettings));
   } catch {
     return getDisplayableEvents();
   }
