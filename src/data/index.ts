@@ -130,9 +130,7 @@ export function getEventByIdAll(id: string): MarathonEvent | undefined {
     const event = adminCreated.find((e) => e.id === id) ?? getEventById(id);
     if (!event) return undefined;
     const visualSettings = getEventVisualSettings();
-    const resolved = applyAdminOverrides(event, visualSettings);
-    if (isPastEvent(resolved)) return undefined;
-    return resolved;
+    return applyAdminOverrides(event, visualSettings);
   } catch {
     return getEventById(id);
   }
