@@ -341,6 +341,37 @@ export default function EventDetailPage() {
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://marathon-navi.com/events/${event.id}`} />
         {event.imageUrl && <meta property="og:image" content={event.imageUrl} />}
+        <script type="application/ld+json">{JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'SportsEvent',
+          name: event.name.replace(/\n/g, ' '),
+          description: event.catchCopy,
+          startDate: event.eventDate,
+          ...(event.eventDateEnd ? { endDate: event.eventDateEnd } : {}),
+          location: {
+            '@type': 'Place',
+            name: event.location,
+            address: {
+              '@type': 'PostalAddress',
+              addressRegion: event.prefecture ?? '新潟県',
+              addressCountry: 'JP',
+            },
+          },
+          organizer: event.organizer ? { '@type': 'Organization', name: event.organizer } : undefined,
+          url: `https://marathon-navi.com/events/${event.id}`,
+          ...(displayOfficialUrl && displayOfficialUrl !== '#' ? { sameAs: displayOfficialUrl } : {}),
+          ...(event.imageUrl ? { image: event.imageUrl } : {}),
+          offers: event.fee ? {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'JPY',
+            description: event.fee,
+            url: event.entryUrl && event.entryUrl !== '#' ? event.entryUrl : `https://marathon-navi.com/events/${event.id}`,
+          } : undefined,
+          sport: 'Running',
+          eventStatus: 'https://schema.org/EventScheduled',
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        })}</script>
       </Helmet>
       {/* スティッキーCTAバナー（宿泊セクションが見えていない間のみ表示） */}
       {!isStayVisible && (
