@@ -331,13 +331,19 @@ export default function EventDetailPage() {
     : (displayOfficialUrl && displayOfficialUrl !== '#' ? displayOfficialUrl : null);
   const entryFinished = isEntryFinished(event.id);
 
+  const eventNameClean = event.name.replace(/\n/g, ' ');
+  const eventYear = event.eventDate ? new Date(event.eventDate).getUTCFullYear() : null;
+  const titleName = eventYear && !eventNameClean.includes(String(eventYear))
+    ? `${eventNameClean}${eventYear}`
+    : eventNameClean;
+
   return (
     <div className="pb-16">
       <Helmet>
-        <title>{event.name.replace(/\n/g, ' ')} | 新潟マラソンナビ</title>
-        <meta name="description" content={`${event.name.replace(/\n/g, ' ')}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
-        <meta property="og:title" content={`${event.name.replace(/\n/g, ' ')} | 新潟マラソンナビ`} />
-        <meta property="og:description" content={`${event.name.replace(/\n/g, ' ')}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
+        <title>{titleName} | 新潟マラソンナビ</title>
+        <meta name="description" content={`${eventNameClean}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
+        <meta property="og:title" content={`${titleName} | 新潟マラソンナビ`} />
+        <meta property="og:description" content={`${eventNameClean}（${event.date}・${event.location}）の大会情報と周辺の宿泊・グルメ・観光スポットをご紹介。${event.catchCopy}`} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://marathon-navi.com/events/${event.id}`} />
         {event.imageUrl && <meta property="og:image" content={event.imageUrl} />}
