@@ -198,7 +198,7 @@ export default function CalendarPage() {
                             </span>
                           ) : (!isExternal && isEntryFinished((entry.event as MarathonEvent).id)) && (
                             <span className="flex-shrink-0 text-xs font-bold bg-red-50 text-red-500 px-1.5 py-0.5 rounded-full mt-px">
-                              締切済
+                              エントリー締切済
                             </span>
                           )}
                         </div>

@@ -308,7 +308,6 @@ export default function TopPage() {
             <div>
               <p className="text-xs font-bold text-orange-400 tracking-widest mb-0.5">RACE CALENDAR 2026</p>
               <p className="text-lg font-black leading-tight">新潟の全マラソン大会を<br className="sm:hidden" />一目で確認</p>
-              <p className="text-sm text-blue-200 mt-0.5">21大会の日程・場所・距離をまとめています</p>
             </div>
           </div>
           <Link
