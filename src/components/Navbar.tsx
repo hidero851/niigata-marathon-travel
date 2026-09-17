@@ -61,6 +61,16 @@ export default function Navbar() {
             <Instagram size={22} />
           </a>
           <Link
+            to="/calendar"
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              location.pathname === '/calendar'
+                ? 'bg-navy-700 text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            カレンダー
+          </Link>
+          <Link
             to="/events"
             className="ml-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-xl transition-colors shadow-sm"
           >
@@ -101,6 +111,13 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          <Link
+            to="/calendar"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            カレンダー
+          </Link>
           <Link
             to="/events"
             onClick={() => setOpen(false)}

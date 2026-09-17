@@ -74,8 +74,9 @@ async function main() {
   );
 
   const entries = [
-    urlEntry(`${SITE_URL}/`,       null,  'weekly',  '1.0'),
-    urlEntry(`${SITE_URL}/events`, null,  'weekly',  '0.9'),
+    urlEntry(`${SITE_URL}/`,         null,  'weekly',  '1.0'),
+    urlEntry(`${SITE_URL}/events`,   null,  'weekly',  '0.9'),
+    urlEntry(`${SITE_URL}/calendar`, null,  'weekly',  '0.9'),
   ];
 
   for (const event of events) {

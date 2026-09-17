@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import TopPage from './pages/TopPage'
 import EventListPage from './pages/EventListPage'
 import EventDetailPage from './pages/EventDetailPage'
+import CalendarPage from './pages/CalendarPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import DataSourcePage from './pages/DataSourcePage'
 import AdminLoginPage from './pages/AdminLoginPage'
@@ -96,6 +97,7 @@ function App() {
             <Route path="/" element={<TopPage />} />
             <Route path="/events" element={<EventListPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route path="/datasource" element={<ProtectedRoute><DataSourcePage /></ProtectedRoute>} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
