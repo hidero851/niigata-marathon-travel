@@ -2,7 +2,8 @@ import { useMemo, useState, useEffect, useContext } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { SyncedContext } from '../App';
-import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake } from 'lucide-react';
+import { Search, ChevronRight, Mountain, Fish, Flame, Leaf, Building2, Snowflake, CalendarDays } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { getAllDisplayableEvents, ALL_TAGS, getPublishedDisplayableProducts } from '../data';
 import EntryAlertSection from '../components/EntryAlertSection';
 import { getFeaturedSettings, getEventEntryDates, isEntryFinished, getHeroImages } from '../utils/adminSettings';
@@ -296,6 +297,22 @@ export default function TopPage() {
           </div>
         </div>
       </section>
+
+      {/* カレンダーバナー */}
+      <div className="bg-navy-700 py-3">
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-white">
+            <CalendarDays size={18} className="text-orange-400 flex-shrink-0" />
+            <span className="text-sm font-bold">新潟の全大会日程を月別に確認できます</span>
+          </div>
+          <Link
+            to="/calendar"
+            className="flex-shrink-0 flex items-center gap-1 text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors"
+          >
+            カレンダーを見る <ChevronRight size={14} />
+          </Link>
+        </div>
+      </div>
 
       {/* エントリーアラート */}
       <EntryAlertSection events={events} />
