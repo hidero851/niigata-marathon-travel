@@ -299,20 +299,28 @@ export default function TopPage() {
       </section>
 
       {/* カレンダーバナー */}
-      <div className="bg-navy-700 py-3">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-white">
-            <CalendarDays size={18} className="text-orange-400 flex-shrink-0" />
-            <span className="text-sm font-bold">新潟の全大会日程を月別に確認できます</span>
+      <section className="bg-gradient-to-r from-navy-800 to-navy-700 py-8">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-5">
+          <div className="flex items-center gap-4 text-white">
+            <div className="w-14 h-14 flex-shrink-0 rounded-2xl bg-orange-500/20 border border-orange-400/30 flex items-center justify-center">
+              <CalendarDays size={28} className="text-orange-400" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-orange-400 tracking-widest mb-0.5">RACE CALENDAR 2026</p>
+              <p className="text-lg font-black leading-tight">新潟の全マラソン大会を<br className="sm:hidden" />一目で確認</p>
+              <p className="text-sm text-blue-200 mt-0.5">21大会の日程・場所・距離をまとめています</p>
+            </div>
           </div>
           <Link
             to="/calendar"
-            className="flex-shrink-0 flex items-center gap-1 text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors"
+            className="flex-shrink-0 flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm py-3 px-6 rounded-xl transition-colors shadow-lg shadow-orange-900/20"
           >
-            カレンダーを見る <ChevronRight size={14} />
+            <CalendarDays size={16} />
+            カレンダーを見る
+            <ChevronRight size={16} />
           </Link>
         </div>
-      </div>
+      </section>
 
       {/* エントリーアラート */}
       <EntryAlertSection events={events} />

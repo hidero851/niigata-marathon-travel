@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { MapPin, ChevronRight, Calendar, ExternalLink } from 'lucide-react';
 import { getAllDisplayableEvents, isPastEvent } from '../data';
 import { externalEvents } from '../data/external-events';
+import { isEntryFinished } from '../utils/adminSettings';
 import type { MarathonEvent } from '../types';
 import type { ExternalEvent } from '../data/external-events';
 
@@ -191,9 +192,13 @@ export default function CalendarPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start gap-1.5 mb-1">
                           <p className="text-sm font-bold text-gray-900 leading-snug">{name}</p>
-                          {past && (
+                          {past ? (
                             <span className="flex-shrink-0 text-xs font-bold bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full mt-px">
-                              終了
+                              開催終了
+                            </span>
+                          ) : (!isExternal && isEntryFinished((entry.event as MarathonEvent).id)) && (
+                            <span className="flex-shrink-0 text-xs font-bold bg-red-50 text-red-500 px-1.5 py-0.5 rounded-full mt-px">
+                              締切済
                             </span>
                           )}
                         </div>
